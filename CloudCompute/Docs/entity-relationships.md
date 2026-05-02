@@ -21,7 +21,7 @@ erDiagram
     Rental ||--o| Review : may_have
 
     ApplicationUser {
-        string Id PK
+        Guid Id PK
         string FullName
         string UserName
         string Email
@@ -34,8 +34,8 @@ erDiagram
     }
 
     Gpu {
-        int Id PK
-        string OwnerId FK
+        Guid Id PK
+        Guid OwnerId FK
         string Name
         string Model
         int VramGb
@@ -49,11 +49,11 @@ erDiagram
     }
 
     Rental {
-        int Id PK
+        Guid Id PK
         string ReferenceNumber
-        string RenterId FK
-        int GpuId FK
-        string OwnerId FK
+        Guid RenterId FK
+        Guid GpuId FK
+        Guid OwnerId FK
         datetime StartTime
         datetime EndTime
         int DurationHours
@@ -67,30 +67,30 @@ erDiagram
     }
 
     CreditTransaction {
-        int Id PK
-        string UserId FK
+        Guid Id PK
+        Guid UserId FK
         CreditTransactionType Type
         decimal Amount
         decimal BalanceAfter
-        int RelatedRentalId FK
-        string AdminId FK
+        Guid RelatedRentalId FK
+        Guid AdminId FK
         string Reason
         datetime CreatedAt
     }
 
     Review {
-        int Id PK
-        string RenterId FK
-        int GpuId FK
-        int RentalId FK
+        Guid Id PK
+        Guid RenterId FK
+        Guid GpuId FK
+        Guid RentalId FK
         int Rating
         string Comment
         datetime CreatedAt
     }
 
     Notification {
-        int Id PK
-        string UserId FK
+        Guid Id PK
+        Guid UserId FK
         NotificationType Type
         string Message
         string Link

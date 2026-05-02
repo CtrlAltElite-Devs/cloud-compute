@@ -5,10 +5,10 @@ namespace CloudCompute.Models;
 
 public class Notification
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
-    public string UserId { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
 
     public NotificationType Type { get; set; }
 

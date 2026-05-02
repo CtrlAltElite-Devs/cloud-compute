@@ -6,10 +6,10 @@ namespace CloudCompute.Models;
 
 public class CreditTransaction
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
-    public string UserId { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
 
     public CreditTransactionType Type { get; set; }
 
@@ -19,9 +19,9 @@ public class CreditTransaction
     [Column(TypeName = "decimal(18,2)")]
     public decimal BalanceAfter { get; set; }
 
-    public int? RelatedRentalId { get; set; }
+    public Guid? RelatedRentalId { get; set; }
 
-    public string? AdminId { get; set; }
+    public Guid? AdminId { get; set; }
 
     [Required]
     [StringLength(500)]

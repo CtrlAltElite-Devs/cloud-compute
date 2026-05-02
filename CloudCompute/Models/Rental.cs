@@ -6,19 +6,19 @@ namespace CloudCompute.Models;
 
 public class Rental
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
     [StringLength(30)]
     public string ReferenceNumber { get; set; } = string.Empty;
 
     [Required]
-    public string RenterId { get; set; } = string.Empty;
+    public Guid RenterId { get; set; }
 
-    public int GpuId { get; set; }
+    public Guid GpuId { get; set; }
 
     [Required]
-    public string OwnerId { get; set; } = string.Empty;
+    public Guid OwnerId { get; set; }
 
     public DateTime StartTime { get; set; }
 

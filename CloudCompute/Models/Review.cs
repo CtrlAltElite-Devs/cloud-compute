@@ -4,14 +4,14 @@ namespace CloudCompute.Models;
 
 public class Review
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
-    public string RenterId { get; set; } = string.Empty;
+    public Guid RenterId { get; set; }
 
-    public int GpuId { get; set; }
+    public Guid GpuId { get; set; }
 
-    public int RentalId { get; set; }
+    public Guid RentalId { get; set; }
 
     [Range(1, 5)]
     public int Rating { get; set; }

@@ -6,10 +6,10 @@ namespace CloudCompute.Models;
 
 public class Gpu
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
-    public string OwnerId { get; set; } = string.Empty;
+    public Guid OwnerId { get; set; }
 
     [Required]
     [StringLength(100)]
