@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-01
+
+### Added
+- Core marketplace domain models for users, GPU listings, rentals, credit transactions, reviews, and notifications
+- Domain enums for GPU status, rental status, credit transaction types, and notification types
+- Entity relationship documentation with Mermaid ERD, relationship summary, and business rules
+
 ## [0.2.0] - 2026-04-23
 
 ### Added
