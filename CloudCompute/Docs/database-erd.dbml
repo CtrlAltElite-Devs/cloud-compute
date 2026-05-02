@@ -35,10 +35,10 @@ Enum NotificationType {
 }
 
 Table Users {
-  Id varchar [pk, note: 'Application user id generated as a GUID string']
+  Id uniqueidentifier [pk]
   FullName varchar(100) [not null]
-  UserName varchar(256) [unique]
-  Email varchar(256) [unique]
+  UserName varchar(256) [not null, unique]
+  Email varchar(256) [not null, unique]
   ProfilePicturePath varchar(300)
   Bio varchar(1000)
   CreditBalance decimal(18,2) [not null, default: 500]
@@ -48,8 +48,8 @@ Table Users {
 }
 
 Table Gpus {
-  Id int [pk, increment]
-  OwnerId varchar [not null]
+  Id uniqueidentifier [pk]
+  OwnerId uniqueidentifier [not null]
   Name varchar(100) [not null]
   Model varchar(100) [not null]
   VramGb int [not null, note: 'Valid range: 1-512']
@@ -63,11 +63,11 @@ Table Gpus {
 }
 
 Table Rentals {
-  Id int [pk, increment]
+  Id uniqueidentifier [pk]
   ReferenceNumber varchar(30) [not null, unique, note: 'Example: RNT-2026-0001']
-  RenterId varchar [not null]
-  GpuId int [not null]
-  OwnerId varchar [not null, note: 'Denormalized owner snapshot for rental history']
+  RenterId uniqueidentifier [not null]
+  GpuId uniqueidentifier [not null]
+  OwnerId uniqueidentifier [not null, note: 'Denormalized owner snapshot for rental history']
   StartTime datetime [not null]
   EndTime datetime [not null]
   DurationHours int [not null, note: 'Valid range: 1-168']
@@ -81,30 +81,30 @@ Table Rentals {
 }
 
 Table CreditTransactions {
-  Id int [pk, increment]
-  UserId varchar [not null]
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [not null]
   Type CreditTransactionType [not null]
   Amount decimal(18,2) [not null, note: 'Signed amount: positive credit or negative debit']
   BalanceAfter decimal(18,2) [not null]
-  RelatedRentalId int
-  AdminId varchar
+  RelatedRentalId uniqueidentifier
+  AdminId uniqueidentifier
   Reason varchar(500) [not null]
   CreatedAt datetime [not null, default: `now()`]
 }
 
 Table Reviews {
-  Id int [pk, increment]
-  RenterId varchar [not null]
-  GpuId int [not null]
-  RentalId int [not null, unique]
+  Id uniqueidentifier [pk]
+  RenterId uniqueidentifier [not null]
+  GpuId uniqueidentifier [not null]
+  RentalId uniqueidentifier [not null, unique]
   Rating int [not null, note: 'Valid range: 1-5']
   Comment varchar(1000)
   CreatedAt datetime [not null, default: `now()`]
 }
 
 Table Notifications {
-  Id int [pk, increment]
-  UserId varchar [not null]
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [not null]
   Type NotificationType [not null]
   Message varchar(500) [not null]
   Link varchar(300)
