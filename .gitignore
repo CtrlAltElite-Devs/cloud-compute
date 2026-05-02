@@ -404,3 +404,4 @@ secrets.json
 
 # Claude Code local configuration
 .claude/
+.config/dotnet-tools.json
