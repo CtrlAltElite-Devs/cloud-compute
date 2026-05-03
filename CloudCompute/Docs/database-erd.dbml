@@ -1,0 +1,125 @@
+//// GPURent / CloudCompute Database ERD
+//// Paste this file into https://dbdiagram.io to render the database diagram.
+
+Enum GpuStatus {
+  Pending
+  Available
+  Rented
+  Maintenance
+  Rejected
+}
+
+Enum RentalStatus {
+  Active
+  Completed
+  Terminated
+}
+
+Enum CreditTransactionType {
+  Initial
+  AdminGrant
+  RentalCharge
+  RentalEarning
+  Refund
+  Revoke
+}
+
+Enum NotificationType {
+  RentalConfirmed
+  RentalExpiring
+  RentalCompleted
+  ReviewReceived
+  CreditGranted
+  ListingApproved
+  ListingRejected
+}
+
+Table Users {
+  Id uniqueidentifier [pk]
+  FullName varchar(100) [not null]
+  UserName varchar(256) [not null, unique]
+  Email varchar(256) [not null, unique]
+  ProfilePicturePath varchar(300)
+  Bio varchar(1000)
+  CreditBalance decimal(18,2) [not null, default: 500]
+  IsOwnerVerified bool [not null, default: false]
+  IsActive bool [not null, default: true]
+  CreatedAt datetime [not null, default: `now()`]
+}
+
+Table Gpus {
+  Id uniqueidentifier [pk]
+  OwnerId uniqueidentifier [not null]
+  Name varchar(100) [not null]
+  Model varchar(100) [not null]
+  VramGb int [not null, note: 'Valid range: 1-512']
+  CudaCores int [not null, note: 'Valid range: 1-200000']
+  PricePerHour decimal(18,2) [not null, note: 'Valid range: 1-100000']
+  Description varchar(4000)
+  ImagePath varchar(300)
+  Status GpuStatus [not null, default: 'Pending']
+  AverageRating decimal(3,2) [not null, default: 0]
+  CreatedAt datetime [not null, default: `now()`]
+}
+
+Table Rentals {
+  Id uniqueidentifier [pk]
+  ReferenceNumber varchar(30) [not null, unique, note: 'Example: RNT-2026-0001']
+  RenterId uniqueidentifier [not null]
+  GpuId uniqueidentifier [not null]
+  OwnerId uniqueidentifier [not null, note: 'Denormalized owner snapshot for rental history']
+  StartTime datetime [not null]
+  EndTime datetime [not null]
+  DurationHours int [not null, note: 'Valid range: 1-168']
+  PricePerHour decimal(18,2) [not null, note: 'Price snapshot at rental time']
+  TotalCost decimal(18,2) [not null]
+  PlatformFee decimal(18,2) [not null]
+  OwnerEarnings decimal(18,2) [not null]
+  Status RentalStatus [not null, default: 'Active']
+  TerminatedEarly bool [not null, default: false]
+  CreatedAt datetime [not null, default: `now()`]
+}
+
+Table CreditTransactions {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [not null]
+  Type CreditTransactionType [not null]
+  Amount decimal(18,2) [not null, note: 'Signed amount: positive credit or negative debit']
+  BalanceAfter decimal(18,2) [not null]
+  RelatedRentalId uniqueidentifier
+  AdminId uniqueidentifier
+  Reason varchar(500) [not null]
+  CreatedAt datetime [not null, default: `now()`]
+}
+
+Table Reviews {
+  Id uniqueidentifier [pk]
+  RenterId uniqueidentifier [not null]
+  GpuId uniqueidentifier [not null]
+  RentalId uniqueidentifier [not null, unique]
+  Rating int [not null, note: 'Valid range: 1-5']
+  Comment varchar(1000)
+  CreatedAt datetime [not null, default: `now()`]
+}
+
+Table Notifications {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [not null]
+  Type NotificationType [not null]
+  Message varchar(500) [not null]
+  Link varchar(300)
+  IsRead bool [not null, default: false]
+  CreatedAt datetime [not null, default: `now()`]
+}
+
+Ref user_gpu_listings: Gpus.OwnerId > Users.Id
+Ref user_rentals_as_renter: Rentals.RenterId > Users.Id
+Ref user_rentals_as_owner: Rentals.OwnerId > Users.Id
+Ref gpu_rentals: Rentals.GpuId > Gpus.Id
+Ref user_credit_transactions: CreditTransactions.UserId > Users.Id
+Ref admin_credit_transactions: CreditTransactions.AdminId > Users.Id
+Ref rental_credit_transactions: CreditTransactions.RelatedRentalId > Rentals.Id
+Ref user_reviews: Reviews.RenterId > Users.Id
+Ref gpu_reviews: Reviews.GpuId > Gpus.Id
+Ref rental_review: Reviews.RentalId - Rentals.Id
+Ref user_notifications: Notifications.UserId > Users.Id
