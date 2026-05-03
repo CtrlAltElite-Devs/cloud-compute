@@ -25,10 +25,10 @@
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="min-vh-100 d-flex flex-column">
+<body class="min-vh-100 d-flex flex-column @ViewData["BodyClass"]">
     <partial name="_Navigation" />
 
-    <div class="container-fluid flex-grow-1 min-vh-100">
+    <div class="container-fluid flex-grow-1 page-shell">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
