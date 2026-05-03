@@ -25,14 +25,16 @@
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body>
+<body class="min-vh-100 d-flex flex-column">
     <partial name="_Navigation" />
 
-    <div class="container">
+    <div class="container-fluid flex-grow-1 min-vh-100">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
+
+    <partial name="_Footer" />
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
