@@ -1,22 +1,46 @@
 html {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 @media (min-width: 768px) {
   html {
-    font-size: 16px;
+    font-size: 14px;
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+/* .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
+} */
+
+/* body {
+  margin-bottom: 60px;
+} */
 
 html {
   position: relative;
   min-height: 100%;
 }
 
-body {
-  margin-bottom: 60px;
+[data-bs-theme="dark"] {
+  --bs-body-bg: #1b1b1b;
+  --bs-body-color: #f2f2f2;
+  --bs-emphasis-color: #ffffff;
+  --bs-secondary-color: #c7c7c7;
+  --bs-tertiary-bg: #252525;
+  --bs-secondary-bg: #202020;
+  --bs-border-color: #303030;
+  --bs-border-color-translucent: rgba(255, 255, 255, .12);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Playfair Display", serif;
+}
+
+.playfair {
+  font-family: "Playfair Display", serif;
+}
+
+.theme-toggle:focus,
+.theme-toggle:active {
+  box-shadow: none;
 }
