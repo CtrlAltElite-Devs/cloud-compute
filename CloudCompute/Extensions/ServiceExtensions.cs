@@ -60,7 +60,7 @@ public static class ServiceExtensions
                             return Task.CompletedTask;
                         }
 
-                        context.Response.Redirect(context.RedirectUri);
+                        context.Response.Redirect(AuthConstants.Routes.MemberLoginPath);
                         return Task.CompletedTask;
                     }
                 };
