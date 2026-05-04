@@ -1,0 +1,28 @@
+@model AlertViewModel
+
+@{
+    var alertClass = Model.Type switch
+    {
+        AlertType.Primary => "alert-primary",
+        AlertType.Secondary => "alert-secondary",
+        AlertType.Success => "alert-success",
+        AlertType.Danger => "alert-danger",
+        AlertType.Warning => "alert-warning",
+        AlertType.Info => "alert-info",
+        AlertType.Light => "alert-light",
+        AlertType.Dark => "alert-dark",
+        _ => "alert-info"
+    };
+
+    var textClass = Model.TextCenter ? " text-center" : string.Empty;
+}
+
+@if (Model.Messages.Count > 0)
+{
+    <div class="alert @alertClass@textClass" role="alert">
+        @foreach (var message in Model.Messages)
+        {
+            <div>@message</div>
+        }
+    </div>
+}

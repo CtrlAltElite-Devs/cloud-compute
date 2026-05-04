@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="border rounded-3 p-4 p-md-5">
+                    <p class="text-uppercase text-muted small fw-semibold mb-2">Authenticated</p>
+                    <h1 class="h3 mb-3">Dashboard</h1>
+                    <p class="mb-1">You are logged in as @User.Identity?.Name.</p>
+                    <p class="text-muted mb-0">This page is protected and only renders after cookie authentication succeeds.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

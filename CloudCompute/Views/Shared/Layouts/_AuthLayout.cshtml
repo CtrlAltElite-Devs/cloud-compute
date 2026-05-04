@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CloudCompute</title>
+
+    <script>
+        (() => {
+            const storedTheme = localStorage.getItem("theme");
+            const getPreferredTheme = () => {
+                if (storedTheme === "light" || storedTheme === "dark") {
+                    return storedTheme;
+                }
+                return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+            };
+
+            document.documentElement.setAttribute("data-bs-theme", getPreferredTheme());
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+
+<body class="@ViewData["BodyClass"]">
+    <div class="auth-theme-switcher dropdown">
+        <button class="btn btn-sm dropdown-toggle border-0 shadow-none theme-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="themeMenuButton" aria-label="Select color theme">
+            <i class="bi bi-circle-half" aria-hidden="true" id="themeMenuIcon"></i>
+            <span class="visually-hidden" id="themeMenuText">Auto</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeMenuButton">
+            <li>
+                <button class="dropdown-item" type="button" data-theme-value="light">
+                    <i class="bi bi-sun-fill me-2" aria-hidden="true"></i>Light
+                </button>
+            </li>
+            <li>
+                <button class="dropdown-item" type="button" data-theme-value="dark">
+                    <i class="bi bi-moon-stars-fill me-2" aria-hidden="true"></i>Dark
+                </button>
+            </li>
+            <li>
+                <button class="dropdown-item" type="button" data-theme-value="auto">
+                    <i class="bi bi-circle-half me-2" aria-hidden="true"></i>Auto
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <main>
+        @RenderBody()
+    </main>
+    
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
