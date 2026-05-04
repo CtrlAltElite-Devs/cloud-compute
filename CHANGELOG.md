@@ -23,7 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reworked member authentication to support email or username with password
 - Updated signup to collect and validate unique usernames before redirecting to login without automatically signing in
 - Replaced the custom password hasher with ASP.NET Core Identity password hashing
-- Added role-aware member and admin login flows with admin route redirects
+- Added role-aware member and admin login flows with clean admin, member, and access-denied redirects
+- Added development-only automatic migrations before admin seeding on startup
+- Updated the development admin seeder to support a configured username and fail on identity conflicts
 - Configured authentication services and middleware in the application startup flow
 
 ### Removed
