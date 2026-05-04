@@ -4,25 +4,28 @@ public static class AuthConstants
 {
     public static class Cookie
     {
-        public const string Name = ".CloudCompute.Auth";
+        public const string Name = "CloudCompute.Auth";
         public const int ExpirationHours = 8;
+        public const int PersistentExpirationDays = 14;
     }
 
     public static class Routes
     {
-        public const string LoginPath = "/auth/login";
+        public const string MemberLoginPath = "/auth/login";
+        public const string AdminLoginPath = "/admin/login";
         public const string LogoutPath = "/auth/logout";
         public const string AccessDeniedRoute = "auth/access-denied";
         public const string AccessDeniedPath = "/" + AccessDeniedRoute;
+        public const string AdminPathPrefix = "/admin";
     }
 
     public static class Messages
     {
-        public const string InvalidLogin = "Invalid username/email or password.";
-        public const string SuspendedAccount = "This account has been suspended.";
-        public const string DuplicateUserName = "Username is already taken.";
-        public const string DuplicateEmail = "Email is already registered.";
-        public const string DuplicateAccount = "An account with the same username or email already exists.";
+        public const string InvalidCredentials = "Invalid email or password.";
+        public const string InvalidAdminCredentials = "Invalid admin email or password.";
+        public const string InactiveAccount = "This account is inactive. Please contact support.";
+        public const string DuplicateEmail = "An account with this email already exists.";
+        public const string DuplicateAccount = "An account with this email already exists.";
     }
 
     public static class Validation
@@ -32,17 +35,19 @@ public static class AuthConstants
 
     public static class Diagnostics
     {
-        public const string MissingHttpContext = "AuthService requires an active HTTP context.";
+        public const string MissingHttpContext = "No active HTTP context is available.";
     }
 
     public static class Claims
     {
-        public const string FullName = "FullName";
+        public const string FullName = "full_name";
     }
 
     public static class Redirects
     {
-        public const string LandingController = "Landing";
-        public const string LandingIndexAction = "Index";
+        public const string DashboardController = "Dashboard";
+        public const string DashboardIndexAction = "Index";
+        public const string AdminDashboardAction = "Dashboard";
+        public const string LoginAction = "Login";
     }
 }

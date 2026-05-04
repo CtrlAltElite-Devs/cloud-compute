@@ -1,7 +1,8 @@
 using CloudCompute.Constants;
-using CloudCompute.Models.ViewModels.Auth;
 using CloudCompute.Services.Auth;
 using CloudCompute.Services.Common;
+using CloudCompute.ViewModels.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudCompute.Controllers
@@ -18,12 +19,12 @@ namespace CloudCompute.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            return View(new LoginViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -37,18 +38,15 @@ namespace CloudCompute.Controllers
                 return View(model);
             }
 
-            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                return LocalRedirect(returnUrl);
-            }
-
-            return RedirectToAction(AuthConstants.Redirects.LandingIndexAction, AuthConstants.Redirects.LandingController);
+            return RedirectToAction(
+                AuthConstants.Redirects.DashboardIndexAction,
+                AuthConstants.Redirects.DashboardController);
         }
 
         [HttpGet]
         public IActionResult Signup()
         {
-            return View();
+            return View(new SignupViewModel());
         }
 
         [HttpPost]
@@ -67,22 +65,24 @@ namespace CloudCompute.Controllers
                 return View(model);
             }
 
-            return RedirectToAction(AuthConstants.Redirects.LandingIndexAction, AuthConstants.Redirects.LandingController);
+            return RedirectToAction(nameof(Login));
         }
 
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _authService.LogoutAsync();
 
-            return RedirectToAction(AuthConstants.Redirects.LandingIndexAction, AuthConstants.Redirects.LandingController);
+            return RedirectToAction(AuthConstants.Redirects.LoginAction);
         }
 
+        [AllowAnonymous]
         [HttpGet(AuthConstants.Routes.AccessDeniedRoute)]
         public IActionResult AccessDenied()
         {
-            return StatusCode(StatusCodes.Status403Forbidden);
+            return View();
         }
 
         private void AddModelErrors(ServiceResult result)
