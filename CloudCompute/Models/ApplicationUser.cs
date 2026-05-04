@@ -17,6 +17,10 @@ public class ApplicationUser
     [StringLength(256)]
     public string Email { get; set; } = string.Empty;
 
+    [Required]
+    [StringLength(1000)]
+    public string PasswordHash { get; set; } = string.Empty;
+
     [StringLength(300)]
     public string? ProfilePicturePath { get; set; }
 
