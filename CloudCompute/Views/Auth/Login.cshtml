@@ -25,15 +25,15 @@
         <form class="auth-form w-100" asp-action="Login" asp-controller="Auth" method="post">
             <div class="text-center mb-5">
                 <h2 class="fs-1 fw-bold mb-3">Login</h2>
-                <p class="auth-muted mb-0">Please enter your email and password.</p>
+                <p class="auth-muted mb-0">Please enter your email or username and password.</p>
             </div>
 
             <partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
 
             <div class="mb-3">
-                <label class="form-label auth-label" asp-for="Email"></label>
-                <input class="form-control auth-input" asp-for="Email" autocomplete="email" placeholder="Enter your email" />
-                <span class="text-danger small" asp-validation-for="Email"></span>
+                <label class="form-label auth-label" asp-for="LoginIdentifier"></label>
+                <input class="form-control auth-input" asp-for="LoginIdentifier" autocomplete="username" placeholder="Enter your email or username" />
+                <span class="text-danger small" asp-validation-for="LoginIdentifier"></span>
             </div>
 
             <div class="mb-3">

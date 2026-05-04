@@ -21,11 +21,12 @@ public static class AuthConstants
 
     public static class Messages
     {
-        public const string InvalidCredentials = "Invalid email or password.";
-        public const string InvalidAdminCredentials = "Invalid admin email or password.";
+        public const string InvalidCredentials = "Invalid email/username or password.";
+        public const string InvalidAdminCredentials = "Invalid admin email/username or password.";
         public const string InactiveAccount = "This account is inactive. Please contact support.";
         public const string DuplicateEmail = "An account with this email already exists.";
-        public const string DuplicateAccount = "An account with this email already exists.";
+        public const string DuplicateUserName = "Username is already taken.";
+        public const string DuplicateAccount = "An account with the same username or email already exists.";
     }
 
     public static class Validation

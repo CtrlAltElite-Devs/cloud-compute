@@ -41,19 +41,34 @@ public class AuthService : IAuthService
     public async Task<ServiceResult> SignupAsync(SignupViewModel model)
     {
         var email = NormalizeEmail(model.Email);
+        var userName = model.UserName.Trim();
         var normalizedEmail = email.ToUpperInvariant();
+        var normalizedUserName = userName.ToUpperInvariant();
+        var errors = new List<ServiceError>();
+
         var duplicateEmail = await _dbContext.Users
             .AnyAsync(user => user.Email.ToUpper() == normalizedEmail);
-
         if (duplicateEmail)
         {
-            return ServiceResult.Failed(new ServiceError(nameof(SignupViewModel.Email), AuthConstants.Messages.DuplicateEmail));
+            errors.Add(new ServiceError(nameof(SignupViewModel.Email), AuthConstants.Messages.DuplicateEmail));
+        }
+
+        var duplicateUserName = await _dbContext.Users
+            .AnyAsync(user => user.UserName.ToUpper() == normalizedUserName);
+        if (duplicateUserName)
+        {
+            errors.Add(new ServiceError(nameof(SignupViewModel.UserName), AuthConstants.Messages.DuplicateUserName));
+        }
+
+        if (errors.Count > 0)
+        {
+            return ServiceResult.Failed(errors.ToArray());
         }
 
         var user = new ApplicationUser
         {
             FullName = model.FullName.Trim(),
-            UserName = email,
+            UserName = userName,
             Email = email,
             IsActive = true,
             Role = UserRole.Member
@@ -85,10 +100,12 @@ public class AuthService : IAuthService
         UserRole requiredRole,
         string invalidCredentialsMessage)
     {
-        var email = NormalizeEmail(model.Email);
-        var normalizedEmail = email.ToUpperInvariant();
+        var loginIdentifier = model.LoginIdentifier.Trim();
+        var normalizedLoginIdentifier = loginIdentifier.ToUpperInvariant();
         var user = await _dbContext.Users
-            .FirstOrDefaultAsync(user => user.Email.ToUpper() == normalizedEmail);
+            .FirstOrDefaultAsync(user =>
+                user.Email.ToUpper() == normalizedLoginIdentifier ||
+                user.UserName.ToUpper() == normalizedLoginIdentifier);
 
         if (user is null || user.Role != requiredRole)
         {
