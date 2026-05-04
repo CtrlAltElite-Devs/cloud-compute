@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-05-04
+
+### Added
+- Custom backend authentication with signup, login, logout, access-denied handling, and cookie-based sessions
+- Secure PBKDF2-SHA256 password hashing service with per-password salts and constant-time verification
+- Authentication ViewModels for login and signup server-side validation
+- EF Core migration adding password hash storage to users
+- User secrets configuration for local project settings
+
+### Changed
+- Refactored authentication logic out of `AuthController` into `AuthService`
+- Configured authentication services and middleware in the application startup flow
+
 ## [Unreleased] - 2026-05-03
 
 ### Added
