@@ -33,6 +33,7 @@ public class DevelopmentAdminSeeder
 
         var fullName = _configuration["SeedAdmin:FullName"];
         var email = _configuration["SeedAdmin:Email"];
+        var userName = _configuration["SeedAdmin:UserName"];
         var password = _configuration["SeedAdmin:Password"];
 
         if (string.IsNullOrWhiteSpace(fullName)
@@ -43,6 +44,7 @@ public class DevelopmentAdminSeeder
         }
 
         email = email.Trim();
+        userName = string.IsNullOrWhiteSpace(userName) ? email : userName.Trim();
         var normalizedEmail = email.ToUpperInvariant();
         var admin = await _dbContext.Users
             .FirstOrDefaultAsync(user => user.Email.ToUpper() == normalizedEmail);
@@ -53,7 +55,7 @@ public class DevelopmentAdminSeeder
             {
                 FullName = fullName.Trim(),
                 Email = email,
-                UserName = email,
+                UserName = userName,
                 Role = UserRole.Admin,
                 IsActive = true
             };
@@ -63,6 +65,7 @@ public class DevelopmentAdminSeeder
         else
         {
             admin.FullName = fullName.Trim();
+            admin.UserName = userName;
             admin.Role = UserRole.Admin;
             admin.IsActive = true;
         }
