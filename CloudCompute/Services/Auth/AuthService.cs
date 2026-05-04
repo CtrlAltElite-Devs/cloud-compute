@@ -104,10 +104,11 @@ public class AuthService : IAuthService
         var normalizedLoginIdentifier = loginIdentifier.ToUpperInvariant();
         var user = await _dbContext.Users
             .FirstOrDefaultAsync(user =>
-                user.Email.ToUpper() == normalizedLoginIdentifier ||
-                user.UserName.ToUpper() == normalizedLoginIdentifier);
+                user.Role == requiredRole &&
+                (user.Email.ToUpper() == normalizedLoginIdentifier ||
+                user.UserName.ToUpper() == normalizedLoginIdentifier));
 
-        if (user is null || user.Role != requiredRole)
+        if (user is null)
         {
             return ServiceResult.Failed(CreateModelError(invalidCredentialsMessage));
         }
@@ -147,7 +148,7 @@ public class AuthService : IAuthService
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Name, user.FullName),
+            new(ClaimTypes.Name, user.UserName),
             new(ClaimTypes.Email, user.Email),
             new(ClaimTypes.Role, user.Role.ToString()),
             new(AuthConstants.Claims.FullName, user.FullName)
