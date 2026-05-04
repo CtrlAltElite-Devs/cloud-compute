@@ -1,3 +1,4 @@
+using CloudCompute.Constants;
 using CloudCompute.Models;
 using CloudCompute.Models.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -46,8 +47,18 @@ public class DevelopmentAdminSeeder
         email = email.Trim();
         userName = string.IsNullOrWhiteSpace(userName) ? email : userName.Trim();
         var normalizedEmail = email.ToUpperInvariant();
-        var admin = await _dbContext.Users
+        var normalizedUserName = userName.ToUpperInvariant();
+        var emailOwner = await _dbContext.Users
             .FirstOrDefaultAsync(user => user.Email.ToUpper() == normalizedEmail);
+        var usernameOwner = await _dbContext.Users
+            .FirstOrDefaultAsync(user => user.UserName.ToUpper() == normalizedUserName);
+
+        if (emailOwner is not null && usernameOwner is not null && emailOwner.Id != usernameOwner.Id)
+        {
+            throw new InvalidOperationException(AuthConstants.Diagnostics.SeedAdminIdentityConflict);
+        }
+
+        var admin = emailOwner ?? usernameOwner;
 
         if (admin is null)
         {

@@ -62,6 +62,11 @@ public static class ServiceExtensions
 
                         context.Response.Redirect(AuthConstants.Routes.MemberLoginPath);
                         return Task.CompletedTask;
+                    },
+                    OnRedirectToAccessDenied = context =>
+                    {
+                        context.Response.Redirect(AuthConstants.Routes.AccessDeniedPath);
+                        return Task.CompletedTask;
                     }
                 };
             });

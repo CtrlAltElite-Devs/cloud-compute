@@ -129,6 +129,12 @@ public class AuthService : IAuthService
             return ServiceResult.Failed(CreateModelError(invalidCredentialsMessage));
         }
 
+        if (passwordResult == PasswordVerificationResult.SuccessRehashNeeded)
+        {
+            user.PasswordHash = _passwordHasher.HashPassword(user, model.Password);
+            await _dbContext.SaveChangesAsync();
+        }
+
         await SignInUserAsync(user, model.RememberMe);
 
         return ServiceResult.Success();

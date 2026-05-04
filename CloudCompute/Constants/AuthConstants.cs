@@ -37,6 +37,7 @@ public static class AuthConstants
     public static class Diagnostics
     {
         public const string MissingHttpContext = "No active HTTP context is available.";
+        public const string SeedAdminIdentityConflict = "Seed admin email and username are assigned to different accounts.";
     }
 
     public static class Claims
