@@ -1,0 +1,32 @@
+{
+  "version": "3.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "provider": "jsdelivr",
+      "library": "bootstrap@5.3.3",
+      "destination": "CloudCompute/wwwroot/lib/bootstrap",
+      "files": [
+        "dist/css/bootstrap.css",
+        "dist/css/bootstrap.css.map",
+        "dist/css/bootstrap.min.css",
+        "dist/css/bootstrap.min.css.map",
+        "dist/js/bootstrap.bundle.js",
+        "dist/js/bootstrap.bundle.js.map",
+        "dist/js/bootstrap.bundle.min.js",
+        "dist/js/bootstrap.bundle.min.js.map",
+        "LICENSE"
+      ]
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "bootstrap-icons@1.11.3",
+      "destination": "CloudCompute/wwwroot/lib/bootstrap-icons",
+      "files": [
+        "font/bootstrap-icons.css",
+        "font/fonts/bootstrap-icons.woff",
+        "font/fonts/bootstrap-icons.woff2"
+      ]
+    }
+  ]
+}

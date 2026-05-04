@@ -1,0 +1,242 @@
+﻿@{
+    ViewData["Title"] = "Landing Page";
+    ViewData["BodyClass"] = "landing-page";
+}
+
+<section class="landing-section text-center d-flex align-items-center py-5">
+    <div class="container">
+        <p class="text-primary fw-semibold mb-3">P2P GPU Rental Marketplace</p>
+        <h1 class="display-2 fw-semibold mb-4">
+            Rent compute power by the hour.
+        </h1>
+        <p class="lead text-muted col-lg-7 mx-auto mb-5">
+            CloudCompute connects people who need GPU power with owners who have hardware to spare. Browse cards,
+            rent with credits, or list your own GPU for others to use.
+        </p>
+        <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+            <a class="btn btn-primary px-4" href="#">Browse GPUs</a>
+            <a class="btn btn-outline-primary px-4" href="#">List your GPU</a>
+        </div>
+
+        <div class="row g-3 mt-5">
+            <div class="col-6 col-lg-3">
+                <div class="bg-body-tertiary border rounded p-4 h-100">
+                    <div class="small text-muted">Starting credits</div>
+                    <div class="h3 mb-0">500</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="bg-body-tertiary border rounded p-4 h-100">
+                    <div class="small text-muted">Minimum rental</div>
+                    <div class="h3 mb-0">1 hr</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="bg-body-tertiary border rounded p-4 h-100">
+                    <div class="small text-muted">Maximum rental</div>
+                    <div class="h3 mb-0">7 days</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="bg-body-tertiary border rounded p-4 h-100">
+                    <div class="small text-muted">Platform fee</div>
+                    <div class="h3 mb-0">10%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="landing-section d-flex align-items-center py-5" style="min-height:50vh;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <p class="text-primary fw-semibold mb-3">How It Works</p>
+            <h2 class="mb-0">From browsing to active rental in three steps.</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="h-100 bg-body-tertiary border rounded p-4 d-flex justify-content-center align-items-center gap-3">
+                    <span class="step-number d-inline-flex align-items-center justify-content-center text-bg-primary rounded-circle fs-4 fw-bold flex-shrink-0">1</span>
+                    <div>
+                        <h2 class="h4">Browse GPUs</h2>
+                        <p class="text-muted mb-0">
+                            Compare model, VRAM, hourly credit price, owner rating, and availability before renting.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="h-100 bg-body-tertiary border rounded p-4 d-flex justify-content-center align-items-center gap-3">
+                    <span class="step-number d-inline-flex align-items-center justify-content-center text-bg-primary rounded-circle fs-4 fw-bold flex-shrink-0">2</span>
+                    <div>
+                        <h2 class="h4">Rent with credits</h2>
+                        <p class="text-muted mb-0">
+                            Confirm duration and total cost upfront. New users start with 500 simulated credits.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="h-100 bg-body-tertiary border rounded p-4 d-flex justify-content-center align-items-center gap-3">
+                    <span class="step-number d-inline-flex align-items-center justify-content-center text-bg-primary rounded-circle fs-4 fw-bold flex-shrink-0">3</span>
+                    <div>
+                        <h2 class="h4">Track the rental</h2>
+                        <p class="text-muted mb-0">
+                            Follow active rentals, review history, and keep every credit movement recorded.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="d-flex align-items-center py-5" style="min-height:50vh;">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <p class="text-primary fw-semibold mb-3">Credit System</p>
+                <h2 class="mb-4">Simulated transactions, clear audit trail.</h2>
+                <p class="text-muted mb-0">
+                    CloudCompute keeps the rental flow realistic while staying classroom-friendly. Every credit movement
+                    is logged with a timestamp and reason, and unused time can be refunded when rentals end early.
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-4">
+                    <div class="col-6">
+                        <div class="bg-body-tertiary rounded p-4 h-100">
+                            <h3 class="h6">No real payments</h3>
+                            <p class="small text-muted mb-0">Rentals use simulated credits for a realistic classroom flow.</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-body-tertiary rounded p-4 h-100">
+                            <h3 class="h6">Upfront cost</h3>
+                            <p class="small text-muted mb-0">Users confirm duration and total credits before renting.</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-body-tertiary rounded p-4 h-100">
+                            <h3 class="h6">Refundable time</h3>
+                            <p class="small text-muted mb-0">Early termination can refund unused hours proportionally.</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-body-tertiary rounded p-4 h-100">
+                            <h3 class="h6">Logged activity</h3>
+                            <p class="small text-muted mb-0">Every credit grant, rental, earning, and refund is tracked.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="d-flex align-items-center py-5" style="min-height:50vh;">
+    <div class="container">
+        <div class="row g-5 align-items-start">
+            <div class="col-lg-4">
+                <p class="text-primary fw-semibold mb-3">FAQ</p>
+                <h2 class="mb-4">Common questions before renting.</h2>
+                <p class="text-muted mb-0">
+                    CloudCompute uses simulated rental flows, so users can experience marketplace behavior without real payments.
+                </p>
+            </div>
+            <div class="col-lg-8">
+                <div class="accordion" id="landingFaq">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqPayments" aria-expanded="true" aria-controls="faqPayments">
+                                Is this using real money?
+                            </button>
+                        </h3>
+                        <div id="faqPayments" class="accordion-collapse collapse show" data-bs-parent="#landingFaq">
+                            <div class="accordion-body text-muted">
+                                No. Rentals use simulated credits so the platform can demonstrate realistic transactions without payment processing.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqRoles" aria-expanded="false" aria-controls="faqRoles">
+                                Can one user rent and list GPUs?
+                            </button>
+                        </h3>
+                        <div id="faqRoles" class="accordion-collapse collapse" data-bs-parent="#landingFaq">
+                            <div class="accordion-body text-muted">
+                                Yes. A user can rent GPUs from other owners and also become an owner after verification.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqEarlyEnd" aria-expanded="false" aria-controls="faqEarlyEnd">
+                                What happens if a rental ends early?
+                            </button>
+                        </h3>
+                        <div id="faqEarlyEnd" class="accordion-collapse collapse" data-bs-parent="#landingFaq">
+                            <div class="accordion-body text-muted">
+                                Unused rental time can be refunded proportionally, and the credit movement is recorded in the audit trail.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqRentalLimits" aria-expanded="false" aria-controls="faqRentalLimits">
+                                How long can I rent a GPU?
+                            </button>
+                        </h3>
+                        <div id="faqRentalLimits" class="accordion-collapse collapse" data-bs-parent="#landingFaq">
+                            <div class="accordion-body text-muted">
+                                Rentals start at one hour and can run for up to seven days, depending on the GPU owner's availability.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqOwnerEarnings" aria-expanded="false" aria-controls="faqOwnerEarnings">
+                                How do GPU owners earn credits?
+                            </button>
+                        </h3>
+                        <div id="faqOwnerEarnings" class="accordion-collapse collapse" data-bs-parent="#landingFaq">
+                            <div class="accordion-body text-muted">
+                                Owners receive credits when renters complete bookings, with the platform fee deducted from the rental total.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqReviews" aria-expanded="false" aria-controls="faqReviews">
+                                Are rentals reviewed after completion?
+                            </button>
+                        </h3>
+                        <div id="faqReviews" class="accordion-collapse collapse" data-bs-parent="#landingFaq">
+                            <div class="accordion-body text-muted">
+                                Yes. Completed rentals can be reviewed so renters can compare listings and owners can build trust over time.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="d-flex align-items-center py-5" style="min-height:50vh;">
+    <div class="container">
+        <div class="bg-body-tertiary rounded p-5 text-center">
+            <p class="text-primary fw-semibold mb-3">Ready to start?</p>
+            <h2 class="mb-4">Rent GPU power or list your own hardware.</h2>
+            <p class="text-muted col-lg-7 mx-auto mb-5">
+                Start with credits, compare available GPUs, and track every rental from confirmation to completion.
+            </p>
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                <a class="btn btn-primary px-4" href="#">Browse GPUs</a>
+                <a class="btn btn-outline-primary px-4" href="#">List your GPU</a>
+            </div>
+        </div>
+    </div>
+</section>

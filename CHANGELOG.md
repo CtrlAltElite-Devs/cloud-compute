@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-05-03
+
+### Added
+- Landing page with hero content, marketplace metrics, how-it-works steps, credit system overview, FAQ accordion, call-to-action section, navigation, and footer
+- Landing page visual polish including a scoped gradient background, dark-mode accordion colors, and filled card backgrounds for metric and process cards
+- Bootstrap color mode toggle with light, dark, and auto options persisted in local storage
+- Bootstrap Icons static assets through LibMan
+- Placeholder login and signup pages with a shared authentication layout
+
+### Changed
+- Updated Bootstrap static assets from 5.1 to 5.3 to support color mode theming
+- Moved MVC and routing service setup into `ServiceExtensions`
+- Configured routing to generate lowercase URLs and query strings
+- Updated the default route to use the landing page as the application entry point
+
+### Removed
+- Unused default MVC template home controller, home views, privacy view, and scoped layout stylesheet
+
 ## [Unreleased] - 2026-05-02
 
 ### Added

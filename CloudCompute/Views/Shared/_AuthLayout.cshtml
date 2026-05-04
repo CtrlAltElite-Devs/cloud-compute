@@ -1,9 +1,11 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CloudCompute</title>
+
+    <!-- Theme Script (unchanged) -->
     <script>
         (() => {
             const storedTheme = localStorage.getItem("theme");
@@ -11,31 +13,30 @@
                 if (storedTheme === "light" || storedTheme === "dark") {
                     return storedTheme;
                 }
-
                 return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
             };
 
             document.documentElement.setAttribute("data-bs-theme", getPreferredTheme());
         })();
     </script>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="min-vh-100 d-flex flex-column @ViewData["BodyClass"]">
-    <partial name="_Navigation" />
 
-    <div class="container-fluid flex-grow-1 page-shell">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <partial name="_Footer" />
-
+<body class="">
+    <main>
+        @RenderBody()
+    </main>
+    
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

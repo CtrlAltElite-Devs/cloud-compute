@@ -4,14 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CloudCompute.Controllers
 {
-    public class HomeController : Controller
+    public class LandingController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
+        public LandingController(ILogger<LandingController> logger) { }
 
         public IActionResult Index()
         {

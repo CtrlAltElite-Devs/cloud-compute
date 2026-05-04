@@ -21,6 +21,7 @@
   <ItemGroup>
     <Folder Include="Data/" />
     <Folder Include="Extensions/" />
+    <Folder Include="Views/Auth/" />
   </ItemGroup>
 
 </Project>
