@@ -30,30 +30,6 @@
 </head>
 
 <body class="app-body @ViewData["BodyClass"]">
-    <div class="app-theme-switcher dropdown">
-        <button class="btn btn-sm dropdown-toggle border-0 shadow-none theme-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="themeMenuButton" aria-label="Select color theme">
-            <i class="bi bi-circle-half" aria-hidden="true" id="themeMenuIcon"></i>
-            <span class="visually-hidden" id="themeMenuText">Auto</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeMenuButton">
-            <li>
-                <button class="dropdown-item" type="button" data-theme-value="light">
-                    <i class="bi bi-sun-fill me-2" aria-hidden="true"></i>Light
-                </button>
-            </li>
-            <li>
-                <button class="dropdown-item" type="button" data-theme-value="dark">
-                    <i class="bi bi-moon-stars-fill me-2" aria-hidden="true"></i>Dark
-                </button>
-            </li>
-            <li>
-                <button class="dropdown-item" type="button" data-theme-value="auto">
-                    <i class="bi bi-circle-half me-2" aria-hidden="true"></i>Auto
-                </button>
-            </li>
-        </ul>
-    </div>
-
     <header class="app-mobile-topbar d-md-none">
         <button class="app-mobile-topbar-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Open navigation">
             <i class="bi bi-list" aria-hidden="true"></i>
@@ -68,6 +44,7 @@
         <partial name="~/Views/Shared/Partials/_Sidebar.cshtml" />
 
         <main class="app-main" role="main">
+            <partial name="~/Views/Shared/Partials/_AppHeader.cshtml" />
             <div class="app-main-inner">
                 @RenderBody()
             </div>
