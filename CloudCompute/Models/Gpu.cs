@@ -29,6 +29,9 @@ public class Gpu
     [Column(TypeName = "decimal(18,2)")]
     public decimal PricePerHour { get; set; }
 
+    [Range(1, 168)]
+    public int MinRentalHours { get; set; } = 1;
+
     [StringLength(4000)]
     public string? Description { get; set; }
 

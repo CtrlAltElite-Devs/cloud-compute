@@ -1,0 +1,77 @@
+@model VerificationPageViewModel
+@{
+    Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
+    ViewData["Title"] = "Owner verification";
+
+    var statusMessage = TempData[CloudCompute.Constants.VerificationConstants.Status.TempDataMessageKey] as string;
+    var statusType = TempData[CloudCompute.Constants.VerificationConstants.Status.TempDataTypeKey] as string;
+    var alertClass = statusType == "danger" ? "alert-danger" : "alert-success";
+
+    var status = Model.LatestRequestStatus;
+    var isPending = status == OwnerVerificationStatus.Pending;
+    var isRejected = status == OwnerVerificationStatus.Rejected;
+    var isApproved = status == OwnerVerificationStatus.Approved;
+}
+
+<section class="mb-4">
+    <p class="text-uppercase text-muted small fw-semibold mb-1">Owner</p>
+    <h1 class="h3 mb-1">Become a verified owner</h1>
+    <p class="text-muted mb-0">Submit a short description of your hardware setup. An admin will review and approve your request.</p>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(statusMessage))
+{
+    <div class="alert @alertClass" role="alert">@statusMessage</div>
+}
+
+@if (isApproved)
+{
+    <div class="profile-card">
+        <h2 class="h5 mb-2">You're verified</h2>
+        <p class="text-muted mb-3">You can now list GPUs on the marketplace.</p>
+        <a class="btn btn-info" asp-controller="Gpus" asp-action="Create">List a GPU</a>
+    </div>
+}
+else if (isPending)
+{
+    <div class="profile-card">
+        <h2 class="h5 mb-2">Your request is under review</h2>
+        <p class="text-muted small mb-3">Submitted @Model.LatestSubmittedAt?.ToString("u")</p>
+        @if (!string.IsNullOrWhiteSpace(Model.LatestJustification))
+        {
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Your justification</p>
+            <p class="mb-0">@Model.LatestJustification</p>
+        }
+    </div>
+}
+else
+{
+    <div class="profile-card">
+        @if (isRejected)
+        {
+            <div class="alert alert-warning" role="alert">
+                <strong>Your previous request was declined.</strong>
+                @if (!string.IsNullOrWhiteSpace(Model.LatestReviewNotes))
+                {
+                    <div class="small mt-1">Reviewer notes: @Model.LatestReviewNotes</div>
+                }
+                <div class="small mt-1">You can submit a new request below.</div>
+            </div>
+        }
+
+        <partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
+
+        <form asp-action="Index" method="post">
+            <div class="mb-3">
+                <label asp-for="Form.Justification" class="form-label">Tell us about your setup</label>
+                <textarea asp-for="Form.Justification" class="form-control" rows="6" placeholder="Hardware, internet, location, why you'd like to list..."></textarea>
+                <span asp-validation-for="Form.Justification" class="text-danger small"></span>
+            </div>
+            <button type="submit" class="btn btn-info">Submit request</button>
+        </form>
+    </div>
+}
+
+@section Scripts {
+    <partial name="~/Views/Shared/Partials/_ValidationScriptsPartial.cshtml" />
+}

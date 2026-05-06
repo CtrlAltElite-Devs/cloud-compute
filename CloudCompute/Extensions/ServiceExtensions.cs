@@ -2,7 +2,9 @@ using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models;
 using CloudCompute.Services.Auth;
+using CloudCompute.Services.Gpu;
 using CloudCompute.Services.Profile;
+using CloudCompute.Services.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -88,6 +90,8 @@ public static class ServiceExtensions
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IProfileService, ProfileService>();
+        services.AddScoped<IVerificationService, VerificationService>();
+        services.AddScoped<IGpuService, GpuService>();
         services.AddScoped<DevelopmentAdminSeeder>();
         services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
     }

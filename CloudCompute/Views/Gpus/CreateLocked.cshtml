@@ -1,0 +1,40 @@
+@model VerificationCtaViewModel
+@{
+    Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
+    ViewData["Title"] = "List a GPU";
+
+    var status = Model.LatestRequestStatus;
+    var isPending = status == OwnerVerificationStatus.Pending;
+    var isRejected = status == OwnerVerificationStatus.Rejected;
+}
+
+<section class="mb-4">
+    <h1 class="h3 mb-1">List a GPU</h1>
+    <p class="text-muted mb-0">Verified owners can list hardware on the marketplace.</p>
+</section>
+
+<div class="profile-card">
+    <h2 class="h5 mb-2">Become a verified owner</h2>
+    <p class="text-muted mb-3">
+        Before listing a GPU, your account needs to be verified by an admin. Tell us about your setup and we'll review your request.
+    </p>
+
+    @if (isPending)
+    {
+        <div class="alert alert-info mb-0" role="alert">
+            <strong>We're reviewing your request.</strong>
+            <div class="small mt-1">You'll be able to list a GPU once an admin approves it.</div>
+        </div>
+    }
+    else
+    {
+        @if (isRejected)
+        {
+            <div class="alert alert-warning" role="alert">
+                <strong>Your last request was declined.</strong>
+                <div class="small mt-1">You can submit a new request below.</div>
+            </div>
+        }
+        <a class="btn btn-info" asp-controller="Verification" asp-action="Index">Request verification</a>
+    }
+</div>
