@@ -1,0 +1,38 @@
+@model ProfileEditViewModel
+
+<form id="profileForm" asp-action="UpdateProfile" asp-controller="Profile" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label class="form-label" asp-for="FirstName"></label>
+            <input class="form-control" asp-for="FirstName" autocomplete="given-name" />
+            <span class="text-danger small" asp-validation-for="FirstName"></span>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label" asp-for="LastName"></label>
+            <input class="form-control" asp-for="LastName" autocomplete="family-name" />
+            <span class="text-danger small" asp-validation-for="LastName"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" asp-for="UserName"></label>
+        <input class="form-control" asp-for="UserName" autocomplete="username" />
+        <span class="text-danger small" asp-validation-for="UserName"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" asp-for="Email"></label>
+        <input class="form-control" asp-for="Email" autocomplete="email" type="email" />
+        <span class="text-danger small" asp-validation-for="Email"></span>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label" asp-for="Bio"></label>
+        <textarea class="form-control" asp-for="Bio" rows="4"></textarea>
+        <span class="text-danger small" asp-validation-for="Bio"></span>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Save Changes</button>
+</form>

@@ -43,6 +43,23 @@ public static class AuthConstants
     public static class Claims
     {
         public const string FullName = "full_name";
+        public const string ProfilePicturePath = "profile_picture_path";
+    }
+
+    public static class Profile
+    {
+        public const string ProfileUpdated = "Profile updated.";
+        public const string PasswordUpdated = "Password updated.";
+        public const string AvatarUpdated = "Profile picture updated.";
+        public const string AvatarRemoved = "Profile picture removed.";
+        public const string IncorrectCurrentPassword = "Current password is incorrect.";
+        public const string DuplicateEmail = "Another account already uses this email.";
+        public const string DuplicateUserName = "Another account already uses this username.";
+        public const string AvatarRequired = "Please choose an image to upload.";
+        public const string AvatarUnsupportedFormat = "Unsupported image format. Use JPG, PNG, or WebP.";
+        public const string AvatarTooLarge = "Image must be 2 MB or smaller.";
+        public const string UserNotFound = "Account could not be found.";
+        public const long AvatarMaxBytes = 2 * 1024 * 1024;
     }
 
     public static class Redirects

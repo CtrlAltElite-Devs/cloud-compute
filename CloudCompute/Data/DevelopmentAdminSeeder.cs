@@ -46,6 +46,7 @@ public class DevelopmentAdminSeeder
 
         email = email.Trim();
         userName = string.IsNullOrWhiteSpace(userName) ? email : userName.Trim();
+        var (firstName, lastName) = SplitFullName(fullName);
         var normalizedEmail = email.ToUpperInvariant();
         var normalizedUserName = userName.ToUpperInvariant();
         var emailOwner = await _dbContext.Users
@@ -64,7 +65,8 @@ public class DevelopmentAdminSeeder
         {
             admin = new ApplicationUser
             {
-                FullName = fullName.Trim(),
+                FirstName = firstName,
+                LastName = lastName,
                 Email = email,
                 UserName = userName,
                 Role = UserRole.Admin,
@@ -75,7 +77,8 @@ public class DevelopmentAdminSeeder
         }
         else
         {
-            admin.FullName = fullName.Trim();
+            admin.FirstName = firstName;
+            admin.LastName = lastName;
             admin.UserName = userName;
             admin.Role = UserRole.Admin;
             admin.IsActive = true;
@@ -83,5 +86,19 @@ public class DevelopmentAdminSeeder
 
         admin.PasswordHash = _passwordHasher.HashPassword(admin, password);
         await _dbContext.SaveChangesAsync();
+    }
+
+    private static (string FirstName, string LastName) SplitFullName(string fullName)
+    {
+        var trimmed = fullName.Trim();
+        var spaceIndex = trimmed.IndexOf(' ');
+        if (spaceIndex < 0)
+        {
+            return (trimmed, string.Empty);
+        }
+
+        var first = trimmed[..spaceIndex];
+        var last = trimmed[(spaceIndex + 1)..].TrimStart();
+        return (first, last);
     }
 }

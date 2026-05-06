@@ -401,6 +401,10 @@ FodyWeavers.xsd
 .env.*
 secrets.json
 
+# User-uploaded profile pictures (keep the directory, ignore the contents)
+CloudCompute/wwwroot/uploads/profiles/*
+!CloudCompute/wwwroot/uploads/profiles/.gitkeep
+
 # Claude Code local configuration
 .claude/
 .config/dotnet-tools.json

@@ -8,9 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Profile page with avatar upload, editable Personal Information form (first name, last name, username, email, bio), and Change Password form, replacing the placeholder
+- Profile picture upload pipeline (`wwwroot/uploads/profiles/`) with extension and 2 MB size validation, automatic cleanup of replaced files, and a `profile_picture_path` claim that lets the sidebar render the uploaded image
+- `IProfileService` / `ProfileService` for profile updates, password changes, and avatar uploads, returning the existing `ServiceResult` shape
 - Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
 
 ### Changed
+- Split `ApplicationUser.FullName` into separate `FirstName` and `LastName` columns (with `FullName` retained as a `[NotMapped]` computed property); EF migration backfills existing rows
+- Signup form and `AuthService.SignupAsync` now collect first and last names separately
+- Authentication cookie now carries an additional `profile_picture_path` claim and is re-issued automatically when the profile, username, email, or avatar changes
+- Sidebar avatar shows the user's uploaded profile picture when available, falling back to initials
 - Relocated the theme switcher from a floating top-right button into the new app header action group
 - Authenticated main content area now shares the header's surface color for visual continuity with the header
 
