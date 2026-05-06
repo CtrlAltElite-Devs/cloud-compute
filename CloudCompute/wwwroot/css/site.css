@@ -18,12 +18,15 @@ html {
 }
 
 [data-bs-theme="dark"] {
-  --bs-body-bg: #1b1b1b;
+  --app-page-bg: #202020;
+  --app-surface-bg: #171717;
+  --app-muted-surface-bg: #242424;
+  --bs-body-bg: var(--app-page-bg);
   --bs-body-color: #f2f2f2;
   --bs-emphasis-color: #ffffff;
   --bs-secondary-color: #c7c7c7;
-  --bs-tertiary-bg: #252525;
-  --bs-secondary-bg: #202020;
+  --bs-tertiary-bg: var(--app-muted-surface-bg);
+  --bs-secondary-bg: var(--app-surface-bg);
   --bs-border-color: #303030;
   --bs-border-color-translucent: rgba(255, 255, 255, .12);
 }
@@ -38,7 +41,7 @@ html {
   background:
     linear-gradient(135deg, rgba(73, 132, 190, .24) 0%, rgba(73, 132, 190, 0) 35%),
     linear-gradient(315deg, rgba(40, 167, 123, .14) 0%, rgba(40, 167, 123, 0) 32%),
-    linear-gradient(180deg, #171a1f 0%, #1d2026 48%, #181818 100%);
+    linear-gradient(180deg, var(--app-surface-bg) 0%, var(--app-page-bg) 48%, var(--app-surface-bg) 100%);
 }
 
 body.landing-page {
@@ -62,6 +65,13 @@ h1, h2, h3, h4, h5, h6 {
 
 .playfair {
   font-family: "Playfair Display", serif;
+}
+
+.brand-logo {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 
 .theme-toggle:focus,

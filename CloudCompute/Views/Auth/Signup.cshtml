@@ -1,11 +1,75 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model SignupViewModel
+
 @{
-    Layout = "_AuthLayout";
+    Layout = "~/Views/Shared/Layouts/_AuthLayout.cshtml";
     ViewData["Title"] = "Signup";
+    ViewData["BodyClass"] = "auth-page";
 }
 
-<div>
-    Signup
-</div>
+<section class="auth-shell row g-0 min-vh-100">
+    <div class="auth-form-panel col-lg-6 d-flex align-items-center justify-content-center min-vh-100 p-4 p-sm-5">
+        <form class="auth-form w-100" asp-action="Signup" asp-controller="Auth" method="post">
+            <div class="text-center mb-5">
+                <h1 class="fs-1 fw-bold mb-3">Create Account</h1>
+                <p class="auth-muted mb-0">Please enter your credentials to proceed.</p>
+            </div>
+
+            <partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
+
+            <div class="mb-3">
+                <label class="form-label auth-label" asp-for="FullName">Full Name</label>
+                <input class="form-control auth-input" asp-for="FullName" autocomplete="name" placeholder="Enter your full name" />
+                <span class="text-danger small" asp-validation-for="FullName"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label auth-label" asp-for="Email"></label>
+                <input class="form-control auth-input" asp-for="Email" autocomplete="email" placeholder="Enter your email" />
+                <span class="text-danger small" asp-validation-for="Email"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label auth-label" asp-for="UserName">Username</label>
+                <input class="form-control auth-input" asp-for="UserName" autocomplete="username" placeholder="Choose a username" />
+                <span class="text-danger small" asp-validation-for="UserName"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label auth-label" asp-for="Password"></label>
+                <input class="form-control auth-input" asp-for="Password" autocomplete="new-password" placeholder="Enter your password" />
+                <span class="text-danger small" asp-validation-for="Password"></span>
+            </div>
+
+            <div class="mb-5">
+                <label class="form-label auth-label" asp-for="ConfirmPassword">Confirm Password</label>
+                <input class="form-control auth-input" asp-for="ConfirmPassword" autocomplete="new-password" placeholder="Re-enter your password" />
+                <span class="text-danger small" asp-validation-for="ConfirmPassword"></span>
+            </div>
+
+            <button class="btn btn-primary w-100 fw-bold py-3 mb-5" type="submit">Create Account</button>
+
+            <p class="auth-muted text-center mb-0">
+                Already have an account?
+                <a class="auth-link fw-bold text-decoration-none" asp-action="Login" asp-controller="Auth">Login</a>
+            </p>
+        </form>
+    </div>
+
+    <div class="auth-visual-panel auth-visual-panel-top col-lg-6 d-none d-lg-flex align-items-end position-relative overflow-hidden p-5">
+        <div class="auth-visual-content position-relative z-1 mb-5">
+            <a asp-action="Index" asp-controller="Landing" aria-label="Go to CloudCompute landing page">
+                <img class="auth-logo-mark" src="~/images/logo.png" asp-append-version="true" alt="CloudCompute" />
+            </a>
+            <h2 class="auth-hero-title display-3 fw-bold lh-1 mb-4">
+                Start your journey with powerful cloud GPUs in high performing compute
+            </h2>
+            <p class="auth-hero-copy lead mb-0">
+                Designed for developers, students, and innovators. Get started in seconds and scale your compute as your projects grow.
+            </p>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="~/Views/Shared/Partials/_ValidationScriptsPartial.cshtml" />
+}

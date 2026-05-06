@@ -1,0 +1,18 @@
+@{
+    var errors = ViewData.ModelState[string.Empty]?.Errors
+        .Select(error => error.ErrorMessage)
+        .Where(message => !string.IsNullOrWhiteSpace(message))
+        .ToList() ?? [];
+}
+
+@if (errors.Count > 0)
+{
+    <partial
+        name="~/Views/Shared/Partials/_Alert.cshtml"
+        model="new AlertViewModel
+        {
+            Type = AlertType.Danger,
+            Messages = errors,
+            TextCenter = true
+        }" />
+}

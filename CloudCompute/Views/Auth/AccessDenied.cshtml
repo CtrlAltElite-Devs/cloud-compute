@@ -1,0 +1,35 @@
+@{
+    Layout = "~/Views/Shared/Layouts/_AuthLayout.cshtml";
+    ViewData["Title"] = "Access Denied";
+    ViewData["BodyClass"] = "auth-page";
+}
+
+<section class="auth-shell row g-0 min-vh-100">
+    <div class="auth-visual-panel col-lg-6 d-none d-lg-flex align-items-center position-relative overflow-hidden p-5">
+        <div class="auth-visual-content position-relative z-1">
+            <a asp-action="Index" asp-controller="Landing" aria-label="Go to CloudCompute landing page">
+                <img class="auth-logo-mark" src="~/images/logo.png" asp-append-version="true" alt="CloudCompute" />
+            </a>
+            <h1 class="auth-hero-title display-3 fw-bold lh-1 mb-4">
+                CloudCompute keeps protected workspaces limited to approved accounts.
+            </h1>
+            <p class="auth-hero-copy lead mb-0">
+                Use the right account to continue into the requested area.
+            </p>
+        </div>
+    </div>
+
+    <div class="auth-form-panel col-lg-6 d-flex align-items-center justify-content-center min-vh-100 p-4 p-sm-5">
+        <div class="auth-form w-100 text-center">
+            <div class="mb-5">
+                <h2 class="fs-1 fw-bold mb-3">Access denied</h2>
+                <p class="auth-muted mb-0">Your account does not have permission to view this page.</p>
+            </div>
+
+            <div class="d-grid gap-3">
+                <a class="btn btn-primary fw-bold py-3" asp-action="Login" asp-controller="Auth">Member login</a>
+                <a class="btn btn-outline-primary fw-bold py-3" asp-action="Login" asp-controller="Admin">Admin login</a>
+            </div>
+        </div>
+    </div>
+</section>

@@ -2,7 +2,7 @@
 
 @{
     Layout = "~/Views/Shared/Layouts/_AuthLayout.cshtml";
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Admin Login";
     ViewData["BodyClass"] = "auth-page";
 }
 
@@ -13,19 +13,19 @@
                 <img class="auth-logo-mark" src="~/images/logo.png" asp-append-version="true" alt="CloudCompute" />
             </a>
             <h1 class="auth-hero-title display-3 fw-bold lh-1 mb-4">
-                From idea to deployment in under an hour powered by affordable GPUs.
+                Manage platform access, compute listings, and credit operations.
             </h1>
             <p class="auth-hero-copy lead mb-0">
-                Access high-performance compute inexpensively. Train, deploy, and scale with ease.
+                Administrative access is limited to approved CloudCompute operators.
             </p>
         </div>
     </div>
 
     <div class="auth-form-panel col-lg-6 d-flex align-items-center justify-content-center min-vh-100 p-4 p-sm-5">
-        <form class="auth-form w-100" asp-action="Login" asp-controller="Auth" method="post">
+        <form class="auth-form w-100" asp-action="Login" asp-controller="Admin" method="post">
             <div class="text-center mb-5">
-                <h2 class="fs-1 fw-bold mb-3">Login</h2>
-                <p class="auth-muted mb-0">Please enter your email or username and password.</p>
+                <h2 class="fs-1 fw-bold mb-3">Admin Login</h2>
+                <p class="auth-muted mb-0">Please enter your admin email or username and password.</p>
             </div>
 
             <partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
@@ -50,8 +50,7 @@
             <button class="btn btn-primary w-100 fw-bold py-3 mb-5" type="submit">Login</button>
 
             <p class="auth-muted text-center mb-0">
-                Don't have an account?
-                <a class="auth-link fw-bold text-decoration-none" asp-action="Signup" asp-controller="Auth">Create an Account</a>
+                <a class="auth-link fw-bold text-decoration-none" asp-action="Login" asp-controller="Auth">Member login</a>
             </p>
         </form>
     </div>

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CloudCompute.Models.Enums;
 
 namespace CloudCompute.Models;
 
@@ -33,6 +34,8 @@ public class ApplicationUser
     public bool IsOwnerVerified { get; set; }
 
     public bool IsActive { get; set; } = true;
+
+    public UserRole Role { get; set; } = UserRole.Member;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

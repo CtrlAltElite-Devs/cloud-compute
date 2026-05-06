@@ -8,15 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-04
 
 ### Added
-- Custom backend authentication with signup, login, logout, access-denied handling, and cookie-based sessions
-- Secure PBKDF2-SHA256 password hashing service with per-password salts and constant-time verification
-- Authentication ViewModels for login and signup server-side validation
+- Backend authentication with signup, login, logout, access-denied handling, and cookie-based sessions
+- Restored member login and signup pages with shared authentication layout, model-state alerts, auth styling, and logo asset
+- Member dashboard page protected by authentication
+- Admin login and dashboard pages protected by admin role authorization
+- Authentication ViewModels for email/username login and signup server-side validation
 - EF Core migration adding password hash storage to users
+- EF Core migration adding user role storage to users
+- Development admin seeder for local admin account provisioning
 - User secrets configuration for local project settings
 
 ### Changed
 - Refactored authentication logic out of `AuthController` into `AuthService`
+- Reworked member authentication to support email or username with password
+- Updated signup to collect and validate unique usernames before redirecting to login without automatically signing in
+- Replaced the custom password hasher with ASP.NET Core Identity password hashing
+- Added role-aware member and admin login flows with clean admin, member, and access-denied redirects
+- Added development-only automatic migrations before admin seeding on startup
+- Updated the development admin seeder to support a configured username and fail on identity conflicts
 - Configured authentication services and middleware in the application startup flow
+
+### Removed
+- Custom authentication password hasher service and interface
 
 ## [Unreleased] - 2026-05-03
 
