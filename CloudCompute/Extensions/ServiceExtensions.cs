@@ -2,6 +2,7 @@ using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models;
 using CloudCompute.Services.Auth;
+using CloudCompute.Services.Profile;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -86,6 +87,7 @@ public static class ServiceExtensions
     private static void ConfigureApplicationServices(IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<DevelopmentAdminSeeder>();
         services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
     }

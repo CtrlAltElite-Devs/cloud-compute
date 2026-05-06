@@ -67,7 +67,8 @@ public class AuthService : IAuthService
 
         var user = new ApplicationUser
         {
-            FullName = model.FullName.Trim(),
+            FirstName = model.FirstName.Trim(),
+            LastName = model.LastName.Trim(),
             UserName = userName,
             Email = email,
             IsActive = true,
@@ -157,7 +158,8 @@ public class AuthService : IAuthService
             new(ClaimTypes.Name, user.UserName),
             new(ClaimTypes.Email, user.Email),
             new(ClaimTypes.Role, user.Role.ToString()),
-            new(AuthConstants.Claims.FullName, user.FullName)
+            new(AuthConstants.Claims.FullName, user.FullName),
+            new(AuthConstants.Claims.ProfilePicturePath, user.ProfilePicturePath ?? string.Empty)
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

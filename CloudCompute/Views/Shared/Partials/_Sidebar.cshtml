@@ -22,6 +22,8 @@
                    ?? User.Identity?.Name
                    ?? "";
     var email = User.FindFirst(ClaimTypes.Email)?.Value ?? "";
+    var profilePicturePath = User.FindFirst(AuthConstants.Claims.ProfilePicturePath)?.Value;
+    var hasProfilePicture = !string.IsNullOrWhiteSpace(profilePicturePath);
     var initials = ComputeInitials(fullName);
 }
 
@@ -73,7 +75,14 @@
     </div>
 
     <div class="app-sidebar-user">
-        <div class="sidebar-avatar" aria-hidden="true">@initials</div>
+        @if (hasProfilePicture)
+        {
+            <img class="sidebar-avatar sidebar-avatar-image" src="@profilePicturePath" alt="" aria-hidden="true" />
+        }
+        else
+        {
+            <div class="sidebar-avatar" aria-hidden="true">@initials</div>
+        }
         <div class="sidebar-user-text">
             <div class="sidebar-user-name">@fullName</div>
             <div class="sidebar-user-email">@email</div>

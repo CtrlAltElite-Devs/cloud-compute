@@ -4,9 +4,15 @@ namespace CloudCompute.ViewModels.Auth;
 
 public class SignupViewModel
 {
-    [Required(ErrorMessage = "Full name is required.")]
-    [StringLength(100, ErrorMessage = "Full name cannot exceed 100 characters.")]
-    public string FullName { get; set; } = string.Empty;
+    [Required(ErrorMessage = "First name is required.")]
+    [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters.")]
+    [Display(Name = "First Name")]
+    public string FirstName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Last name is required.")]
+    [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters.")]
+    [Display(Name = "Last Name")]
+    public string LastName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress(ErrorMessage = "Enter a valid email address.")]
