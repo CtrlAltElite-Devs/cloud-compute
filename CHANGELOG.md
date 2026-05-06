@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-05-07
+
+### Added
+- Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
+
+### Changed
+- Relocated the theme switcher from a floating top-right button into the new app header action group
+- Authenticated main content area now shares the header's surface color for visual continuity with the header
+
 ## [Unreleased] - 2026-05-06
 
 ### Added
