@@ -1,0 +1,214 @@
+/* App shell — authenticated layout with left sidebar + main content */
+
+.app-body {
+  min-height: 100vh;
+  margin: 0;
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar — width on md+; offcanvas-md handles below-md positioning */
+.app-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 16rem;
+  flex-shrink: 0;
+  background-color: var(--bs-body-bg);
+  border-right: 1px solid var(--bs-border-color);
+}
+
+.app-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.25rem 1rem;
+}
+
+.sidebar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--bs-emphasis-color);
+  text-decoration: none;
+}
+
+.sidebar-brand:hover {
+  color: var(--bs-emphasis-color);
+}
+
+.app-sidebar-body {
+  padding: 0.5rem 0.75rem;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.sidebar-section-label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  padding: 0.75rem 0.75rem 0.4rem;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--bs-body-color);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sidebar-link:hover {
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-emphasis-color);
+}
+
+.sidebar-link.active {
+  background-color: var(--bs-secondary-bg);
+  color: var(--bs-emphasis-color);
+  font-weight: 600;
+}
+
+.sidebar-link i {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* User card */
+.app-sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.sidebar-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6c8cff, #4a6cf7);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.sidebar-user-text {
+  min-width: 0;
+  flex-grow: 1;
+}
+
+.sidebar-user-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--bs-emphasis-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-email {
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-kebab {
+  border: none;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  padding: 0.25rem 0.5rem;
+  flex-shrink: 0;
+}
+
+.sidebar-user-kebab:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Main content */
+.app-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main-inner {
+  padding: 1.5rem 2rem;
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Mobile top bar */
+.app-mobile-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+}
+
+.app-mobile-topbar .brand-logo {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.app-mobile-topbar-brand {
+  font-weight: 700;
+  font-family: "Playfair Display", serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--bs-emphasis-color);
+  text-decoration: none;
+}
+
+.app-mobile-topbar-toggle {
+  border: 1px solid var(--bs-border-color);
+  background: transparent;
+  color: var(--bs-body-color);
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.5rem;
+}
+
+/* Theme switcher floater (mirrors auth-theme-switcher pattern) */
+.app-theme-switcher {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1030;
+}
+
+@media (max-width: 767.98px) {
+  .app-main-inner {
+    padding: 1.25rem;
+  }
+}

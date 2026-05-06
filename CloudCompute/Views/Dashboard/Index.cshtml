@@ -1,18 +1,46 @@
+@using System.Security.Claims
+@using CloudCompute.Constants
 @{
+    Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
     ViewData["Title"] = "Dashboard";
+
+    var fullName = User.FindFirst(AuthConstants.Claims.FullName)?.Value
+                   ?? User.Identity?.Name
+                   ?? "";
 }
 
-<section class="py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="border rounded-3 p-4 p-md-5">
-                    <p class="text-uppercase text-muted small fw-semibold mb-2">Authenticated</p>
-                    <h1 class="h3 mb-3">Dashboard</h1>
-                    <p class="mb-1">You are logged in as @User.Identity?.Name.</p>
-                    <p class="text-muted mb-0">This page is protected and only renders after cookie authentication succeeds.</p>
-                </div>
+<section class="mb-4">
+    <p class="text-uppercase text-muted small fw-semibold mb-1">Dashboard</p>
+    <h1 class="h3 mb-1">Welcome back@(string.IsNullOrWhiteSpace(fullName) ? "" : $", {fullName}").</h1>
+    <p class="text-muted mb-0">Here's a quick look at your marketplace activity. Detailed widgets are coming soon.</p>
+</section>
+
+<div class="row g-3">
+    <div class="col-12 col-md-4">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-2 text-muted small fw-semibold mb-2">
+                <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+                <span class="text-uppercase">Active rentals</span>
             </div>
+            <p class="h4 mb-0">&mdash;</p>
         </div>
     </div>
-</section>
+    <div class="col-12 col-md-4">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-2 text-muted small fw-semibold mb-2">
+                <i class="bi bi-card-list" aria-hidden="true"></i>
+                <span class="text-uppercase">Your listings</span>
+            </div>
+            <p class="h4 mb-0">&mdash;</p>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-2 text-muted small fw-semibold mb-2">
+                <i class="bi bi-coin" aria-hidden="true"></i>
+                <span class="text-uppercase">Credit balance</span>
+            </div>
+            <p class="h4 mb-0">&mdash;</p>
+        </div>
+    </div>
+</div>
