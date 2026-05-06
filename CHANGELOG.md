@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Owner verification request flow at `/verification`: authenticated members submit a justification (30–2000 chars) that admins review at `/admin/verifications`, with approve/reject modals that capture optional reviewer notes; approval flips `ApplicationUser.IsOwnerVerified`
+- "List a GPU" form at `/gpus/create` with Hardware (brand, model, VRAM, CUDA cores), Pricing & Availability (price per hour, min rental hours, description), single photo upload, and an Approval Checklist sidebar; submissions are persisted as `Pending` GPUs awaiting admin approval
+- GPU photo upload pipeline (`wwwroot/uploads/gpus/`) reusing the avatar pattern, with JPG/PNG/WebP allowlist and 5 MB size cap
+- `IVerificationService` / `VerificationService` and `IGpuService` / `GpuService` returning the existing `ServiceResult` shape, plus `Constants/VerificationConstants.cs` and `Constants/GpuConstants.cs` for messages, file limits, and TempData keys
+- `OwnerVerificationRequest` entity (with `OwnerVerificationStatus` enum) and `Gpu.MinRentalHours` column, persisted via the `AddOwnerVerificationAndGpuMinRentalHours` EF migration
+- Locked-state CTA on `/gpus/create` for unverified members that surfaces "Become a verified owner" with state-aware messaging (no prior request, pending review, or previously rejected)
 - Profile page with avatar upload, editable Personal Information form (first name, last name, username, email, bio), and Change Password form, replacing the placeholder
 - Profile picture upload pipeline (`wwwroot/uploads/profiles/`) with extension and 2 MB size validation, automatic cleanup of replaced files, and a `profile_picture_path` claim that lets the sidebar render the uploaded image
 - `IProfileService` / `ProfileService` for profile updates, password changes, and avatar uploads, returning the existing `ServiceResult` shape
