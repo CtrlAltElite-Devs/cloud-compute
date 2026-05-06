@@ -1,0 +1,85 @@
+@using System.Security.Claims
+@using CloudCompute.Constants
+@functions {
+    private static string ComputeInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0][..1].ToUpperInvariant();
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+    }
+}
+@{
+    var controllerName = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var actionName = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
+    string ActiveIf(string c, string a) =>
+        string.Equals(controllerName, c, StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(actionName, a, StringComparison.OrdinalIgnoreCase)
+            ? "active" : "";
+
+    var fullName = User.FindFirst(AuthConstants.Claims.FullName)?.Value
+                   ?? User.Identity?.Name
+                   ?? "";
+    var email = User.FindFirst(ClaimTypes.Email)?.Value ?? "";
+    var initials = ComputeInitials(fullName);
+}
+
+<aside class="app-sidebar offcanvas-md offcanvas-start" id="appSidebar" tabindex="-1" aria-labelledby="appSidebarLabel">
+    <div class="app-sidebar-header">
+        <a class="sidebar-brand playfair" asp-controller="Dashboard" asp-action="Index" id="appSidebarLabel">
+            <img class="brand-logo" src="~/images/logo.png" alt="" aria-hidden="true" asp-append-version="true" />
+            <span>CloudCompute</span>
+        </a>
+        <button class="btn-close d-md-none" type="button" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Close"></button>
+    </div>
+
+    <div class="app-sidebar-body">
+        <div class="sidebar-section-label">Platform</div>
+        <nav class="sidebar-nav" aria-label="Platform">
+            <a class="sidebar-link @ActiveIf("Dashboard", "Index")" asp-controller="Dashboard" asp-action="Index">
+                <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="sidebar-link @ActiveIf("Gpus", "Index")" asp-controller="Gpus" asp-action="Index">
+                <i class="bi bi-cpu" aria-hidden="true"></i>
+                <span>Browse GPUs</span>
+            </a>
+            <a class="sidebar-link @ActiveIf("Rentals", "Active")" asp-controller="Rentals" asp-action="Active">
+                <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+                <span>Active Rentals</span>
+            </a>
+            <a class="sidebar-link @ActiveIf("Rentals", "History")" asp-controller="Rentals" asp-action="History">
+                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                <span>History</span>
+            </a>
+            <a class="sidebar-link @ActiveIf("Profile", "Index")" asp-controller="Profile" asp-action="Index">
+                <i class="bi bi-person" aria-hidden="true"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-section-label">Owner</div>
+        <nav class="sidebar-nav" aria-label="Owner">
+            <a class="sidebar-link @ActiveIf("Gpus", "Mine")" asp-controller="Gpus" asp-action="Mine">
+                <i class="bi bi-card-list" aria-hidden="true"></i>
+                <span>My Listings</span>
+            </a>
+            <a class="sidebar-link @ActiveIf("Gpus", "Create")" asp-controller="Gpus" asp-action="Create">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                <span>List a GPU</span>
+            </a>
+        </nav>
+    </div>
+
+    <div class="app-sidebar-user">
+        <div class="sidebar-avatar" aria-hidden="true">@initials</div>
+        <div class="sidebar-user-text">
+            <div class="sidebar-user-name">@fullName</div>
+            <div class="sidebar-user-email">@email</div>
+        </div>
+        <button class="sidebar-user-kebab btn btn-sm" type="button" aria-label="More options" disabled>
+            <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+        </button>
+    </div>
+</aside>
