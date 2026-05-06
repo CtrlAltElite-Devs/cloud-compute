@@ -1,0 +1,49 @@
+<header class="app-header" role="banner">
+    <div class="app-header-search d-none d-md-flex">
+        <input
+            type="search"
+            class="form-control app-header-search-input"
+            placeholder="Search GPUs, owners, rentals..."
+            aria-label="Search GPUs, owners, rentals"
+            autocomplete="off" />
+    </div>
+
+    <div class="app-header-actions">
+        <div class="dropdown">
+            <button class="app-header-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="themeMenuButton" aria-label="Select color theme">
+                <i class="bi bi-circle-half" aria-hidden="true" id="themeMenuIcon"></i>
+                <span class="visually-hidden" id="themeMenuText">Auto</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeMenuButton">
+                <li>
+                    <button class="dropdown-item" type="button" data-theme-value="light">
+                        <i class="bi bi-sun-fill me-2" aria-hidden="true"></i>Light
+                    </button>
+                </li>
+                <li>
+                    <button class="dropdown-item" type="button" data-theme-value="dark">
+                        <i class="bi bi-moon-stars-fill me-2" aria-hidden="true"></i>Dark
+                    </button>
+                </li>
+                <li>
+                    <button class="dropdown-item" type="button" data-theme-value="auto">
+                        <i class="bi bi-circle-half me-2" aria-hidden="true"></i>Auto
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <button type="button" class="app-header-icon-btn" aria-label="Notifications">
+            <i class="bi bi-bell" aria-hidden="true"></i>
+        </button>
+
+        <button
+            type="button"
+            class="app-header-signout"
+            data-bs-toggle="modal"
+            data-bs-target="#logoutModal">
+            <span>Sign Out</span>
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+        </button>
+    </div>
+</header>
