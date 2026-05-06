@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-06
 
 ### Added
+- Authenticated app shell with left sidebar (Dashboard, Browse GPUs, Active Rentals, History, Profile, My Listings, List a GPU) and a slide-in offcanvas drawer on mobile
+- Placeholder pages for browsing GPUs, owner listings, listing a GPU, active rentals, rental history, and member profile
 - Docker Compose dev configuration for SQL Server 2022 local database
+
+### Changed
+- Member dashboard moved onto the new app shell with a welcome headline and summary cards for active rentals, listings, and credit balance
 
 ## [Unreleased] - 2026-05-04
 
