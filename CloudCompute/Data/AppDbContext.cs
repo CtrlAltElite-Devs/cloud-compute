@@ -19,6 +19,8 @@ public class AppDbContext : DbContext
 
     public DbSet<Notification> Notifications { get; set; }
 
+    public DbSet<OwnerVerificationRequest> OwnerVerificationRequests => Set<OwnerVerificationRequest>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -100,5 +102,11 @@ public class AppDbContext : DbContext
             .WithMany(user => user.Notifications)
             .HasForeignKey(notification => notification.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<OwnerVerificationRequest>()
+            .HasOne(request => request.User)
+            .WithMany(user => user.OwnerVerificationRequests)
+            .HasForeignKey(request => request.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

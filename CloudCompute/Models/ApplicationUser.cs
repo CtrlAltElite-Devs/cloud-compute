@@ -59,4 +59,6 @@ public class ApplicationUser
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public ICollection<OwnerVerificationRequest> OwnerVerificationRequests { get; set; } = new List<OwnerVerificationRequest>();
 }

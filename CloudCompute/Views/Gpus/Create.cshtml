@@ -1,18 +1,104 @@
+@model GpuCreateViewModel
 @{
     Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
     ViewData["Title"] = "List a GPU";
 }
 
 <section class="mb-4">
-    <p class="text-uppercase text-muted small fw-semibold mb-1">Owner</p>
     <h1 class="h3 mb-1">List a GPU</h1>
-    <p class="text-muted mb-0">Coming soon.</p>
+    <p class="text-muted mb-0">Submit your hardware for approval. Live within 24 hours.</p>
 </section>
 
-<div class="border rounded-3 p-4">
-    <p class="mb-0">
-        Submit a new GPU listing with model, VRAM, CUDA cores, and your hourly credit price.
-        New listings start as <em>pending</em> and become rentable once an admin approves them.
-        Owner verification is required before listings go live.
-    </p>
-</div>
+<partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="profile-card mb-4">
+                <h2 class="h6 mb-3">Hardware</h2>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Brand" class="form-label text-uppercase small text-muted">Brand</label>
+                        <input asp-for="Brand" class="form-control" placeholder="e.g. NVIDIA" />
+                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Model" class="form-label text-uppercase small text-muted">Model</label>
+                        <input asp-for="Model" class="form-control" placeholder="e.g. RTX 4090" />
+                        <span asp-validation-for="Model" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="VramGb" class="form-label text-uppercase small text-muted">VRAM (GB)</label>
+                        <input asp-for="VramGb" class="form-control" type="number" min="1" max="512" />
+                        <span asp-validation-for="VramGb" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CudaCores" class="form-label text-uppercase small text-muted">CUDA / Stream Cores</label>
+                        <input asp-for="CudaCores" class="form-control" type="number" min="1" max="200000" />
+                        <span asp-validation-for="CudaCores" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-card mb-4">
+                <h2 class="h6 mb-3">Pricing &amp; Availability</h2>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="PricePerHour" class="form-label text-uppercase small text-muted">Price per hour ($)</label>
+                        <input asp-for="PricePerHour" class="form-control" type="number" step="0.01" min="1" max="100000" />
+                        <span asp-validation-for="PricePerHour" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="MinRentalHours" class="form-label text-uppercase small text-muted">Min rental duration (h)</label>
+                        <input asp-for="MinRentalHours" class="form-control" type="number" min="1" max="168" />
+                        <span asp-validation-for="MinRentalHours" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label text-uppercase small text-muted">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Cooling setup, network speed, special access..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-card mb-4">
+                <h2 class="h6 mb-3">Photo</h2>
+                <label for="gpuPhotoInput" class="d-flex flex-column align-items-center justify-content-center text-center border border-1 rounded-3 p-4" style="cursor: pointer; min-height: 10rem;">
+                    <i class="bi bi-cloud-arrow-up fs-3 text-info" aria-hidden="true"></i>
+                    <span class="fw-semibold mt-2">Click to upload</span>
+                    <span class="text-muted small">PNG, JPG, or WebP up to 5 MB</span>
+                </label>
+                <input asp-for="Photo" id="gpuPhotoInput" type="file" class="d-none" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+                <div id="gpuPhotoFilename" class="text-muted small mt-2"></div>
+                <span asp-validation-for="Photo" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="profile-card position-lg-sticky" style="top: 1rem;">
+                <h2 class="h6 mb-3">Approval Checklist</h2>
+                <ul class="list-unstyled mb-3">
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-info me-2" aria-hidden="true"></i>Photo of GPU + system</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-info me-2" aria-hidden="true"></i>Stable internet (&ge;100 Mbps)</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-info me-2" aria-hidden="true"></i>Static IP or VPN</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-info me-2" aria-hidden="true"></i>Identity verified</li>
+                </ul>
+                <button type="submit" class="btn btn-info w-100">Submit for approval</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="~/Views/Shared/Partials/_ValidationScriptsPartial.cshtml" />
+    <script>
+        (() => {
+            const input = document.getElementById("gpuPhotoInput");
+            const label = document.getElementById("gpuPhotoFilename");
+            if (!input || !label) return;
+            input.addEventListener("change", () => {
+                label.textContent = input.files && input.files[0] ? input.files[0].name : "";
+            });
+        })();
+    </script>
+}
