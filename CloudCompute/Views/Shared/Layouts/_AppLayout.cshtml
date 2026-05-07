@@ -1,3 +1,7 @@
+@using CloudCompute.Models.Enums
+@{
+    var isAdmin = User.IsInRole(nameof(UserRole.Admin));
+}
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="">
 <head>
@@ -34,10 +38,20 @@
         <button class="app-mobile-topbar-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Open navigation">
             <i class="bi bi-list" aria-hidden="true"></i>
         </button>
-        <a class="app-mobile-topbar-brand" asp-controller="Dashboard" asp-action="Index">
-            <img class="brand-logo" src="~/images/logo.png" alt="" aria-hidden="true" asp-append-version="true" />
-            <span>CloudCompute</span>
-        </a>
+        @if (isAdmin)
+        {
+            <a class="app-mobile-topbar-brand" asp-controller="Admin" asp-action="Dashboard">
+                <img class="brand-logo" src="~/images/logo.png" alt="" aria-hidden="true" asp-append-version="true" />
+                <span>CloudCompute</span>
+            </a>
+        }
+        else
+        {
+            <a class="app-mobile-topbar-brand" asp-controller="Dashboard" asp-action="Index">
+                <img class="brand-logo" src="~/images/logo.png" alt="" aria-hidden="true" asp-append-version="true" />
+                <span>CloudCompute</span>
+            </a>
+        }
     </header>
 
     <div class="app-shell">

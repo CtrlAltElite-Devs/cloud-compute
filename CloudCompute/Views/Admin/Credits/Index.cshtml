@@ -3,6 +3,7 @@
 @using CloudCompute.ViewModels.Admin
 @model AdminCreditLedgerViewModel
 @{
+    Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
     ViewData["Title"] = "Admin · Credit ledger";
 
     var statusMessage = TempData[AdminConstants.Status.TempDataMessageKey] as string;
@@ -41,26 +42,27 @@
     }) ?? "#";
 }
 
-<section class="py-5">
-    <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-            <div>
-                <p class="text-uppercase text-muted small fw-semibold mb-1">Admin</p>
-                <h1 class="h3 mb-0">Credit ledger</h1>
-            </div>
-            <div class="d-flex gap-2">
-                <a class="btn btn-primary btn-sm" asp-action="GrantCredits">Grant credits</a>
-                <a class="btn btn-outline-primary btn-sm" asp-action="BulkGrantCredits">Bulk grant</a>
-                <a class="btn btn-outline-danger btn-sm" asp-action="RevokeCredits">Revoke</a>
-            </div>
+<section class="dashboard-page">
+    <div class="dashboard-hero d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Admin</p>
+            <h1 class="dashboard-title mb-1">Credit ledger</h1>
+            <p class="text-muted mb-0">Browse all credit movements across the platform.</p>
         </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary btn-sm" asp-action="GrantCredits">Grant credits</a>
+            <a class="btn btn-outline-primary btn-sm" asp-action="BulkGrantCredits">Bulk grant</a>
+            <a class="btn btn-outline-danger btn-sm" asp-action="RevokeCredits">Revoke</a>
+        </div>
+    </div>
 
-        @if (!string.IsNullOrWhiteSpace(statusMessage))
-        {
-            <div class="alert @alertClass" role="alert">@statusMessage</div>
-        }
+    @if (!string.IsNullOrWhiteSpace(statusMessage))
+    {
+        <div class="alert @alertClass" role="alert">@statusMessage</div>
+    }
 
-        <form method="get" asp-action="Credits" class="row g-2 align-items-end mb-4">
+    <section class="dashboard-panel mb-3">
+        <form method="get" asp-action="Credits" class="row g-2 align-items-end mb-0">
             <div class="col-md-4">
                 <label class="form-label small">User search</label>
                 <input type="search" name="UserQuery" value="@Model.Filter.UserQuery" class="form-control" placeholder="Name, username, or email" />
@@ -87,74 +89,80 @@
                 <button type="submit" class="btn btn-primary">Filter</button>
             </div>
         </form>
+    </section>
 
-        @if (Model.Rows.Count == 0)
-        {
-            <div class="border rounded-3 p-4 text-center text-muted">No transactions match those filters.</div>
-        }
-        else
-        {
-            <div class="border rounded-3 overflow-hidden">
+    @if (Model.Rows.Count == 0)
+    {
+        <div class="dashboard-empty-state">
+            <i class="bi bi-coin" aria-hidden="true"></i>
+            <h3>No transactions match those filters</h3>
+            <p>Adjust the search criteria above to broaden results.</p>
+        </div>
+    }
+    else
+    {
+        <section class="dashboard-panel p-0 overflow-hidden">
+            <div class="table-responsive">
                 <table class="table mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th>When</th>
+                            <th class="ps-4">When</th>
                             <th>User</th>
                             <th>Type</th>
                             <th class="text-end">Amount</th>
                             <th class="text-end">Balance after</th>
                             <th>Reason</th>
-                            <th>Admin</th>
+                            <th class="pe-4">Admin</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var row in Model.Rows)
                         {
                             <tr>
-                                <td class="small text-muted">@row.CreatedAt.ToString("u")</td>
+                                <td class="ps-4 small text-muted">@row.CreatedAt.ToString("u")</td>
                                 <td>@row.UserDisplay</td>
                                 <td>@row.Type</td>
                                 <td class="text-end @(row.Amount < 0 ? "text-danger" : "text-success")">@row.Amount.ToString("+0.##;-0.##;0")</td>
                                 <td class="text-end">@row.BalanceAfter.ToString("N2")</td>
                                 <td>@row.Reason</td>
-                                <td class="small text-muted">@(row.AdminDisplay ?? "—")</td>
+                                <td class="pe-4 small text-muted">@(row.AdminDisplay ?? "—")</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
+        </section>
 
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
-                <div class="text-muted small">
-                    Showing <strong>@firstRow</strong>–<strong>@lastRow</strong> of <strong>@Model.TotalCount</strong> transaction@(Model.TotalCount == 1 ? "" : "s")
-                </div>
-                @if (totalPages > 1)
-                {
-                    <nav aria-label="Ledger pagination">
-                        <ul class="pagination mb-0">
-                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" href="@(currentPage == 1 ? "#" : PageUrl(currentPage - 1))" aria-label="Previous">‹ Prev</a>
-                            </li>
-                            @foreach (var p in pageList)
-                            {
-                                if (p == -1)
-                                {
-                                    <li class="page-item disabled"><span class="page-link">…</span></li>
-                                }
-                                else
-                                {
-                                    <li class="page-item @(p == currentPage ? "active" : "")">
-                                        <a class="page-link" href="@PageUrl(p)">@p</a>
-                                    </li>
-                                }
-                            }
-                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                                <a class="page-link" href="@(currentPage == totalPages ? "#" : PageUrl(currentPage + 1))" aria-label="Next">Next ›</a>
-                            </li>
-                        </ul>
-                    </nav>
-                }
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
+            <div class="text-muted small">
+                Showing <strong>@firstRow</strong>–<strong>@lastRow</strong> of <strong>@Model.TotalCount</strong> transaction@(Model.TotalCount == 1 ? "" : "s")
             </div>
-        }
-    </div>
+            @if (totalPages > 1)
+            {
+                <nav aria-label="Ledger pagination">
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@(currentPage == 1 ? "#" : PageUrl(currentPage - 1))" aria-label="Previous">‹ Prev</a>
+                        </li>
+                        @foreach (var p in pageList)
+                        {
+                            if (p == -1)
+                            {
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            }
+                            else
+                            {
+                                <li class="page-item @(p == currentPage ? "active" : "")">
+                                    <a class="page-link" href="@PageUrl(p)">@p</a>
+                                </li>
+                            }
+                        }
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@(currentPage == totalPages ? "#" : PageUrl(currentPage + 1))" aria-label="Next">Next ›</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    }
 </section>
