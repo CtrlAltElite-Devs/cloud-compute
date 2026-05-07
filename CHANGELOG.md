@@ -48,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
 
 ### Changed
+- Render the Type column on `/admin/credits` as color-coded Bootstrap badges (Initial/Admin grant/Rental charge/Rental earning/Refund/Revoke) using the existing `bg-{variant}-subtle text-{variant}` style, with friendlier spaced labels
 - Polished GPU catalog, detail, create, and edit listing pages, including owner-specific listing actions and cleaner upload controls
 - Restricted member-facing pages to member accounts so admin sessions cannot use member listing or rental workflows
 - Rebuilt `/admin/grantcredits` and `/admin/revokecredits` as a stepped flow: search-and-pick a user (each result row shows their current credit balance), then reveal Amount and Reason. The Selected User panel shows the chosen user's current balance and a live "new balance after" preview that recomputes on every keystroke; revoke also surfaces an "Amount exceeds the user's current balance" warning that mirrors the server-side check. Deep links from `/admin/users/{id}` (`?userId=...`) and validation re-renders both land directly on the second step
