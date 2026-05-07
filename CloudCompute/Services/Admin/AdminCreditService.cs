@@ -27,7 +27,13 @@ public class AdminCreditService : IAdminCreditService
             return Fail(AdminConstants.Messages.AmountOutOfRange);
         }
 
-        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == model.UserId);
+        if (model.UserId is null)
+        {
+            return Fail(AdminConstants.Messages.UserNotFound);
+        }
+
+        var userId = model.UserId.Value;
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user is null)
         {
             return Fail(AdminConstants.Messages.UserNotFound);
@@ -133,7 +139,13 @@ public class AdminCreditService : IAdminCreditService
             return Fail(AdminConstants.Messages.AmountOutOfRange);
         }
 
-        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == model.UserId);
+        if (model.UserId is null)
+        {
+            return Fail(AdminConstants.Messages.UserNotFound);
+        }
+
+        var userId = model.UserId.Value;
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user is null)
         {
             return Fail(AdminConstants.Messages.UserNotFound);
@@ -154,6 +166,7 @@ public class AdminCreditService : IAdminCreditService
         {
             user.CreditBalance -= model.Amount;
 
+            var revokeReason = model.Reason.Trim();
             _dbContext.CreditTransactions.Add(new CreditTransaction
             {
                 UserId = user.Id,
@@ -161,8 +174,14 @@ public class AdminCreditService : IAdminCreditService
                 Amount = -model.Amount,
                 BalanceAfter = user.CreditBalance,
                 AdminId = adminId,
-                Reason = model.Reason.Trim()
+                Reason = revokeReason
             });
+
+            _notificationService.Create(
+                user.Id,
+                NotificationType.CreditRevoked,
+                string.Format(NotificationConstants.Messages.CreditRevokedFormat, model.Amount, revokeReason),
+                NotificationConstants.Routes.DashboardPath);
 
             await _dbContext.SaveChangesAsync();
             await tx.CommitAsync();

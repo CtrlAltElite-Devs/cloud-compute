@@ -134,6 +134,36 @@ public class AdminUserService : IAdminUserService
         };
     }
 
+    public async Task<IReadOnlyList<AdminUserOption>> SearchMembersAsync(string? query, int limit)
+    {
+        limit = Math.Clamp(limit, 1, 50);
+
+        var users = _dbContext.Users
+            .AsNoTracking()
+            .Where(u => u.Role == UserRole.Member);
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var q = query.Trim();
+            users = users.Where(u =>
+                EF.Functions.Like(u.FirstName + " " + u.LastName, $"%{q}%") ||
+                EF.Functions.Like(u.UserName, $"%{q}%") ||
+                EF.Functions.Like(u.Email, $"%{q}%"));
+        }
+
+        return await users
+            .OrderBy(u => u.FirstName)
+            .ThenBy(u => u.LastName)
+            .Take(limit)
+            .Select(u => new AdminUserOption
+            {
+                Id = u.Id,
+                DisplayName = u.FirstName + " " + u.LastName + " · " + u.Email,
+                Balance = u.CreditBalance
+            })
+            .ToListAsync();
+    }
+
     public async Task<ServiceResult> SetActiveAsync(Guid userId, bool isActive, Guid actingAdminId)
     {
         if (userId == actingAdminId)

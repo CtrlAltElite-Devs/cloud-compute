@@ -9,6 +9,8 @@ public interface IAdminUserService
 
     Task<AdminUserDetailViewModel?> GetDetailAsync(Guid userId);
 
+    Task<IReadOnlyList<AdminUserOption>> SearchMembersAsync(string? query, int limit);
+
     Task<ServiceResult> SetActiveAsync(Guid userId, bool isActive, Guid actingAdminId);
 
     Task<ServiceResult> SetOwnerVerifiedAsync(Guid userId, bool isVerified);

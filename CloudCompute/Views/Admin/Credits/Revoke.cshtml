@@ -1,7 +1,11 @@
+@using System.Globalization
 @using CloudCompute.ViewModels.Admin
 @model AdminRevokeCreditViewModel
 @{
     ViewData["Title"] = "Admin · Revoke credits";
+    var hasPreselected = Model.UserId.HasValue && !string.IsNullOrWhiteSpace(Model.UserDisplay);
+    var initialBalanceAttr = Model.CurrentBalance?.ToString(CultureInfo.InvariantCulture) ?? "";
+    var initialBalanceDisplay = Model.CurrentBalance?.ToString("N2") ?? "—";
 }
 
 <section class="py-5">
@@ -18,29 +22,63 @@
 
                 <partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
 
-                <form asp-action="RevokeCredits" method="post" class="border rounded-3 p-4">
-                    <div class="mb-3">
-                        <label class="form-label" asp-for="UserId">User ID</label>
-                        <input class="form-control" asp-for="UserId" placeholder="GUID" />
-                        @if (!string.IsNullOrWhiteSpace(Model.UserDisplay))
-                        {
-                            <div class="form-text">Revoking from: <strong>@Model.UserDisplay</strong></div>
-                        }
-                        <span asp-validation-for="UserId" class="text-danger small"></span>
+                <form asp-action="RevokeCredits" method="post" class="border rounded-3 p-4"
+                      data-search-url="@Url.Action("SearchMembers", "Admin")">
+                    <input type="hidden" asp-for="UserId" />
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold mb-2">Choose a user</label>
+
+                        <div id="user-picker" class="@(hasPreselected ? "d-none" : "")">
+                            <input type="search" id="user-search" class="form-control mb-2"
+                                   placeholder="Search by name, username, or email" autocomplete="off" />
+                            <div class="border rounded-3" style="max-height: 260px; overflow-y: auto;">
+                                <div id="user-results" class="list-group list-group-flush"></div>
+                                <div id="user-status" class="p-3 text-center text-muted small">Start typing to search.</div>
+                            </div>
+                            <div class="form-text">Press Enter to pick the first match. Showing up to 20 results.</div>
+                        </div>
+
+                        <div id="user-selected" class="@(hasPreselected ? "" : "d-none")">
+                            <div class="d-flex align-items-center justify-content-between border rounded-3 p-3">
+                                <div>
+                                    <div class="text-muted small text-uppercase">Selected user</div>
+                                    <strong id="selected-display">@Model.UserDisplay</strong>
+                                    <div class="small text-muted mt-1">
+                                        Current balance:
+                                        <span id="current-balance" class="fw-semibold text-body" data-balance="@initialBalanceAttr">@initialBalanceDisplay</span>
+                                    </div>
+                                </div>
+                                <button type="button" id="change-user" class="btn btn-sm btn-outline-secondary">Change</button>
+                            </div>
+                        </div>
+
+                        <span asp-validation-for="UserId" class="text-danger small d-block mt-1"></span>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label" asp-for="Amount">Amount to deduct</label>
-                        <input class="form-control" asp-for="Amount" type="number" step="0.01" min="1" max="100000" />
-                        <span asp-validation-for="Amount" class="text-danger small"></span>
+
+                    <div id="grant-fields" class="@(hasPreselected ? "" : "d-none")">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" asp-for="Amount">Amount to deduct</label>
+                            <input class="form-control" asp-for="Amount" type="number" step="0.01" min="1" max="100000" />
+                            <div class="form-text">
+                                New balance after revoke:
+                                <span id="new-balance" class="fw-semibold text-body">—</span>
+                            </div>
+                            <div id="insufficient-warning" class="text-danger small mt-1 d-none">
+                                Amount exceeds the user's current balance.
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" asp-for="Reason">Reason</label>
+                            <textarea class="form-control" asp-for="Reason" rows="3" placeholder="Why are credits being revoked?"></textarea>
+                            <span asp-validation-for="Reason" class="text-danger small"></span>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label" asp-for="Reason">Reason</label>
-                        <textarea class="form-control" asp-for="Reason" rows="3" placeholder="Why are credits being revoked?"></textarea>
-                        <span asp-validation-for="Reason" class="text-danger small"></span>
-                    </div>
+
                     <div class="d-flex justify-content-end gap-2">
                         <a class="btn btn-link" asp-action="Credits">Cancel</a>
-                        <button type="submit" class="btn btn-danger">Revoke credits</button>
+                        <button type="submit" id="submit-btn" class="btn btn-danger @(hasPreselected ? "" : "d-none")">Revoke credits</button>
                     </div>
                 </form>
             </div>
@@ -50,4 +88,176 @@
 
 @section Scripts {
     <partial name="~/Views/Shared/Partials/_ValidationScriptsPartial.cshtml" />
+    <script>
+        (function () {
+            const form = document.querySelector('form[data-search-url]');
+            const searchUrl = form.dataset.searchUrl;
+            const search = document.getElementById('user-search');
+            const results = document.getElementById('user-results');
+            const status = document.getElementById('user-status');
+            const picker = document.getElementById('user-picker');
+            const selectedPanel = document.getElementById('user-selected');
+            const selectedDisplay = document.getElementById('selected-display');
+            const currentBalanceEl = document.getElementById('current-balance');
+            const newBalanceEl = document.getElementById('new-balance');
+            const insufficientWarning = document.getElementById('insufficient-warning');
+            const changeBtn = document.getElementById('change-user');
+            const fields = document.getElementById('grant-fields');
+            const submitBtn = document.getElementById('submit-btn');
+            const userIdInput = document.getElementById('UserId');
+            const amountInput = document.getElementById('Amount');
+
+            const initialBalance = parseFloat(currentBalanceEl.dataset.balance);
+            let currentBalance = isNaN(initialBalance) ? null : initialBalance;
+
+            let debounceTimer = null;
+            let activeRequest = null;
+
+            function formatNumber(n) {
+                return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            function setBalance(balance) {
+                currentBalance = balance;
+                if (balance == null) {
+                    currentBalanceEl.textContent = '—';
+                    currentBalanceEl.dataset.balance = '';
+                } else {
+                    currentBalanceEl.textContent = formatNumber(balance);
+                    currentBalanceEl.dataset.balance = String(balance);
+                }
+                updateBalancePreview();
+            }
+
+            function updateBalancePreview() {
+                newBalanceEl.classList.remove('text-danger');
+                insufficientWarning.classList.add('d-none');
+                if (currentBalance == null) {
+                    newBalanceEl.textContent = '—';
+                    return;
+                }
+                const amt = parseFloat(amountInput.value);
+                if (isNaN(amt) || amt <= 0) {
+                    newBalanceEl.textContent = formatNumber(currentBalance);
+                    return;
+                }
+                const newBal = Math.round((currentBalance - amt) * 100) / 100;
+                newBalanceEl.textContent = formatNumber(newBal);
+                if (newBal < 0) {
+                    newBalanceEl.classList.add('text-danger');
+                    insufficientWarning.classList.remove('d-none');
+                }
+            }
+
+            function setStatus(text) {
+                status.textContent = text;
+                status.classList.remove('d-none');
+            }
+            function hideStatus() {
+                status.classList.add('d-none');
+            }
+
+            function renderResults(items) {
+                results.innerHTML = '';
+                if (items.length === 0) {
+                    setStatus('No users match that search.');
+                    return;
+                }
+                hideStatus();
+                for (const item of items) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'list-group-item list-group-item-action text-start';
+                    btn.dataset.id = item.id;
+                    btn.dataset.display = item.display;
+                    btn.dataset.balance = String(item.balance);
+
+                    const row = document.createElement('div');
+                    row.className = 'd-flex justify-content-between align-items-center';
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = item.display;
+                    const balSpan = document.createElement('span');
+                    balSpan.className = 'text-muted small';
+                    balSpan.textContent = `${formatNumber(item.balance)} cr`;
+                    row.appendChild(nameSpan);
+                    row.appendChild(balSpan);
+                    btn.appendChild(row);
+
+                    btn.addEventListener('click', () => selectUser(item.id, item.display, item.balance, true));
+                    results.appendChild(btn);
+                }
+            }
+
+            async function runSearch(query) {
+                if (activeRequest) activeRequest.abort();
+                activeRequest = new AbortController();
+                try {
+                    const url = `${searchUrl}?q=${encodeURIComponent(query)}`;
+                    const res = await fetch(url, { signal: activeRequest.signal, headers: { 'Accept': 'application/json' } });
+                    if (!res.ok) {
+                        setStatus('Search failed. Try again.');
+                        return;
+                    }
+                    const data = await res.json();
+                    renderResults(data);
+                } catch (e) {
+                    if (e.name === 'AbortError') return;
+                    setStatus('Search failed. Try again.');
+                }
+            }
+
+            function selectUser(id, display, balance, focusAmount) {
+                userIdInput.value = id;
+                selectedDisplay.textContent = display;
+                setBalance(balance);
+                picker.classList.add('d-none');
+                selectedPanel.classList.remove('d-none');
+                fields.classList.remove('d-none');
+                submitBtn.classList.remove('d-none');
+                if (focusAmount && amountInput) amountInput.focus();
+            }
+
+            function clearUser() {
+                userIdInput.value = '';
+                setBalance(null);
+                selectedPanel.classList.add('d-none');
+                fields.classList.add('d-none');
+                submitBtn.classList.add('d-none');
+                picker.classList.remove('d-none');
+                search.value = '';
+                results.innerHTML = '';
+                setStatus('Start typing to search.');
+                search.focus();
+            }
+
+            search.addEventListener('input', () => {
+                const q = search.value.trim();
+                clearTimeout(debounceTimer);
+                if (!q) {
+                    if (activeRequest) activeRequest.abort();
+                    results.innerHTML = '';
+                    setStatus('Start typing to search.');
+                    return;
+                }
+                setStatus('Searching…');
+                debounceTimer = setTimeout(() => runSearch(q), 200);
+            });
+
+            search.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const first = results.querySelector('button');
+                    if (first) selectUser(first.dataset.id, first.dataset.display, parseFloat(first.dataset.balance), true);
+                }
+            });
+
+            amountInput.addEventListener('input', updateBalancePreview);
+            changeBtn.addEventListener('click', clearUser);
+
+            updateBalancePreview();
+            if (!userIdInput.value) {
+                search.focus();
+            }
+        })();
+    </script>
 }

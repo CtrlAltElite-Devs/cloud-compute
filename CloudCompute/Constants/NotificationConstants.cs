@@ -23,6 +23,7 @@ public static class NotificationConstants
         public const string ListingRejectedFormat = "Your listing '{0}' was rejected.";
         public const string ListingRejectedWithReasonFormat = "Your listing '{0}' was rejected: {1}";
         public const string CreditGrantedFormat = "You received {0:N0} credits. {1}";
+        public const string CreditRevokedFormat = "{0:N0} credits were removed from your account. {1}";
         public const string RentalExpiringFormat = "Your rental {0} expires in less than 1 hour.";
 
         public const string MarkedAsRead = "Notification marked as read.";

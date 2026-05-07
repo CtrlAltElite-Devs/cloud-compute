@@ -8,6 +8,37 @@
     var statusMessage = TempData[AdminConstants.Status.TempDataMessageKey] as string;
     var statusType = TempData[AdminConstants.Status.TempDataTypeKey] as string;
     var alertClass = statusType == AdminConstants.Status.Danger ? "alert-danger" : "alert-success";
+
+    var currentPage = Model.Filter.Page;
+    var totalPages = Model.TotalPages;
+    var firstRow = Model.Rows.Count > 0 ? (currentPage - 1) * Model.Filter.PageSize + 1 : 0;
+    var lastRow = firstRow + Model.Rows.Count - 1;
+
+    var pageList = new List<int>();
+    if (totalPages <= 7)
+    {
+        for (var i = 1; i <= totalPages; i++) pageList.Add(i);
+    }
+    else
+    {
+        pageList.Add(1);
+        var winStart = Math.Max(2, currentPage - 2);
+        var winEnd = Math.Min(totalPages - 1, currentPage + 2);
+        if (winStart > 2) pageList.Add(-1);
+        for (var i = winStart; i <= winEnd; i++) pageList.Add(i);
+        if (winEnd < totalPages - 1) pageList.Add(-1);
+        pageList.Add(totalPages);
+    }
+
+    string PageUrl(int p) => Url.Action("Credits", new
+    {
+        UserQuery = Model.Filter.UserQuery,
+        Type = Model.Filter.Type,
+        From = Model.Filter.From?.ToString("yyyy-MM-dd"),
+        To = Model.Filter.To?.ToString("yyyy-MM-dd"),
+        PageSize = Model.Filter.PageSize,
+        Page = p
+    }) ?? "#";
 }
 
 <section class="py-5">
@@ -93,25 +124,37 @@
                 </table>
             </div>
 
-            @if (Model.TotalPages > 1)
-            {
-                <nav class="mt-3" aria-label="Ledger pagination">
-                    <ul class="pagination justify-content-center mb-0">
-                        @for (var pageIndex = 1; pageIndex <= Model.TotalPages; pageIndex++)
-                        {
-                            <li class="page-item @(pageIndex == Model.Filter.Page ? "active" : "")">
-                                <a class="page-link"
-                                   asp-action="Credits"
-                                   asp-route-UserQuery="@Model.Filter.UserQuery"
-                                   asp-route-Type="@Model.Filter.Type"
-                                   asp-route-From="@Model.Filter.From?.ToString("yyyy-MM-dd")"
-                                   asp-route-To="@Model.Filter.To?.ToString("yyyy-MM-dd")"
-                                   asp-route-Page="@pageIndex">@pageIndex</a>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
+                <div class="text-muted small">
+                    Showing <strong>@firstRow</strong>–<strong>@lastRow</strong> of <strong>@Model.TotalCount</strong> transaction@(Model.TotalCount == 1 ? "" : "s")
+                </div>
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Ledger pagination">
+                        <ul class="pagination mb-0">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@(currentPage == 1 ? "#" : PageUrl(currentPage - 1))" aria-label="Previous">‹ Prev</a>
                             </li>
-                        }
-                    </ul>
-                </nav>
-            }
+                            @foreach (var p in pageList)
+                            {
+                                if (p == -1)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                }
+                                else
+                                {
+                                    <li class="page-item @(p == currentPage ? "active" : "")">
+                                        <a class="page-link" href="@PageUrl(p)">@p</a>
+                                    </li>
+                                }
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" href="@(currentPage == totalPages ? "#" : PageUrl(currentPage + 1))" aria-label="Next">Next ›</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            </div>
         }
     </div>
 </section>
