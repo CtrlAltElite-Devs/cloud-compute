@@ -6,6 +6,8 @@ namespace CloudCompute.Models;
 
 public class ApplicationUser
 {
+    public const decimal InitialCreditBalance = 500m;
+
     public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
@@ -36,7 +38,7 @@ public class ApplicationUser
     public string? Bio { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
-    public decimal CreditBalance { get; set; } = 500m;
+    public decimal CreditBalance { get; set; } = InitialCreditBalance;
 
     public bool IsOwnerVerified { get; set; }
 

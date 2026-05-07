@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
 
 ### Changed
+- Signup now writes an `Initial` `CreditTransaction` for the 500-credit welcome balance so every user's ledger has an opening row that matches `ApplicationUser.CreditBalance`; the user insert and ledger row commit in the same `SaveChangesAsync` call
 - Replaced the static notifications bell `<button>` in `_AppHeader.cshtml` with the new `NotificationBell` view component, and added a Notifications link in the authenticated sidebar Platform nav between History and Profile
 - Split `ApplicationUser.FullName` into separate `FirstName` and `LastName` columns (with `FullName` retained as a `[NotMapped]` computed property); EF migration backfills existing rows
 - Signup form and `AuthService.SignupAsync` now collect first and last names separately
