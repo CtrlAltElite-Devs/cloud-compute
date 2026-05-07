@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Rental receipt view linked from Rental History, with renter-scoped receipt lookup and a dedicated receipt card showing payment, GPU, status, start/end timestamps, platform fee, owner earnings, and total paid
+- Active rental early termination flow with a confirmation modal, renter ownership/status validation, `TerminatedEarly` rental updates, GPU availability restoration, and no refund/reversal transactions
+- `NotificationType.RentalTerminated` with distinct notification list/dashboard icon and badge styling so terminated rentals are not categorized as completed
 - `NotificationType.VerificationApproved` / `NotificationType.VerificationRejected` with matching message templates and icon/badge classes; admin approval or rejection on `/admin/verifications` now stages an in-app notification (linking to `/verification`) inside the same `SaveChangesAsync` as the status change, and admin reviewer notes are passed through to the notification message when present
 - `NotificationType.Welcome` plus an initial-credit notification staged during signup: every new account now gets a welcome notification and a "received 500 credits" notification committed atomically with the user insert and credit ledger row, both linking to `/dashboard` (Welcome's timestamp is bumped one tick so it sorts above the credit notification on `/notifications`)
 - Member-facing GPU catalog, detail, rental confirmation, and active-rentals flow
@@ -48,6 +51,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
 
 ### Changed
+- Active Rentals now updates each running rental timer and usage progress live in the browser, replaces the disabled termination placeholder with an actionable CTA, and clamps expired cards at `00:00:00` / `100% used`
+- Rental History now renders persisted rental rows with status filters and an enabled Receipt action instead of the placeholder history page
+- GPU catalog cards are now fully clickable, with clearer owner, spec, rating, and per-hour pricing presentation
+- Unread notification cards now use a slimmer left border treatment
 - Render the Type column on `/admin/credits` as color-coded Bootstrap badges (Initial/Admin grant/Rental charge/Rental earning/Refund/Revoke) using the existing `bg-{variant}-subtle text-{variant}` style, with friendlier spaced labels
 - Polished GPU catalog, detail, create, and edit listing pages, including owner-specific listing actions and cleaner upload controls
 - Restricted member-facing pages to member accounts so admin sessions cannot use member listing or rental workflows
