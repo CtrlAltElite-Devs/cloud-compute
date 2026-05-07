@@ -29,7 +29,11 @@ public class AdminListingService : IAdminListingService
             .Include(g => g.Owner)
             .AsQueryable();
 
-        if (filter.Status.HasValue)
+        if (filter.All)
+        {
+            filter.Status = null;
+        }
+        else if (filter.Status.HasValue)
         {
             query = query.Where(g => g.Status == filter.Status.Value);
         }

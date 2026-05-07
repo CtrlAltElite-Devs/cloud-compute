@@ -5,6 +5,7 @@ namespace CloudCompute.ViewModels.Admin;
 public class AdminListingFilter
 {
     public GpuStatus? Status { get; set; } = GpuStatus.Pending;
+    public bool All { get; set; }
     public string? OwnerQuery { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 20;
