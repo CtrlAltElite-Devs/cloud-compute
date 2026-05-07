@@ -31,9 +31,34 @@ public class RentalsController : Controller
         return View(model);
     }
 
-    public IActionResult History()
+    public async Task<IActionResult> History([FromQuery] RentalHistoryFilterViewModel filter)
     {
-        return View();
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var model = await _rentalService.GetHistoryAsync(userId.Value, filter);
+        return View(model);
+    }
+
+    [HttpGet("rentals/receipt/{rentalId:guid}")]
+    public async Task<IActionResult> Receipt(Guid rentalId)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var model = await _rentalService.GetReceiptAsync(userId.Value, rentalId);
+        if (model is null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
     }
 
     [HttpGet("rentals/confirm/{gpuId:guid}")]

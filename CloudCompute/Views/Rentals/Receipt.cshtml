@@ -1,0 +1,104 @@
+@model RentalReceiptViewModel
+@{
+    Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
+    ViewData["Title"] = "Rental Receipt";
+
+    string StatusBadgeClass(RentalStatus status) => status switch
+    {
+        RentalStatus.Active => "text-bg-info",
+        RentalStatus.Completed => "text-bg-success",
+        RentalStatus.Terminated => "text-bg-warning",
+        _ => "text-bg-secondary"
+    };
+
+    var rentalDate = Model.StartTime.ToLocalTime().ToString("yyyy-MM-dd");
+    var startTime = Model.StartTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
+    var endTime = Model.EndTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
+}
+
+<section class="mb-4">
+    <a class="btn btn-sm btn-outline-secondary mb-3" asp-controller="Rentals" asp-action="History">
+        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+        History
+    </a>
+    <p class="text-uppercase text-muted small fw-semibold mb-1">Receipt</p>
+    <h1 class="h3 mb-1">Rental Receipt</h1>
+    <p class="text-muted mb-0">Payment and session details for @Model.ReferenceNumber.</p>
+</section>
+
+<section class="rental-receipt-wrap">
+    <article class="rental-receipt-card">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+            <div class="d-flex align-items-center gap-2 min-width-0">
+                <img class="brand-logo" src="~/images/logo.png" alt="" aria-hidden="true" asp-append-version="true" />
+                <span class="fw-semibold text-truncate">CloudCompute</span>
+            </div>
+            <span class="badge rounded-pill text-bg-success">Paid</span>
+        </div>
+
+        <div class="mb-4">
+            <div class="text-muted small mb-1">Receipt</div>
+            <div class="rental-receipt-total">Php @Model.TotalCost.ToString("N2")</div>
+            <div class="text-muted small">Reference @Model.ReferenceNumber</div>
+        </div>
+
+        <hr class="rental-receipt-divider" />
+
+        <dl class="rental-receipt-grid">
+            <div>
+                <dt>GPU</dt>
+                <dd>@Model.GpuModel</dd>
+            </div>
+            <div>
+                <dt>Date</dt>
+                <dd>@rentalDate</dd>
+            </div>
+            <div>
+                <dt>Duration</dt>
+                <dd>@Model.DurationHours hour@(Model.DurationHours == 1 ? "" : "s")</dd>
+            </div>
+            <div>
+                <dt>Status</dt>
+                <dd>
+                    <span class="badge rounded-pill @StatusBadgeClass(Model.Status)">@Model.Status</span>
+                </dd>
+            </div>
+            <div>
+                <dt>Owner</dt>
+                <dd>@Model.OwnerDisplayName</dd>
+            </div>
+            <div>
+                <dt>Rate</dt>
+                <dd>Php @Model.PricePerHour.ToString("N2") / hour</dd>
+            </div>
+        </dl>
+
+        <hr class="rental-receipt-divider" />
+
+        <div class="d-flex flex-column gap-2 mb-4">
+            <div class="d-flex justify-content-between gap-3">
+                <span class="text-muted">Start</span>
+                <span class="text-end">@startTime</span>
+            </div>
+            <div class="d-flex justify-content-between gap-3">
+                <span class="text-muted">End</span>
+                <span class="text-end">@endTime</span>
+            </div>
+            <div class="d-flex justify-content-between gap-3">
+                <span class="text-muted">Platform fee</span>
+                <span>Php @Model.PlatformFee.ToString("N2")</span>
+            </div>
+            <div class="d-flex justify-content-between gap-3">
+                <span class="text-muted">Owner earnings</span>
+                <span>Php @Model.OwnerEarnings.ToString("N2")</span>
+            </div>
+        </div>
+
+        <hr class="rental-receipt-divider" />
+
+        <div class="d-flex justify-content-between align-items-center gap-3">
+            <span class="text-muted">Total Paid</span>
+            <strong>Php @Model.TotalCost.ToString("N2")</strong>
+        </div>
+    </article>
+</section>

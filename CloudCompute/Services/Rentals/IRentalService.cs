@@ -12,4 +12,8 @@ public interface IRentalService
     Task<ServiceResult> TerminateAsync(Guid renterId, Guid rentalId);
 
     Task<ActiveRentalsViewModel> GetActiveAsync(Guid renterId);
+
+    Task<RentalHistoryViewModel> GetHistoryAsync(Guid renterId, RentalHistoryFilterViewModel filter);
+
+    Task<RentalReceiptViewModel?> GetReceiptAsync(Guid renterId, Guid rentalId);
 }
