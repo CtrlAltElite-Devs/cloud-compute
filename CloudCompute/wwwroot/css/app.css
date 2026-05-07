@@ -335,6 +335,229 @@
   font-size: 1rem;
 }
 
+/* Dashboard */
+.dashboard-page {
+  color: var(--bs-body-color);
+}
+
+.dashboard-title {
+  color: var(--bs-emphasis-color);
+  font-weight: 700;
+}
+
+.dashboard-primary-action {
+  white-space: nowrap;
+  padding-inline: 1.25rem;
+}
+
+.dashboard-stat-card,
+.dashboard-panel {
+  background-color: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 28px rgba(0, 0, 0, 0.05);
+}
+
+[data-bs-theme="dark"] .dashboard-stat-card,
+[data-bs-theme="dark"] .dashboard-panel {
+  background-color: #1f1f1f;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
+}
+
+.dashboard-stat-card {
+  min-height: 8rem;
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.dashboard-stat-label {
+  margin-bottom: auto;
+  color: var(--bs-secondary-color);
+  font-size: 0.8rem;
+}
+
+.dashboard-stat-value {
+  color: var(--bs-emphasis-color);
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.dashboard-stat-caption {
+  margin-top: 0.35rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.78rem;
+}
+
+.dashboard-panel {
+  padding: 1.25rem;
+}
+
+.dashboard-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.dashboard-panel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--bs-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dashboard-panel-link:hover {
+  color: var(--bs-primary-text-emphasis);
+}
+
+.dashboard-rental-list,
+.dashboard-notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dashboard-rental-card,
+.dashboard-notification-card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.9rem;
+  background-color: var(--bs-tertiary-bg);
+}
+
+[data-bs-theme="dark"] .dashboard-rental-card,
+[data-bs-theme="dark"] .dashboard-notification-card {
+  background-color: #1a1a1a;
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+.dashboard-rental-card {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem;
+}
+
+.dashboard-rental-image {
+  width: 6rem;
+  height: 3.75rem;
+  border-radius: 0.55rem;
+  object-fit: cover;
+}
+
+.dashboard-rental-image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.16), rgba(var(--bs-info-rgb), 0.14));
+  color: var(--bs-primary);
+  font-size: 1.75rem;
+}
+
+.dashboard-rental-name {
+  color: var(--bs-emphasis-color);
+  font-weight: 700;
+}
+
+.dashboard-rental-owner,
+.dashboard-rental-meta-label,
+.dashboard-notification-time {
+  color: var(--bs-secondary-color);
+  font-size: 0.78rem;
+}
+
+.dashboard-rental-meta {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dashboard-rental-meta strong {
+  display: block;
+  color: var(--bs-primary);
+  font-size: 0.9rem;
+}
+
+.dashboard-status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  background-color: var(--bs-success);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.dashboard-notification-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.dashboard-notification-unread {
+  border-left: 4px solid var(--bs-primary);
+}
+
+.dashboard-notification-message {
+  color: var(--bs-emphasis-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.dashboard-empty-state {
+  min-height: 15rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  border: 1px dashed var(--bs-border-color);
+  border-radius: 1rem;
+  color: var(--bs-secondary-color);
+}
+
+.dashboard-empty-state i {
+  font-size: 2rem;
+}
+
+.dashboard-empty-state h3 {
+  margin: 0;
+  color: var(--bs-emphasis-color);
+  font-size: 1rem;
+}
+
+.dashboard-empty-state p {
+  margin: 0;
+  max-width: 24rem;
+}
+
+.dashboard-empty-state-compact {
+  min-height: 12rem;
+}
+
 @media (max-width: 767.98px) {
   .app-main-inner {
     padding: 1.25rem;
@@ -342,5 +565,25 @@
 
   .app-header {
     padding: 0.5rem 1rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .dashboard-rental-card {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+  }
+
+  .dashboard-rental-image {
+    width: 4.5rem;
+    height: 3.5rem;
+  }
+
+  .dashboard-rental-meta {
+    text-align: left;
+  }
+
+  .dashboard-status-pill,
+  .dashboard-rental-meta {
+    grid-column: 2;
   }
 }
