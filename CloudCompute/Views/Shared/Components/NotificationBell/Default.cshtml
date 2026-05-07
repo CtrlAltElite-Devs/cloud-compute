@@ -1,0 +1,16 @@
+@model NotificationBellViewModel
+@{
+    var ariaLabel = Model.HasUnread
+        ? $"Notifications ({Model.CountDisplay} unread)"
+        : "Notifications";
+}
+<a class="app-header-icon-btn position-relative" asp-controller="Notifications" asp-action="Index" aria-label="@ariaLabel">
+    <i class="bi bi-bell" aria-hidden="true"></i>
+    @if (Model.HasUnread)
+    {
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+            @Model.CountDisplay
+            <span class="visually-hidden">unread notifications</span>
+        </span>
+    }
+</a>

@@ -2,6 +2,7 @@ using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
+using CloudCompute.Services.Notifications;
 using CloudCompute.ViewModels.Admin;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +11,12 @@ namespace CloudCompute.Services.Admin;
 public class AdminListingService : IAdminListingService
 {
     private readonly AppDbContext _dbContext;
+    private readonly INotificationService _notificationService;
 
-    public AdminListingService(AppDbContext dbContext)
+    public AdminListingService(AppDbContext dbContext, INotificationService notificationService)
     {
         _dbContext = dbContext;
+        _notificationService = notificationService;
     }
 
     public async Task<AdminListingListViewModel> ListAsync(AdminListingFilter filter)
@@ -123,6 +126,11 @@ public class AdminListingService : IAdminListingService
 
         gpu.Status = GpuStatus.Available;
         gpu.RejectionReason = null;
+        _notificationService.Create(
+            gpu.OwnerId,
+            NotificationType.ListingApproved,
+            string.Format(NotificationConstants.Messages.ListingApprovedFormat, gpu.Name),
+            NotificationConstants.Routes.MyListingsPath);
         await _dbContext.SaveChangesAsync();
         return ServiceResult.Success();
     }
@@ -142,6 +150,14 @@ public class AdminListingService : IAdminListingService
 
         gpu.Status = GpuStatus.Rejected;
         gpu.RejectionReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
+        var rejectionMessage = string.IsNullOrWhiteSpace(gpu.RejectionReason)
+            ? string.Format(NotificationConstants.Messages.ListingRejectedFormat, gpu.Name)
+            : string.Format(NotificationConstants.Messages.ListingRejectedWithReasonFormat, gpu.Name, gpu.RejectionReason);
+        _notificationService.Create(
+            gpu.OwnerId,
+            NotificationType.ListingRejected,
+            rejectionMessage,
+            NotificationConstants.Routes.MyListingsPath);
         await _dbContext.SaveChangesAsync();
         return ServiceResult.Success();
     }

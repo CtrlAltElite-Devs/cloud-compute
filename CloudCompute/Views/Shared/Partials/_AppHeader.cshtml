@@ -33,9 +33,7 @@
             </ul>
         </div>
 
-        <button type="button" class="app-header-icon-btn" aria-label="Notifications">
-            <i class="bi bi-bell" aria-hidden="true"></i>
-        </button>
+        @await Component.InvokeAsync("NotificationBell")
 
         <button
             type="button"

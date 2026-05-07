@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- In-app notifications page at `/notifications` showing the signed-in user's most recent 100 notifications as cards with type-specific icons, status badges, relative timestamps, an "Open" action that marks-as-read and redirects to the notification's link, per-row mark-as-read, and a header-level "Mark all as read" action
+- Notifications bell in the authenticated app header with an unread-count badge that links to `/notifications`; rendered via the new `NotificationBell` view component so the count refreshes on every authenticated page load
+- Automatic notification creation on admin approval/rejection of a GPU listing (linking the owner to `/gpus/mine`) and on admin credit grants — single or bulk — linking the recipient to `/dashboard`; each notification is staged before the existing `SaveChangesAsync`/transaction so it commits atomically with the source action
+- `INotificationService` / `NotificationService` with a staging-only `Create`, a paged read query, mark-as-read / mark-all-as-read (single-statement EF Core 8 `ExecuteUpdateAsync`), and a click-through `Open` action that uses `Url.IsLocalUrl` to reject non-local link redirects
+- `Constants/NotificationConstants.cs` for status TempData keys, route targets, message format strings, and `Notification` length limits
 - Owner-side "My Listings" page at `/gpus/mine` that shows each of the signed-in user's GPUs as a card with photo, model, status badge (PENDING REVIEW / LIVE / RENTED / PAUSED / REJECTED), specs, rental count, average rating, and (for rejected listings) the admin's rejection reason
 - Inline owner actions on `/gpus/mine`: an Available toggle that flips a listing between `Available` and `Maintenance` (`POST /gpus/{id}/toggle-status`), an edit shortcut, and a delete action (`POST /gpus/{id}/delete`) that refuses listings with rental or review history and cleans up the photo file from disk on success
 - "Edit Listing" page at `/gpus/{id}/edit` that reuses the List a GPU form fields for hardware, pricing, description, and an optional photo replacement (the previous photo is deleted only after the database update succeeds)
@@ -34,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
 
 ### Changed
+- Replaced the static notifications bell `<button>` in `_AppHeader.cshtml` with the new `NotificationBell` view component, and added a Notifications link in the authenticated sidebar Platform nav between History and Profile
 - Split `ApplicationUser.FullName` into separate `FirstName` and `LastName` columns (with `FullName` retained as a `[NotMapped]` computed property); EF migration backfills existing rows
 - Signup form and `AuthService.SignupAsync` now collect first and last names separately
 - Authentication cookie now carries an additional `profile_picture_path` claim and is re-issued automatically when the profile, username, email, or avatar changes

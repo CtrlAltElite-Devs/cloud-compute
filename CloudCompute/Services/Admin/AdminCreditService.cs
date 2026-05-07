@@ -3,6 +3,7 @@ using CloudCompute.Data;
 using CloudCompute.Models;
 using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
+using CloudCompute.Services.Notifications;
 using CloudCompute.ViewModels.Admin;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,12 @@ namespace CloudCompute.Services.Admin;
 public class AdminCreditService : IAdminCreditService
 {
     private readonly AppDbContext _dbContext;
+    private readonly INotificationService _notificationService;
 
-    public AdminCreditService(AppDbContext dbContext)
+    public AdminCreditService(AppDbContext dbContext, INotificationService notificationService)
     {
         _dbContext = dbContext;
+        _notificationService = notificationService;
     }
 
     public async Task<ServiceResult> GrantAsync(AdminGrantCreditViewModel model, Guid adminId)
@@ -40,6 +43,7 @@ public class AdminCreditService : IAdminCreditService
         {
             user.CreditBalance += model.Amount;
 
+            var grantReason = model.Reason.Trim();
             _dbContext.CreditTransactions.Add(new CreditTransaction
             {
                 UserId = user.Id,
@@ -47,8 +51,14 @@ public class AdminCreditService : IAdminCreditService
                 Amount = model.Amount,
                 BalanceAfter = user.CreditBalance,
                 AdminId = adminId,
-                Reason = model.Reason.Trim()
+                Reason = grantReason
             });
+
+            _notificationService.Create(
+                user.Id,
+                NotificationType.CreditGranted,
+                string.Format(NotificationConstants.Messages.CreditGrantedFormat, model.Amount, grantReason),
+                NotificationConstants.Routes.DashboardPath);
 
             await _dbContext.SaveChangesAsync();
             await tx.CommitAsync();
@@ -97,6 +107,12 @@ public class AdminCreditService : IAdminCreditService
                     AdminId = adminId,
                     Reason = reason
                 });
+
+                _notificationService.Create(
+                    user.Id,
+                    NotificationType.CreditGranted,
+                    string.Format(NotificationConstants.Messages.CreditGrantedFormat, model.Amount, reason),
+                    NotificationConstants.Routes.DashboardPath);
             }
 
             await _dbContext.SaveChangesAsync();
