@@ -100,6 +100,7 @@ public static class ServiceExtensions
         services.AddScoped<IAdminListingService, AdminListingService>();
         services.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddHostedService<RentalExpiryNotifier>();
         services.AddScoped<DevelopmentAdminSeeder>();
         services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
     }
