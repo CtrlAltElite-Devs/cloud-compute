@@ -71,7 +71,7 @@ public class NotificationItemViewModel
 
     public string RowCssClass => IsRead
         ? "profile-card"
-        : "profile-card border-start border-4 border-info";
+        : "profile-card border-start border-2 border-info";
 
     public string RelativeTime
     {
