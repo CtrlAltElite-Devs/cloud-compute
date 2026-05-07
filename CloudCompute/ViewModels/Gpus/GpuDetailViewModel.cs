@@ -37,4 +37,6 @@ public class GpuDetailViewModel
     public int ReviewCount { get; set; }
 
     public bool CanRent { get; set; }
+
+    public IReadOnlyList<GpuReviewItemViewModel> RecentReviews { get; set; } = Array.Empty<GpuReviewItemViewModel>();
 }

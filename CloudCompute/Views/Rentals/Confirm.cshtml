@@ -60,7 +60,7 @@
             <h2 class="h5 mb-3">Cost summary</h2>
             <dl class="row mb-0">
                 <dt class="col-7 text-muted fw-normal">Price per hour</dt>
-                <dd class="col-5 text-end">@Model.PricePerHour.ToString("N2")</dd>
+                <dd class="col-5 text-end">@Model.PricePerHour.ToString("N2") credits</dd>
 
                 <dt class="col-7 text-muted fw-normal">Duration</dt>
                 <dd class="col-5 text-end">@Model.DurationHours hour(s)</dd>
@@ -72,13 +72,13 @@
                 <dd class="col-5 text-end">@Model.EndTime.ToLocalTime().ToString("MMM d, h:mm tt")</dd>
 
                 <dt class="col-7 text-muted fw-normal">Current balance</dt>
-                <dd class="col-5 text-end">@Model.CurrentBalance.ToString("N2")</dd>
+                <dd class="col-5 text-end">@Model.CurrentBalance.ToString("N2") credits</dd>
 
                 <dt class="col-7 text-muted fw-normal">Total cost</dt>
-                <dd class="col-5 text-end">@Model.TotalCost.ToString("N2")</dd>
+                <dd class="col-5 text-end">@Model.TotalCost.ToString("N2") credits</dd>
 
                 <dt class="col-7 border-top pt-3">Balance after rental</dt>
-                <dd class="col-5 text-end border-top pt-3 @(Model.BalanceAfter < 0 ? "text-danger" : "")">@Model.BalanceAfter.ToString("N2")</dd>
+                <dd class="col-5 text-end border-top pt-3 @(Model.BalanceAfter < 0 ? "text-danger" : "")">@Model.BalanceAfter.ToString("N2") credits</dd>
             </dl>
         </aside>
     </div>
