@@ -26,9 +26,12 @@ public static class GpuConstants
         public const string ListingNotFound = "Listing not found.";
         public const string ListingPaused = "Listing paused. It won't appear in Browse GPUs.";
         public const string ListingResumed = "Listing is live again.";
+        public const string ListingMarkedUnavailable = "Listing marked as unavailable. It won't appear in Browse GPUs.";
+        public const string ListingMarkedMaintenance = "Listing marked as under maintenance. It won't appear in Browse GPUs.";
         public const string ListingDeleted = "Listing deleted.";
         public const string ListingUpdated = "Listing updated.";
-        public const string CannotToggleStatus = "Only approved listings can be paused or resumed.";
+        public const string CannotChangeStatus = "Only approved listings can change availability.";
+        public const string InvalidStatusTarget = "Choose Available, Unavailable, or Maintenance.";
         public const string CannotDeleteWithHistory = "This listing has rental or review history and can't be deleted.";
         public const string CannotDeleteWhileRented = "This listing is currently rented and can't be deleted.";
         public const string CannotEditWhileRented = "This listing is currently rented and can't be edited.";

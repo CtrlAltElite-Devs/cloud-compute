@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Owner Earnings dashboard at `/owner/earnings` (verified owners only): summary cards for total credits earned all-time (sum of `RentalEarning` ledger rows), pending payouts (sum of `OwnerEarnings` on active rentals), and the count of GPUs with rental history; per-GPU earnings table grouped by `Rental.GpuId`; a Chart.js line chart with a 7-day / 30-day toggle showing daily earning buckets. Backed by a new `IOwnerEarningsService` / `OwnerEarningsService`. The sidebar surfaces an "Earnings" link in the Owner section once the signed-in user's `IsOwnerVerified` flag is true.
+- `Unavailable` value on the `GpuStatus` enum so owners can mark an approved listing as Unavailable (separate from temporary Maintenance). The "My Listings" toggle is now a 3-option dropdown — Available / Unavailable / Maintenance — that posts to `POST /gpus/{id}/set-status` (replacing the previous binary `toggle-status` action). `IGpuService.SetStatusAsync` validates that the listing is currently in a member-controllable state and that the requested target is one of the three permitted values. Adds the `AddGpuUnavailableStatus` EF migration (no schema change — `GpuStatus` is stored as `int`).
+
+### Changed
+- `IGpuService.ToggleStatusAsync` removed in favor of `SetStatusAsync(ownerId, gpuId, status)`; the `GpusController` route changed from `gpus/{id}/toggle-status` to `gpus/{id}/set-status`.
+
 - Account deletion (soft delete) on the Profile page: a new "Delete Account" Danger Zone card opens a confirmation modal that requires the current password; on submit the account is deactivated (`IsActive=false`, `IsOwnerVerified=false`), PII (first/last name, username, email, bio, avatar, password hash) is anonymized to a `deleted-{guid}` placeholder, the avatar file is removed from disk, any `Available` or `Pending` listings owned by the user are flipped to `Maintenance`, the user is signed out, and the request is rejected if the renter still has active rentals
 - Suspension enforcement on the rent path: `RentalService.CreateAsync` now returns a form-level error when the signed-in renter's `IsActive` is false, so suspended accounts cannot create new rentals even if their session is still valid
 - Suspension enforcement on the listing path: `GpuService.CreateAsync` now returns a form-level error when the signed-in owner's `IsActive` is false, so suspended owners cannot submit new GPU listings for approval

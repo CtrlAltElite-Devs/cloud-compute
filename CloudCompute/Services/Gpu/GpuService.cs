@@ -222,20 +222,30 @@ public class GpuService : IGpuService
         return new RentedGpusViewModel { Items = rentals };
     }
 
-    public async Task<ServiceResult> ToggleStatusAsync(Guid ownerId, Guid gpuId)
+    public async Task<ServiceResult> SetStatusAsync(Guid ownerId, Guid gpuId, GpuStatus status)
     {
+        if (status is not (GpuStatus.Available or GpuStatus.Unavailable or GpuStatus.Maintenance))
+        {
+            return ServiceResult.Failed(CreateModelError(GpuConstants.Messages.InvalidStatusTarget));
+        }
+
         var gpu = await _dbContext.Gpus.FirstOrDefaultAsync(g => g.Id == gpuId);
         if (gpu is null || gpu.OwnerId != ownerId)
         {
             return ServiceResult.Failed(CreateModelError(GpuConstants.Messages.ListingNotFound));
         }
 
-        if (gpu.Status is not (GpuStatus.Available or GpuStatus.Maintenance))
+        if (gpu.Status is not (GpuStatus.Available or GpuStatus.Unavailable or GpuStatus.Maintenance))
         {
-            return ServiceResult.Failed(CreateModelError(GpuConstants.Messages.CannotToggleStatus));
+            return ServiceResult.Failed(CreateModelError(GpuConstants.Messages.CannotChangeStatus));
         }
 
-        gpu.Status = gpu.Status == GpuStatus.Available ? GpuStatus.Maintenance : GpuStatus.Available;
+        if (gpu.Status == status)
+        {
+            return ServiceResult.Success();
+        }
+
+        gpu.Status = status;
 
         try
         {

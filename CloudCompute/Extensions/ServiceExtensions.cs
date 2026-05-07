@@ -6,6 +6,7 @@ using CloudCompute.Services.Auth;
 using CloudCompute.Services.Dashboard;
 using CloudCompute.Services.Gpu;
 using CloudCompute.Services.Notifications;
+using CloudCompute.Services.Owner;
 using CloudCompute.Services.Profile;
 using CloudCompute.Services.Rentals;
 using CloudCompute.Services.Reviews;
@@ -98,6 +99,7 @@ public static class ServiceExtensions
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IVerificationService, VerificationService>();
         services.AddScoped<IGpuService, GpuService>();
+        services.AddScoped<IOwnerEarningsService, OwnerEarningsService>();
         services.AddScoped<IRentalService, RentalService>();
         services.AddScoped<IRentalLifecycleService, RentalLifecycleService>();
         services.AddScoped<IReviewService, ReviewService>();

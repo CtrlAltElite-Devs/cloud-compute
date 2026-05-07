@@ -84,18 +84,28 @@ else
                     </div>
 
                     <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                        <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post" class="m-0">
-                            @Html.AntiForgeryToken()
-                            <label class="form-check form-switch d-flex align-items-center gap-2 mb-0
-                                          @(item.IsToggleEnabled ? "" : "opacity-50")"
-                                   title="@(item.IsToggleEnabled ? "Toggle availability" : "Available only for approved listings")">
-                                <input class="form-check-input m-0" type="checkbox"
-                                       checked="@item.IsToggleOn"
-                                       disabled="@(!item.IsToggleEnabled)"
-                                       onchange="this.form.submit()" />
-                                <span class="form-check-label small">Available</span>
-                            </label>
-                        </form>
+                        @if (item.IsStatusSelectorEnabled)
+                        {
+                            <form asp-action="SetStatus" asp-route-id="@item.Id" method="post" class="m-0">
+                                @Html.AntiForgeryToken()
+                                <label class="visually-hidden" for="status-@item.Id">Listing status</label>
+                                <select id="status-@item.Id" name="status" class="form-select form-select-sm"
+                                        style="min-width: 9.5rem;"
+                                        title="Change listing status"
+                                        onchange="this.form.submit()">
+                                    <option value="@((int)GpuStatus.Available)" selected="@(item.Status == GpuStatus.Available)">Available</option>
+                                    <option value="@((int)GpuStatus.Unavailable)" selected="@(item.Status == GpuStatus.Unavailable)">Unavailable</option>
+                                    <option value="@((int)GpuStatus.Maintenance)" selected="@(item.Status == GpuStatus.Maintenance)">Maintenance</option>
+                                </select>
+                            </form>
+                        }
+                        else
+                        {
+                            <select class="form-select form-select-sm" disabled style="min-width: 9.5rem;"
+                                    title="Status is locked while @item.BadgeLabel.ToLower()">
+                                <option selected>@item.BadgeLabel</option>
+                            </select>
+                        }
 
                         @if (item.IsEditEnabled)
                         {

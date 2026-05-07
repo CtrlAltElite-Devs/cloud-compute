@@ -6,5 +6,6 @@ public enum GpuStatus
     Available = 1,
     Rented = 2,
     Maintenance = 3,
-    Rejected = 4
+    Rejected = 4,
+    Unavailable = 5
 }
