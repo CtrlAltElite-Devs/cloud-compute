@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Rental receipt view linked from Rental History, with renter-scoped receipt lookup and a dedicated receipt card showing payment, GPU, status, start/end timestamps, platform fee, owner earnings, and total paid
+- Active rental early termination flow with a confirmation modal, renter ownership/status validation, `TerminatedEarly` rental updates, GPU availability restoration, and no refund/reversal transactions
+- `NotificationType.RentalTerminated` with distinct notification list/dashboard icon and badge styling so terminated rentals are not categorized as completed
 - Member-facing GPU catalog, detail, rental confirmation, and active-rentals flow
 - Transactional rental creation with upfront renter charge, owner earnings after platform fee, credit ledger rows, GPU status updates, and rental notifications
 - `NotificationType.CreditRevoked` with `CreditRevokedFormat` template plus matching icon/badge classes; admin credit revocations now stage an in-app notification (linking to `/dashboard`) inside the same transaction as the ledger entry, mirroring the existing grant flow
@@ -46,6 +49,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
 
 ### Changed
+- Active Rentals now updates each running rental timer and usage progress live in the browser, replaces the disabled termination placeholder with an actionable CTA, and clamps expired cards at `00:00:00` / `100% used`
+- Rental History now renders persisted rental rows with status filters and an enabled Receipt action instead of the placeholder history page
+- GPU catalog cards are now fully clickable, with clearer owner, spec, rating, and per-hour pricing presentation
+- Unread notification cards now use a slimmer left border treatment
 - Polished GPU catalog, detail, create, and edit listing pages, including owner-specific listing actions and cleaner upload controls
 - Restricted member-facing pages to member accounts so admin sessions cannot use member listing or rental workflows
 - Rebuilt `/admin/grantcredits` and `/admin/revokecredits` as a stepped flow: search-and-pick a user (each result row shows their current credit balance), then reveal Amount and Reason. The Selected User panel shows the chosen user's current balance and a live "new balance after" preview that recomputes on every keystroke; revoke also surfaces an "Amount exceeds the user's current balance" warning that mirrors the server-side check. Deep links from `/admin/users/{id}` (`?userId=...`) and validation re-renders both land directly on the second step
