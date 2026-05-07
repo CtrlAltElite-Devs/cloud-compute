@@ -12,5 +12,7 @@ public class VerificationPageViewModel
 
     public string? LatestReviewNotes { get; set; }
 
+    public string? LatestIdentityImagePath { get; set; }
+
     public RequestVerificationViewModel Form { get; set; } = new();
 }

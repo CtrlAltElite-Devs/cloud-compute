@@ -1,6 +1,7 @@
 using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models;
+using CloudCompute.Services.Admin;
 using CloudCompute.Services.Auth;
 using CloudCompute.Services.Gpu;
 using CloudCompute.Services.Profile;
@@ -92,6 +93,11 @@ public static class ServiceExtensions
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IVerificationService, VerificationService>();
         services.AddScoped<IGpuService, GpuService>();
+        services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+        services.AddScoped<IAdminUserService, AdminUserService>();
+        services.AddScoped<IAdminCreditService, AdminCreditService>();
+        services.AddScoped<IAdminListingService, AdminListingService>();
+        services.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
         services.AddScoped<DevelopmentAdminSeeder>();
         services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
     }

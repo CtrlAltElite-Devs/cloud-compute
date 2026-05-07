@@ -1,0 +1,117 @@
+@using CloudCompute.Constants
+@using CloudCompute.Models.Enums
+@using CloudCompute.ViewModels.Admin
+@model AdminCreditLedgerViewModel
+@{
+    ViewData["Title"] = "Admin · Credit ledger";
+
+    var statusMessage = TempData[AdminConstants.Status.TempDataMessageKey] as string;
+    var statusType = TempData[AdminConstants.Status.TempDataTypeKey] as string;
+    var alertClass = statusType == AdminConstants.Status.Danger ? "alert-danger" : "alert-success";
+}
+
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+            <div>
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Admin</p>
+                <h1 class="h3 mb-0">Credit ledger</h1>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-primary btn-sm" asp-action="GrantCredits">Grant credits</a>
+                <a class="btn btn-outline-primary btn-sm" asp-action="BulkGrantCredits">Bulk grant</a>
+                <a class="btn btn-outline-danger btn-sm" asp-action="RevokeCredits">Revoke</a>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(statusMessage))
+        {
+            <div class="alert @alertClass" role="alert">@statusMessage</div>
+        }
+
+        <form method="get" asp-action="Credits" class="row g-2 align-items-end mb-4">
+            <div class="col-md-4">
+                <label class="form-label small">User search</label>
+                <input type="search" name="UserQuery" value="@Model.Filter.UserQuery" class="form-control" placeholder="Name, username, or email" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Type</label>
+                <select name="Type" class="form-select">
+                    <option value="">Any</option>
+                    @foreach (var type in Enum.GetValues<CreditTransactionType>())
+                    {
+                        <option value="@type" selected="@(Model.Filter.Type == type)">@type</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">From</label>
+                <input type="date" name="From" value="@(Model.Filter.From?.ToString("yyyy-MM-dd"))" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">To</label>
+                <input type="date" name="To" value="@(Model.Filter.To?.ToString("yyyy-MM-dd"))" class="form-control" />
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+
+        @if (Model.Rows.Count == 0)
+        {
+            <div class="border rounded-3 p-4 text-center text-muted">No transactions match those filters.</div>
+        }
+        else
+        {
+            <div class="border rounded-3 overflow-hidden">
+                <table class="table mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>When</th>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th class="text-end">Amount</th>
+                            <th class="text-end">Balance after</th>
+                            <th>Reason</th>
+                            <th>Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr>
+                                <td class="small text-muted">@row.CreatedAt.ToString("u")</td>
+                                <td>@row.UserDisplay</td>
+                                <td>@row.Type</td>
+                                <td class="text-end @(row.Amount < 0 ? "text-danger" : "text-success")">@row.Amount.ToString("+0.##;-0.##;0")</td>
+                                <td class="text-end">@row.BalanceAfter.ToString("N2")</td>
+                                <td>@row.Reason</td>
+                                <td class="small text-muted">@(row.AdminDisplay ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="mt-3" aria-label="Ledger pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        @for (var pageIndex = 1; pageIndex <= Model.TotalPages; pageIndex++)
+                        {
+                            <li class="page-item @(pageIndex == Model.Filter.Page ? "active" : "")">
+                                <a class="page-link"
+                                   asp-action="Credits"
+                                   asp-route-UserQuery="@Model.Filter.UserQuery"
+                                   asp-route-Type="@Model.Filter.Type"
+                                   asp-route-From="@Model.Filter.From?.ToString("yyyy-MM-dd")"
+                                   asp-route-To="@Model.Filter.To?.ToString("yyyy-MM-dd")"
+                                   asp-route-Page="@pageIndex">@pageIndex</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</section>

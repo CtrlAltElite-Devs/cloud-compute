@@ -1,0 +1,107 @@
+@using CloudCompute.Models.Enums
+@using CloudCompute.ViewModels.Admin
+@model AdminAnalyticsViewModel
+@{
+    ViewData["Title"] = "Admin · Analytics";
+}
+
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Admin</p>
+                <h1 class="h3 mb-0">Platform analytics</h1>
+            </div>
+            <a class="btn btn-outline-secondary btn-sm" asp-action="Dashboard">Back to dashboard</a>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="border rounded-3 p-4 h-100">
+                    <p class="text-uppercase text-muted small fw-semibold mb-1">Total users</p>
+                    <p class="display-6 mb-0">@Model.TotalUsers</p>
+                    <p class="text-muted small mb-0">@Model.AdminCount admin · @Model.VerifiedOwners verified</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="border rounded-3 p-4 h-100">
+                    <p class="text-uppercase text-muted small fw-semibold mb-1">Active / suspended</p>
+                    <p class="display-6 mb-0">@Model.ActiveUsers <span class="text-muted fs-6">/ @Model.SuspendedUsers</span></p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="border rounded-3 p-4 h-100">
+                    <p class="text-uppercase text-muted small fw-semibold mb-1">Credits in circulation</p>
+                    <p class="display-6 mb-0">@Model.TotalCreditsInCirculation.ToString("N0")</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="border rounded-3 p-4 h-100">
+                    <p class="text-uppercase text-muted small fw-semibold mb-1">Rental earnings (all-time)</p>
+                    <p class="display-6 mb-0">@Model.TotalRentalEarnings.ToString("N0")</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="border rounded-3 p-4 h-100">
+                    <h2 class="h6 text-uppercase text-muted small fw-semibold mb-3">Admin credit activity</h2>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-6 text-muted">Total granted</dt>
+                        <dd class="col-sm-6 text-end">@Model.TotalCreditsGranted.ToString("N2")</dd>
+                        <dt class="col-sm-6 text-muted">Total revoked</dt>
+                        <dd class="col-sm-6 text-end">@Model.TotalCreditsRevoked.ToString("N2")</dd>
+                        <dt class="col-sm-6 text-muted">Net</dt>
+                        <dd class="col-sm-6 text-end">@((Model.TotalCreditsGranted - Model.TotalCreditsRevoked).ToString("N2"))</dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded-3 p-4 h-100">
+                    <h2 class="h6 text-uppercase text-muted small fw-semibold mb-3">Listings by status</h2>
+                    <dl class="row mb-0">
+                        @foreach (var status in Enum.GetValues<GpuStatus>())
+                        {
+                            var count = Model.ListingCountsByStatus.TryGetValue(status, out var n) ? n : 0;
+                            <dt class="col-sm-6 text-muted">@status</dt>
+                            <dd class="col-sm-6 text-end">@count</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="border rounded-3 p-4">
+            <h2 class="h6 text-uppercase text-muted small fw-semibold mb-3">Top earners</h2>
+            @if (Model.TopEarners.Count == 0)
+            {
+                <p class="text-muted mb-0">No rental earnings recorded yet.</p>
+            }
+            else
+            {
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Owner</th>
+                            <th class="text-end">Total earned</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var rank = 1; }
+                        @foreach (var earner in Model.TopEarners)
+                        {
+                            <tr>
+                                <td class="text-muted small">@rank</td>
+                                <td>@earner.OwnerDisplay</td>
+                                <td class="text-end">@earner.TotalEarned.ToString("N2")</td>
+                            </tr>
+                            rank++;
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</section>

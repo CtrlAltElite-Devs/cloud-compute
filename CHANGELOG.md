@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Admin dashboard at `/admin/dashboard` with at-a-glance cards (pending verifications, pending listings, active/suspended users, credits in circulation) and a recent admin credit-activity table
+- Admin user management at `/admin/users` with name/username/email search, role/status/verification filters, paged list, and `/admin/users/{id}` detail view showing recent credit transactions and owned GPUs
+- Admin user actions: suspend/reactivate (with self-action and admin-on-admin guards) and a manual `IsOwnerVerified` toggle that bypasses the verification queue
+- Admin credit management at `/admin/credits`: paged ledger with user/type/date filters, single-user grant form, bulk member grant (active-only by default, wrapped in a DB transaction), and revoke form (rejects amounts that would drive a balance below zero); all writes log a `CreditTransaction` with `AdminId`/`Reason`
+- Admin listing moderation at `/admin/listings`: status-grouped queue (with counts) and `/admin/listings/{id}` detail view; approve flips `Pending → Available`, reject flips `Pending → Rejected` and stores the new `Gpu.RejectionReason`
+- Admin platform analytics at `/admin/analytics`: total/active/suspended users, credits in circulation, total credits granted/revoked, listing breakdown by status, and top earners by `RentalEarning` credit transactions
+- `IAdminDashboardService`, `IAdminUserService`, `IAdminCreditService`, `IAdminListingService`, `IAdminAnalyticsService` implementations and corresponding view models under `ViewModels/Admin/`
+- `Constants/AdminConstants.cs` for routes, TempData keys, validation limits (1–100 000 credits, 5–500 char reasons), and admin status messages
+- Role-aware admin nav links (Dashboard / Users / Credits / Listings / Verifications / Analytics) on `_Navigation.cshtml`, shown only to users in the `Admin` role
+- Owner-verification ID image upload: `/verification` form now accepts a JPG/PNG/WebP photo (max 4 MB) saved to `wwwroot/uploads/verification/`, with the image rendered in `/admin/verifications` table thumbnails and inside the approve/reject modals; new `OwnerVerificationRequest.IdentityImagePath` and `Gpu.RejectionReason` columns persisted via the `AddVerificationIdImageAndGpuRejectionReason` EF migration
 - Owner verification request flow at `/verification`: authenticated members submit a justification (30–2000 chars) that admins review at `/admin/verifications`, with approve/reject modals that capture optional reviewer notes; approval flips `ApplicationUser.IsOwnerVerified`
 - "List a GPU" form at `/gpus/create` with Hardware (brand, model, VRAM, CUDA cores), Pricing & Availability (price per hour, min rental hours, description), single photo upload, and an Approval Checklist sidebar; submissions are persisted as `Pending` GPUs awaiting admin approval
 - GPU photo upload pipeline (`wwwroot/uploads/gpus/`) reusing the avatar pattern, with JPG/PNG/WebP allowlist and 5 MB size cap
