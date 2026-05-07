@@ -6,6 +6,7 @@
     var statusMessage = TempData[GpuConstants.Status.TempDataMessageKey] as string;
     var statusType = TempData[GpuConstants.Status.TempDataTypeKey] as string;
     var alertClass = statusType == "danger" ? "alert-danger" : "alert-success";
+    var reviewPromptRentalId = TempData[GpuConstants.Status.ReviewPromptRentalIdKey] as string;
 
     string StatusBadgeClass(RentalStatus status) => status switch
     {
@@ -97,13 +98,16 @@ else
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-inline-flex align-items-center justify-content-end gap-2">
-                                    @if (item.Status == RentalStatus.Completed && !item.HasReview)
+                                    @{
+                                        var isReviewable = item.Status == RentalStatus.Completed || item.Status == RentalStatus.Terminated;
+                                    }
+                                    @if (isReviewable && !item.HasReview)
                                     {
                                         <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#@modalId">
                                             <i class="bi bi-star me-1" aria-hidden="true"></i> Review
                                         </button>
                                     }
-                                    else if (item.Status == RentalStatus.Completed && item.HasReview)
+                                    else if (isReviewable && item.HasReview)
                                     {
                                         <span class="badge rounded-pill text-bg-light border text-muted">Reviewed</span>
                                     }
@@ -121,7 +125,7 @@ else
         </div>
     </section>
 
-    @foreach (var item in Model.Items.Where(item => item.Status == RentalStatus.Completed && !item.HasReview))
+    @foreach (var item in Model.Items.Where(item => (item.Status == RentalStatus.Completed || item.Status == RentalStatus.Terminated) && !item.HasReview))
     {
         var modalId = $"reviewModal-{item.Id:N}";
         <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@(modalId)-title" aria-hidden="true">
@@ -190,5 +194,31 @@ else
                 </div>
             </div>
         </div>
+    }
+}
+
+@section Scripts {
+    @if (!string.IsNullOrWhiteSpace(reviewPromptRentalId))
+    {
+        <script>
+            (() => {
+                const rentalId = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(reviewPromptRentalId));
+                if (!rentalId) {
+                    return;
+                }
+                const openReviewModal = () => {
+                    const normalized = rentalId.replace(/-/g, "");
+                    const modalEl = document.getElementById(`reviewModal-${normalized}`);
+                    if (modalEl && window.bootstrap) {
+                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    }
+                };
+                if (document.readyState === "loading") {
+                    document.addEventListener("DOMContentLoaded", openReviewModal);
+                } else {
+                    openReviewModal();
+                }
+            })();
+        </script>
     }
 }

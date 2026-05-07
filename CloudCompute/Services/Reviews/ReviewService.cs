@@ -27,7 +27,7 @@ public class ReviewService : IReviewService
             .AsNoTracking()
             .Where(r => r.Id == rentalId
                         && r.RenterId == renterId
-                        && r.Status == RentalStatus.Completed
+                        && (r.Status == RentalStatus.Completed || r.Status == RentalStatus.Terminated)
                         && r.Review == null
                         && r.OwnerId != renterId)
             .Select(r => new RentalReviewFormViewModel
@@ -98,10 +98,10 @@ public class ReviewService : IReviewService
                 return Fail("Rental could not be found.");
             }
 
-            if (rental.Status != RentalStatus.Completed)
+            if (rental.Status is not (RentalStatus.Completed or RentalStatus.Terminated))
             {
                 await tx.RollbackAsync();
-                return Fail("Only completed rentals can be reviewed.");
+                return Fail("Only completed or terminated rentals can be reviewed.");
             }
 
             if (rental.Review is not null)

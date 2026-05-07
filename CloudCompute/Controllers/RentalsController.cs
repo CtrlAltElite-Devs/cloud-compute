@@ -184,9 +184,10 @@ public class RentalsController : Controller
             return RedirectToAction(nameof(Active));
         }
 
-        TempData[GpuConstants.Status.TempDataMessageKey] = "Rental terminated. The GPU is available again.";
+        TempData[GpuConstants.Status.TempDataMessageKey] = "Rental terminated. The GPU is available again. Share a quick review of your experience.";
         TempData[GpuConstants.Status.TempDataTypeKey] = "success";
-        return RedirectToAction(nameof(Active));
+        TempData[GpuConstants.Status.ReviewPromptRentalIdKey] = rentalId.ToString();
+        return RedirectToAction(nameof(History));
     }
 
     private Guid? GetCurrentUserId()
