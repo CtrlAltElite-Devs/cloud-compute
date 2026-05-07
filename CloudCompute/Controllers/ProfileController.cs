@@ -142,6 +142,30 @@ public class ProfileController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveAvatar()
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var result = await _profileService.RemoveAvatarAsync(userId.Value);
+        if (!result.Succeeded)
+        {
+            var message = result.Errors.FirstOrDefault()?.Message ?? AuthConstants.Profile.UserNotFound;
+            SetStatus(message, success: false);
+        }
+        else
+        {
+            SetStatus(AuthConstants.Profile.AvatarRemoved, success: true);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
     private static ProfilePageViewModel BuildPageViewModel(
         ApplicationUser user,
         ProfileEditViewModel? profileForm,
