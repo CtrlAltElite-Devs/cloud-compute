@@ -270,6 +270,84 @@ public class RentalService : IRentalService
         return new ActiveRentalsViewModel { Items = items };
     }
 
+    public async Task<RentalHistoryViewModel> GetHistoryAsync(Guid renterId, RentalHistoryFilterViewModel filter)
+    {
+        filter = new RentalHistoryFilterViewModel
+        {
+            Search = filter?.Search?.Trim(),
+            Status = filter?.Status
+        };
+
+        var baseQuery = _dbContext.Rentals
+            .AsNoTracking()
+            .Where(r => r.RenterId == renterId);
+
+        var hasAnyRentals = await baseQuery.AnyAsync();
+
+        var query = baseQuery;
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            query = query.Where(r => r.Gpu != null && r.Gpu.Model.Contains(filter.Search));
+        }
+
+        if (filter.Status.HasValue)
+        {
+            query = query.Where(r => r.Status == filter.Status.Value);
+        }
+
+        var items = await query
+            .OrderByDescending(r => r.StartTime)
+            .Select(r => new RentalHistoryItemViewModel
+            {
+                Id = r.Id,
+                ReferenceNumber = r.ReferenceNumber,
+                GpuName = r.Gpu != null ? r.Gpu.Name : string.Empty,
+                GpuModel = r.Gpu != null ? r.Gpu.Model : string.Empty,
+                ImagePath = r.Gpu != null ? r.Gpu.ImagePath : null,
+                OwnerDisplayName = r.Owner != null ? (r.Owner.FirstName + " " + r.Owner.LastName) : "Unknown owner",
+                Status = r.Status,
+                StartTime = r.StartTime,
+                EndTime = r.EndTime,
+                DurationHours = r.DurationHours,
+                PricePerHour = r.PricePerHour,
+                TotalCost = r.TotalCost,
+                HasReview = r.Review != null
+            })
+            .ToListAsync();
+
+        return new RentalHistoryViewModel
+        {
+            Filter = filter,
+            Items = items,
+            HasAnyRentals = hasAnyRentals
+        };
+    }
+
+    public Task<RentalReceiptViewModel?> GetReceiptAsync(Guid renterId, Guid rentalId)
+    {
+        return _dbContext.Rentals
+            .AsNoTracking()
+            .Where(r => r.Id == rentalId && r.RenterId == renterId)
+            .Select(r => new RentalReceiptViewModel
+            {
+                Id = r.Id,
+                ReferenceNumber = r.ReferenceNumber,
+                GpuName = r.Gpu != null ? r.Gpu.Name : string.Empty,
+                GpuModel = r.Gpu != null ? r.Gpu.Model : string.Empty,
+                OwnerDisplayName = r.Owner != null ? (r.Owner.FirstName + " " + r.Owner.LastName) : "Unknown owner",
+                Status = r.Status,
+                StartTime = r.StartTime,
+                EndTime = r.EndTime,
+                DurationHours = r.DurationHours,
+                PricePerHour = r.PricePerHour,
+                TotalCost = r.TotalCost,
+                PlatformFee = r.PlatformFee,
+                OwnerEarnings = r.OwnerEarnings
+            })
+            .FirstOrDefaultAsync();
+    }
+
     private static ServiceResult Validate(Guid renterId, decimal balance, CloudCompute.Models.Gpu gpu, int durationHours)
     {
         if (gpu.Status != GpuStatus.Available)

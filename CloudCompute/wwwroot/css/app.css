@@ -158,6 +158,87 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 28px rgba(0, 0, 0, 0.3);
 }
 
+
+.rental-history-table {
+  --bs-table-bg: transparent;
+  --bs-table-border-color: rgba(var(--bs-secondary-rgb), 0.18);
+}
+
+.rental-history-table thead th {
+  color: var(--bs-secondary-color);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding-block: 0.95rem;
+}
+
+.rental-history-table tbody td {
+  padding-block: 0.95rem;
+}
+
+.rental-history-table tbody tr:last-child td {
+  border-bottom-width: 0;
+}
+
+.rental-receipt-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.rental-receipt-card {
+  width: min(100%, 34rem);
+  color: #f4f4f5;
+  background: #232323;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.22);
+}
+
+.rental-receipt-card .text-muted {
+  color: #969696 !important;
+}
+
+.rental-receipt-total {
+  color: #f8f9fa;
+  font-size: clamp(1.65rem, 4vw, 2rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.rental-receipt-divider {
+  border-color: rgba(255, 255, 255, 0.09);
+  opacity: 1;
+  margin: 1.35rem 0;
+}
+
+.rental-receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 2rem;
+  margin: 0;
+}
+
+.rental-receipt-grid dt {
+  color: #969696;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.45rem;
+}
+
+.rental-receipt-grid dd {
+  margin: 0;
+  color: #f8f9fa;
+  font-size: 1rem;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+@media (max-width: 575.98px) {
+  .rental-receipt-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .min-width-0 {
   min-width: 0;
 }

@@ -1,17 +1,97 @@
+@model RentalHistoryViewModel
 @{
     Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
-    ViewData["Title"] = "History";
+    ViewData["Title"] = "Rental History";
+
+    string StatusBadgeClass(RentalStatus status) => status switch
+    {
+        RentalStatus.Active => "text-bg-success",
+        RentalStatus.Completed => "text-bg-success",
+        RentalStatus.Terminated => "text-bg-warning",
+        _ => "text-bg-light"
+    };
 }
 
 <section class="mb-4">
     <p class="text-uppercase text-muted small fw-semibold mb-1">Platform</p>
-    <h1 class="h3 mb-1">History</h1>
-    <p class="text-muted mb-0">Coming soon.</p>
+    <h1 class="h3 mb-1">Rental History</h1>
+    <p class="text-muted mb-0">Search and filter the GPU rentals tied to your account.</p>
 </section>
 
-<div class="border rounded-3 p-4">
-    <p class="mb-0">
-        Browse your completed rentals with reference numbers, durations, total costs, and the
-        option to leave a review. Every charge and refund is recorded in your credit ledger.
-    </p>
-</div>
+<form method="get" class="mb-4">
+    <div class="d-flex flex-wrap gap-2">
+        <input type="hidden" name="Search" value="@Model.Filter.Search" />
+        <button type="submit" name="Status" value="" class="btn btn-sm @(Model.Filter.Status is null ? "btn-info" : "btn-outline-info")">
+            All
+        </button>
+        <button type="submit" name="Status" value="@RentalStatus.Completed" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Completed ? "btn-info" : "btn-outline-info")">
+            Completed
+        </button>
+        <button type="submit" name="Status" value="@RentalStatus.Terminated" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Terminated ? "btn-info" : "btn-outline-info")">
+            Terminated
+        </button>
+    </div>
+</form>
+
+@if (!Model.HasAnyRentals)
+{
+    <div class="profile-card text-center py-5">
+        <i class="bi bi-lightning-charge fs-1 text-muted" aria-hidden="true"></i>
+        <h2 class="h5 mt-3 mb-2">No rental history yet</h2>
+        <p class="text-muted mb-3">Rent an available GPU to start building your history.</p>
+        <a class="btn btn-info" asp-controller="Gpus" asp-action="Index">Browse GPUs</a>
+    </div>
+}
+else if (Model.Items.Count == 0)
+{
+    <div class="profile-card text-center py-5">
+        <i class="bi bi-funnel fs-1 text-muted" aria-hidden="true"></i>
+        <h2 class="h5 mt-3 mb-2">No rentals match these filters</h2>
+        <p class="text-muted mb-3">Adjust your search terms or clear the filters to see every rental.</p>
+        <a class="btn btn-outline-secondary" asp-controller="Rentals" asp-action="History">Clear filters</a>
+    </div>
+}
+else
+{
+    <section class="profile-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-sm mb-0 align-middle rental-history-table">
+                <thead>
+                    <tr>
+                        <th class="ps-4">GPU</th>
+                        <th>Rental window</th>
+                        <th>Duration</th>
+                        <th>Cost</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-semibold">@item.GpuModel</div>
+                                <div class="text-muted small">@item.ReferenceNumber</div>
+                            </td>
+                            <td>
+                                @item.StartTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt") -> @item.EndTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                            </td>
+                            <td>@item.DurationHours h</td>
+                            <td>Php @item.TotalCost.ToString("N2")</td>
+                            <td>
+                                <span class="badge rounded-pill @StatusBadgeClass(item.Status)">@item.Status</span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a class="btn btn-sm btn-outline-info" asp-controller="Rentals" asp-action="Receipt" asp-route-rentalId="@item.Id">
+                                    <i class="bi bi-receipt me-1" aria-hidden="true"></i>
+                                    Receipt
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
