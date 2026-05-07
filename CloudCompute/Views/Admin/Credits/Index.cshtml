@@ -40,6 +40,17 @@
         PageSize = Model.Filter.PageSize,
         Page = p
     }) ?? "#";
+
+    (string Variant, string Label) TypeBadge(CreditTransactionType type) => type switch
+    {
+        CreditTransactionType.Initial => ("secondary", "Initial"),
+        CreditTransactionType.AdminGrant => ("primary", "Admin grant"),
+        CreditTransactionType.RentalCharge => ("danger", "Rental charge"),
+        CreditTransactionType.RentalEarning => ("success", "Rental earning"),
+        CreditTransactionType.Refund => ("info", "Refund"),
+        CreditTransactionType.Revoke => ("warning", "Revoke"),
+        _ => ("secondary", type.ToString())
+    };
 }
 
 <section class="dashboard-page">
@@ -121,7 +132,10 @@
                             <tr>
                                 <td class="ps-4 small text-muted">@row.CreatedAt.ToString("u")</td>
                                 <td>@row.UserDisplay</td>
-                                <td>@row.Type</td>
+                                <td>
+                                    @{ var badge = TypeBadge(row.Type); }
+                                    <span class="badge bg-@(badge.Variant)-subtle text-@(badge.Variant)">@badge.Label</span>
+                                </td>
                                 <td class="text-end @(row.Amount < 0 ? "text-danger" : "text-success")">@row.Amount.ToString("+0.##;-0.##;0")</td>
                                 <td class="text-end">@row.BalanceAfter.ToString("N2")</td>
                                 <td>@row.Reason</td>
