@@ -3,18 +3,6 @@
     var isAdmin = User.IsInRole(nameof(UserRole.Admin));
 }
 <header class="app-header" role="banner">
-    @if (!isAdmin)
-    {
-        <div class="app-header-search d-none d-md-flex">
-            <input
-                type="search"
-                class="form-control app-header-search-input"
-                placeholder="Search GPUs, owners, rentals..."
-                aria-label="Search GPUs, owners, rentals"
-                autocomplete="off" />
-        </div>
-    }
-
     <div class="app-header-actions">
         <div class="dropdown">
             <button class="app-header-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="themeMenuButton" aria-label="Select color theme">
@@ -42,6 +30,7 @@
 
         @if (!isAdmin)
         {
+            @await Component.InvokeAsync("CreditBalance")
             @await Component.InvokeAsync("NotificationBell")
         }
 
