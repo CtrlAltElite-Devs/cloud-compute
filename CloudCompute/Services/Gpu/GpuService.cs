@@ -4,7 +4,6 @@ using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
 using CloudCompute.ViewModels.Gpus;
 using Microsoft.EntityFrameworkCore;
-using GpuEntity = CloudCompute.Models.Gpu;
 
 namespace CloudCompute.Services.Gpu;
 
@@ -17,6 +16,85 @@ public class GpuService : IGpuService
     {
         _dbContext = dbContext;
         _environment = environment;
+    }
+
+    public async Task<GpuCatalogViewModel> GetCatalogAsync(Guid currentUserId, string? search)
+    {
+        var normalizedSearch = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+
+        var query = _dbContext.Gpus
+            .AsNoTracking()
+            .Include(g => g.Owner)
+            .Where(g => g.Status == GpuStatus.Available);
+
+        if (normalizedSearch is not null)
+        {
+            query = query.Where(g =>
+                EF.Functions.Like(g.Name, $"%{normalizedSearch}%") ||
+                EF.Functions.Like(g.Model, $"%{normalizedSearch}%") ||
+                (g.Owner != null && (
+                    EF.Functions.Like(g.Owner.UserName, $"%{normalizedSearch}%") ||
+                    EF.Functions.Like(g.Owner.FirstName + " " + g.Owner.LastName, $"%{normalizedSearch}%"))));
+        }
+
+        var items = await query
+            .OrderByDescending(g => g.CreatedAt)
+            .Select(g => new GpuCatalogItemViewModel
+            {
+                Id = g.Id,
+                Name = g.Name,
+                Model = g.Model,
+                VramGb = g.VramGb,
+                CudaCores = g.CudaCores,
+                PricePerHour = g.PricePerHour,
+                MinRentalHours = g.MinRentalHours,
+                ImagePath = g.ImagePath,
+                Status = g.Status,
+                IsOwnedByCurrentUser = g.OwnerId == currentUserId,
+                OwnerDisplayName = g.Owner != null ? (g.Owner.FirstName + " " + g.Owner.LastName) : "Unknown owner",
+                OwnerUserName = g.Owner != null ? g.Owner.UserName : string.Empty,
+                AverageRating = g.Reviews.Any()
+                    ? (decimal)g.Reviews.Average(r => (double)r.Rating)
+                    : g.AverageRating,
+                ReviewCount = g.Reviews.Count
+            })
+            .ToListAsync();
+
+        return new GpuCatalogViewModel
+        {
+            Search = normalizedSearch,
+            Items = items
+        };
+    }
+
+    public async Task<GpuDetailViewModel?> GetDetailAsync(Guid currentUserId, Guid gpuId)
+    {
+        return await _dbContext.Gpus
+            .AsNoTracking()
+            .Where(g => g.Id == gpuId && g.Status == GpuStatus.Available)
+            .Select(g => new GpuDetailViewModel
+            {
+                Id = g.Id,
+                OwnerId = g.OwnerId,
+                Name = g.Name,
+                Model = g.Model,
+                VramGb = g.VramGb,
+                CudaCores = g.CudaCores,
+                PricePerHour = g.PricePerHour,
+                MinRentalHours = g.MinRentalHours,
+                Description = g.Description,
+                ImagePath = g.ImagePath,
+                Status = g.Status,
+                OwnerDisplayName = g.Owner != null ? (g.Owner.FirstName + " " + g.Owner.LastName) : "Unknown owner",
+                OwnerUserName = g.Owner != null ? g.Owner.UserName : string.Empty,
+                OwnerProfilePicturePath = g.Owner != null ? g.Owner.ProfilePicturePath : null,
+                AverageRating = g.Reviews.Any()
+                    ? (decimal)g.Reviews.Average(r => (double)r.Rating)
+                    : g.AverageRating,
+                ReviewCount = g.Reviews.Count,
+                CanRent = g.OwnerId != currentUserId && g.Status == GpuStatus.Available
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task<ServiceResult> CreateAsync(Guid ownerId, GpuCreateViewModel model)
@@ -38,7 +116,7 @@ public class GpuService : IGpuService
             return ServiceResult.Failed(photoResult.Errors.ToArray());
         }
 
-        var gpu = new GpuEntity
+        var gpu = new CloudCompute.Models.Gpu
         {
             OwnerId = ownerId,
             Name = model.Brand.Trim(),

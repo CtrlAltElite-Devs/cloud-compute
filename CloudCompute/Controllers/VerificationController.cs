@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CloudCompute.Controllers;
 
-[Authorize]
+[Authorize(Roles = nameof(UserRole.Member))]
 public class VerificationController : Controller
 {
     private readonly IVerificationService _verificationService;

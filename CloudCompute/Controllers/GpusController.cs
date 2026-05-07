@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using CloudCompute.Constants;
 using CloudCompute.Data;
+using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
 using CloudCompute.Services.Gpu;
 using CloudCompute.Services.Verification;
@@ -12,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CloudCompute.Controllers;
 
-[Authorize]
+[Authorize(Roles = nameof(UserRole.Member))]
 public class GpusController : Controller
 {
     private readonly IGpuService _gpuService;
@@ -29,9 +30,35 @@ public class GpusController : Controller
         _dbContext = dbContext;
     }
 
-    public IActionResult Index()
+    [HttpGet("gpus")]
+    public async Task<IActionResult> Index(string? search)
     {
-        return View();
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var model = await _gpuService.GetCatalogAsync(userId.Value, search);
+        return View(model);
+    }
+
+    [HttpGet("gpus/{id:guid}")]
+    public async Task<IActionResult> Detail(Guid id)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var model = await _gpuService.GetDetailAsync(userId.Value, id);
+        if (model is null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
     }
 
     public async Task<IActionResult> Mine()
