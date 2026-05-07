@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Member-facing GPU catalog, detail, rental confirmation, and active-rentals flow
+- Transactional rental creation with upfront renter charge, owner earnings after platform fee, credit ledger rows, GPU status updates, and rental notifications
 - `NotificationType.CreditRevoked` with `CreditRevokedFormat` template plus matching icon/badge classes; admin credit revocations now stage an in-app notification (linking to `/dashboard`) inside the same transaction as the ledger entry, mirroring the existing grant flow
 - `/admin/searchmembers` JSON endpoint backing a server-side, debounced, top-20 search of non-admin users (by name/username/email, with current credit balance) used by the redesigned admin credit pickers
 - Member dashboard overview backed by `IDashboardService` / `DashboardService`, showing credit balance, active rental count, current-month spend, lifetime compute hours, active rental previews, and recent notification previews
@@ -44,6 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
 
 ### Changed
+- Polished GPU catalog, detail, create, and edit listing pages, including owner-specific listing actions and cleaner upload controls
+- Restricted member-facing pages to member accounts so admin sessions cannot use member listing or rental workflows
 - Rebuilt `/admin/grantcredits` and `/admin/revokecredits` as a stepped flow: search-and-pick a user (each result row shows their current credit balance), then reveal Amount and Reason. The Selected User panel shows the chosen user's current balance and a live "new balance after" preview that recomputes on every keystroke; revoke also surfaces an "Amount exceeds the user's current balance" warning that mirrors the server-side check. Deep links from `/admin/users/{id}` (`?userId=...`) and validation re-renders both land directly on the second step
 - Replaced the flat per-page-button pager on `/admin/credits` with a windowed pagination (`‹ Prev | 1 … current±2 … last | Next ›`) plus a "Showing X–Y of Z transactions" counter; Prev/Next are disabled at the edges and all filter state is preserved across page links
 - Replaced the placeholder member dashboard with a responsive card-based overview UI that preserves the authenticated app shell theme and links out to Browse GPUs, Active Rentals, and Notifications
