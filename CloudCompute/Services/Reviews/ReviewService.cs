@@ -5,6 +5,7 @@ using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
 using CloudCompute.Services.Notifications;
 using CloudCompute.ViewModels.Rentals;
+using CloudCompute.ViewModels.Reviews;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudCompute.Services.Reviews;
@@ -41,6 +42,33 @@ public class ReviewService : IReviewService
                 Rating = 5
             })
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<MyReviewsViewModel> GetMineAsync(Guid renterId)
+    {
+        var items = await _dbContext.Reviews
+            .AsNoTracking()
+            .Where(r => r.RenterId == renterId)
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new MyReviewItemViewModel
+            {
+                Id = r.Id,
+                RentalId = r.RentalId,
+                GpuId = r.GpuId,
+                GpuName = r.Gpu != null ? r.Gpu.Name : string.Empty,
+                GpuModel = r.Gpu != null ? r.Gpu.Model : string.Empty,
+                ImagePath = r.Gpu != null ? r.Gpu.ImagePath : null,
+                OwnerDisplayName = r.Gpu != null && r.Gpu.Owner != null
+                    ? (r.Gpu.Owner.FirstName + " " + r.Gpu.Owner.LastName)
+                    : "Unknown owner",
+                ReferenceNumber = r.Rental != null ? r.Rental.ReferenceNumber : string.Empty,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                CreatedAt = r.CreatedAt
+            })
+            .ToListAsync();
+
+        return new MyReviewsViewModel { Items = items };
     }
 
     public async Task<ServiceResult> CreateAsync(Guid renterId, RentalReviewFormViewModel form)

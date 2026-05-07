@@ -1,6 +1,7 @@
 using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models.Enums;
+using CloudCompute.Services.Rentals;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudCompute.Services.Notifications;
@@ -45,46 +46,15 @@ public class RentalExpiryNotifier : BackgroundService
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+        var lifecycleService = scope.ServiceProvider.GetRequiredService<IRentalLifecycleService>();
 
         var now = DateTime.UtcNow;
         var threshold = now.Add(_warningWindow);
 
-        var completed = await dbContext.Rentals
-            .Include(r => r.Gpu)
-            .Include(r => r.Renter)
-            .Where(r => r.Status == RentalStatus.Active && r.EndTime <= now)
-            .ToListAsync(cancellationToken);
-
-        if (completed.Count > 0)
+        var completedCount = await lifecycleService.CompleteExpiredActiveRentalsAsync(cancellationToken);
+        if (completedCount > 0)
         {
-            await using var completionTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-            foreach (var rental in completed)
-            {
-                rental.Status = RentalStatus.Completed;
-
-                if (rental.Gpu is not null)
-                {
-                    rental.Gpu.Status = GpuStatus.Available;
-                }
-
-                notificationService.Create(
-                    rental.RenterId,
-                    NotificationType.RentalCompleted,
-                    $"Rental {rental.ReferenceNumber} is complete.",
-                    "/rentals/history");
-
-                notificationService.Create(
-                    rental.OwnerId,
-                    NotificationType.RentalCompleted,
-                    $"{rental.Renter?.FullName ?? "A renter"} completed rental {rental.ReferenceNumber}.",
-                    NotificationConstants.Routes.MyListingsPath);
-            }
-
-            await dbContext.SaveChangesAsync(cancellationToken);
-            await completionTransaction.CommitAsync(cancellationToken);
-
-            _logger.LogInformation("RentalExpiryNotifier completed {Count} expired rentals", completed.Count);
+            _logger.LogInformation("RentalExpiryNotifier completed {Count} expired rentals", completedCount);
         }
 
         var expiring = await dbContext.Rentals

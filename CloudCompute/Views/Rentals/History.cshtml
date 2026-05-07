@@ -33,6 +33,9 @@
         <button type="submit" name="Status" value="" class="btn btn-sm @(Model.Filter.Status is null ? "btn-info" : "btn-outline-info")">
             All
         </button>
+        <button type="submit" name="Status" value="@RentalStatus.Active" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Active ? "btn-info" : "btn-outline-info")">
+            Active
+        </button>
         <button type="submit" name="Status" value="@RentalStatus.Completed" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Completed ? "btn-info" : "btn-outline-info")">
             Completed
         </button>
@@ -78,6 +81,7 @@ else
                 <tbody>
                     @foreach (var item in Model.Items)
                     {
+                        var modalId = $"reviewModal-{item.Id:N}";
                         <tr>
                             <td class="ps-4">
                                 <div class="fw-semibold">@item.GpuModel</div>
@@ -95,9 +99,9 @@ else
                                 <div class="d-inline-flex align-items-center justify-content-end gap-2">
                                     @if (item.Status == RentalStatus.Completed && !item.HasReview)
                                     {
-                                        <a class="btn btn-sm btn-info" asp-controller="Rentals" asp-action="Review" asp-route-rentalId="@item.Id">
+                                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#@modalId">
                                             <i class="bi bi-star me-1" aria-hidden="true"></i> Review
-                                        </a>
+                                        </button>
                                     }
                                     else if (item.Status == RentalStatus.Completed && item.HasReview)
                                     {
@@ -116,4 +120,75 @@ else
             </table>
         </div>
     </section>
+
+    @foreach (var item in Model.Items.Where(item => item.Status == RentalStatus.Completed && !item.HasReview))
+    {
+        var modalId = $"reviewModal-{item.Id:N}";
+        <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@(modalId)-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form asp-controller="Rentals" asp-action="Review" asp-route-rentalId="@item.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="RentalId" value="@item.Id" />
+
+                        <div class="modal-header">
+                            <div>
+                                <h2 class="modal-title fs-5" id="@(modalId)-title">Review GPU rental</h2>
+                                <div class="text-muted small">@item.ReferenceNumber</div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="d-flex gap-3 mb-4">
+                                @if (!string.IsNullOrWhiteSpace(item.ImagePath))
+                                {
+                                    <img src="@item.ImagePath" alt="@item.GpuModel" class="rounded-3 flex-shrink-0" style="width:112px;height:84px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center bg-body-secondary text-muted flex-shrink-0" style="width:112px;height:84px;">
+                                        <i class="bi bi-cpu fs-3" aria-hidden="true"></i>
+                                    </div>
+                                }
+                                <div class="min-width-0">
+                                    <div class="fw-semibold text-truncate">@item.GpuModel</div>
+                                    <div class="text-muted small text-truncate">@item.GpuName</div>
+                                    <div class="text-muted small text-truncate">Owner: @item.OwnerDisplayName</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-label">Rating</div>
+                                <div class="btn-group d-flex w-100" role="radiogroup" aria-label="Review rating">
+                                    @for (var rating = 1; rating <= 5; rating++)
+                                    {
+                                        var ratingId = $"{modalId}-rating-{rating}";
+                                        <input class="btn-check" type="radio" name="Rating" id="@ratingId" value="@rating" autocomplete="off" checked="@(rating == 5)" />
+                                        <label class="btn btn-outline-warning flex-fill" for="@ratingId" aria-label="@rating star@(rating == 1 ? "" : "s")">
+                                            <i class="bi bi-star-fill" aria-hidden="true"></i>
+                                            <span class="visually-hidden">@rating star@(rating == 1 ? "" : "s")</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="form-label" for="@(modalId)-comment">Comment</label>
+                                <textarea class="form-control" id="@(modalId)-comment" name="Comment" rows="4" maxlength="1000"></textarea>
+                                <div class="form-text">Optional, up to 1000 characters.</div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-info">
+                                <i class="bi bi-send me-1" aria-hidden="true"></i> Submit review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
 }
