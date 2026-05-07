@@ -1,0 +1,143 @@
+@model GpuDetailViewModel
+@{
+    Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
+    ViewData["Title"] = Model.Model;
+    var isOwnerView = !Model.CanRent;
+    var minimumEstimate = Model.PricePerHour * Model.MinRentalHours;
+    var dayEstimate = Model.PricePerHour * 24;
+}
+
+<div class="mb-4">
+    <a class="btn btn-sm btn-outline-secondary" asp-action="Index">
+        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Browse GPUs
+    </a>
+</div>
+
+<section class="profile-card mb-4">
+    <div class="row g-4">
+        <div class="col-12 col-lg-6 d-flex">
+            @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+            {
+                <img src="@Model.ImagePath" alt="@Model.Model" class="rounded-3 w-100 h-100" style="min-height:360px;object-fit:cover;" />
+            }
+            else
+            {
+                <div class="rounded-3 d-flex align-items-center justify-content-center bg-body-secondary text-muted w-100 h-100" style="min-height:360px;">
+                    <i class="bi bi-cpu fs-1" aria-hidden="true"></i>
+                </div>
+            }
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+                <div>
+                    <h1 class="h3 mb-1">@Model.Model</h1>
+                    <p class="text-muted mb-0">@Model.Name</p>
+                </div>
+                <span class="badge text-bg-success">@Model.Status</span>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="border rounded-3 p-3 h-100">
+                        <div class="text-muted small">VRAM</div>
+                        <div class="fw-semibold">@Model.VramGb GB</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="border rounded-3 p-3 h-100">
+                        <div class="text-muted small">CUDA cores</div>
+                        <div class="fw-semibold">@Model.CudaCores.ToString("N0")</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="border rounded-3 p-3 h-100">
+                        <div class="text-muted small">Renter rating</div>
+                        <div class="fw-semibold @(Model.ReviewCount == 0 && Model.AverageRating <= 0 ? "text-muted" : "")">
+                            <i class="bi bi-star-fill text-warning" aria-hidden="true"></i>
+                            @(Model.ReviewCount > 0 || Model.AverageRating > 0 ? $"{Model.AverageRating:0.0} ({Model.ReviewCount})" : "No renter reviews yet")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="border rounded-3 p-3 h-100">
+                        <div class="text-muted small">Hourly rate</div>
+                        <div class="fw-semibold">@Model.PricePerHour.ToString("N2") credits/hr</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border rounded-3 p-3 mb-4">
+                <div class="d-flex flex-wrap gap-4">
+                    <div>
+                        <div class="text-muted small">Minimum rental</div>
+                        <div class="fw-semibold">@Model.MinRentalHours hour(s)</div>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Maximum rental</div>
+                        <div class="fw-semibold">168 hours</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-end gap-2">
+                @if (Model.CanRent)
+                {
+                    <a class="btn btn-info btn-lg flex-shrink-0" asp-controller="Rentals" asp-action="Confirm" asp-route-gpuId="@Model.Id">
+                        <i class="bi bi-lightning-charge me-1" aria-hidden="true"></i> Rent
+                    </a>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-2 flex-shrink-0">
+                        <a class="btn btn-info" asp-controller="Gpus" asp-action="Edit" asp-route-id="@Model.Id">
+                            <i class="bi bi-pencil me-1" aria-hidden="true"></i> Edit
+                        </a>
+                        <a class="btn btn-outline-secondary" asp-controller="Gpus" asp-action="Mine">
+                            Manage
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-7">
+        <section class="profile-card h-100">
+            <h2 class="h5 mb-3">Description</h2>
+            <p class="mb-0 text-muted">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description provided." : Model.Description)</p>
+        </section>
+    </div>
+    <div class="col-12 col-lg-5">
+        <section class="profile-card mb-4">
+            <h2 class="h5 mb-3">Owner</h2>
+            <div class="d-flex align-items-center gap-3 min-width-0">
+                @if (!string.IsNullOrWhiteSpace(Model.OwnerProfilePicturePath))
+                {
+                    <img src="@Model.OwnerProfilePicturePath" alt="" class="rounded-circle flex-shrink-0" style="width:56px;height:56px;object-fit:cover;" />
+                }
+                else
+                {
+                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-body-secondary text-muted flex-shrink-0" style="width:56px;height:56px;">
+                        <i class="bi bi-person" aria-hidden="true"></i>
+                    </div>
+                }
+                <div class="min-width-0">
+                    <div class="fw-semibold text-truncate">@Model.OwnerDisplayName</div>
+                    <div class="small text-muted text-truncate">@Model.OwnerUserName</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-card">
+            <h2 class="h5 mb-3">Cost preview</h2>
+            <dl class="row mb-0">
+                <dt class="col-7 text-muted fw-normal">@Model.MinRentalHours hr minimum</dt>
+                <dd class="col-5 text-end">@minimumEstimate.ToString("N2") credits</dd>
+                <dt class="col-7 text-muted fw-normal">24 hr estimate</dt>
+                <dd class="col-5 text-end">@dayEstimate.ToString("N2") credits</dd>
+            </dl>
+        </section>
+    </div>
+</div>

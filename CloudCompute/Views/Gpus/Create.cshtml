@@ -11,7 +11,7 @@
 
 <partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
 
-<form asp-action="Create" method="post" enctype="multipart/form-data">
+<form asp-action="Create" method="post" enctype="multipart/form-data" id="gpuCreateForm">
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="profile-card mb-4">
@@ -83,7 +83,7 @@
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-info me-2" aria-hidden="true"></i>Static IP or VPN</li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-info me-2" aria-hidden="true"></i>Identity verified</li>
                 </ul>
-                <button type="submit" class="btn btn-info w-100">Submit for approval</button>
+                <button type="submit" class="btn btn-info w-100" id="gpuCreateSubmit">Submit for approval</button>
             </div>
         </div>
     </div>
@@ -98,6 +98,19 @@
             if (!input || !label) return;
             input.addEventListener("change", () => {
                 label.textContent = input.files && input.files[0] ? input.files[0].name : "";
+            });
+        })();
+
+        (() => {
+            const form = document.getElementById("gpuCreateForm");
+            const submit = document.getElementById("gpuCreateSubmit");
+            if (!form || !submit) return;
+
+            form.addEventListener("submit", () => {
+                if (!form.checkValidity()) return;
+
+                submit.disabled = true;
+                submit.textContent = "Submitting...";
             });
         })();
     </script>
