@@ -197,6 +197,55 @@ public class RentalService : IRentalService
         }
     }
 
+    public async Task<ServiceResult> TerminateAsync(Guid renterId, Guid rentalId)
+    {
+        await using var tx = await _dbContext.Database.BeginTransactionAsync();
+        try
+        {
+            var rental = await _dbContext.Rentals
+                .Include(r => r.Gpu)
+                .Include(r => r.Renter)
+                .FirstOrDefaultAsync(r => r.Id == rentalId && r.RenterId == renterId && r.Status == RentalStatus.Active);
+
+            if (rental is null)
+            {
+                await tx.RollbackAsync();
+                return ServiceResult.Failed(ModelError("Active rental could not be found."));
+            }
+
+            var now = DateTime.UtcNow;
+            rental.Status = RentalStatus.Terminated;
+            rental.TerminatedEarly = true;
+            rental.EndTime = now;
+
+            if (rental.Gpu is not null)
+            {
+                rental.Gpu.Status = GpuStatus.Available;
+            }
+
+            _notificationService.Create(
+                rental.RenterId,
+                NotificationType.RentalTerminated,
+                $"Rental {rental.ReferenceNumber} was terminated.",
+                "/rentals/history");
+
+            _notificationService.Create(
+                rental.OwnerId,
+                NotificationType.RentalTerminated,
+                $"{rental.Renter?.FullName ?? "A renter"} terminated rental {rental.ReferenceNumber}.",
+                "/gpus/mine");
+
+            await _dbContext.SaveChangesAsync();
+            await tx.CommitAsync();
+            return ServiceResult.Success();
+        }
+        catch (DbUpdateException)
+        {
+            await tx.RollbackAsync();
+            return ServiceResult.Failed(ModelError("We couldn't terminate the rental. Please try again."));
+        }
+    }
+
     public async Task<ActiveRentalsViewModel> GetActiveAsync(Guid renterId)
     {
         var items = await _dbContext.Rentals

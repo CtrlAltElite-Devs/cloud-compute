@@ -9,5 +9,7 @@ public interface IRentalService
 
     Task<RentalCreateResult> CreateAsync(Guid renterId, Guid gpuId, int durationHours);
 
+    Task<ServiceResult> TerminateAsync(Guid renterId, Guid rentalId);
+
     Task<ActiveRentalsViewModel> GetActiveAsync(Guid renterId);
 }

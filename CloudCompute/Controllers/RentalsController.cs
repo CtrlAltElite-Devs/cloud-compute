@@ -87,6 +87,29 @@ public class RentalsController : Controller
         return RedirectToAction(nameof(Active));
     }
 
+    [HttpPost("rentals/terminate/{rentalId:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Terminate(Guid rentalId)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var result = await _rentalService.TerminateAsync(userId.Value, rentalId);
+        if (!result.Succeeded)
+        {
+            TempData[GpuConstants.Status.TempDataMessageKey] = result.Errors.FirstOrDefault()?.Message ?? "Rental could not be terminated.";
+            TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
+            return RedirectToAction(nameof(Active));
+        }
+
+        TempData[GpuConstants.Status.TempDataMessageKey] = "Rental terminated. The GPU is available again.";
+        TempData[GpuConstants.Status.TempDataTypeKey] = "success";
+        return RedirectToAction(nameof(Active));
+    }
+
     private Guid? GetCurrentUserId()
     {
         var raw = User.FindFirstValue(ClaimTypes.NameIdentifier);

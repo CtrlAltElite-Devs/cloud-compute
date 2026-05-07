@@ -32,6 +32,8 @@ Enum NotificationType {
   CreditGranted
   ListingApproved
   ListingRejected
+  CreditRevoked
+  RentalTerminated
 }
 
 Table Users {

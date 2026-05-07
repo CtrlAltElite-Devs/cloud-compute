@@ -27,6 +27,7 @@ public class NotificationItemViewModel
         NotificationType.RentalConfirmed => "bi-lightning-charge text-info",
         NotificationType.RentalExpiring => "bi-clock-history text-warning",
         NotificationType.RentalCompleted => "bi-check2-circle text-success",
+        NotificationType.RentalTerminated => "bi-x-circle text-danger",
         NotificationType.ReviewReceived => "bi-star text-warning",
         _ => "bi-bell text-secondary"
     };
@@ -40,6 +41,7 @@ public class NotificationItemViewModel
         NotificationType.RentalConfirmed => "RENTAL CONFIRMED",
         NotificationType.RentalExpiring => "RENTAL EXPIRING",
         NotificationType.RentalCompleted => "RENTAL COMPLETED",
+        NotificationType.RentalTerminated => "RENTAL TERMINATED",
         NotificationType.ReviewReceived => "REVIEW",
         _ => "NOTIFICATION"
     };
@@ -53,6 +55,7 @@ public class NotificationItemViewModel
         NotificationType.RentalConfirmed => "bg-info text-dark",
         NotificationType.RentalExpiring => "bg-warning text-dark",
         NotificationType.RentalCompleted => "bg-success",
+        NotificationType.RentalTerminated => "bg-danger",
         NotificationType.ReviewReceived => "bg-info text-dark",
         _ => "bg-secondary"
     };
