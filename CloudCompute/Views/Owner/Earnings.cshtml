@@ -1,0 +1,180 @@
+@using CloudCompute.ViewModels.Owner
+@model OwnerEarningsViewModel
+@{
+    Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
+    ViewData["Title"] = "Earnings";
+
+    string FormatCredits(decimal amount) => amount.ToString("N2");
+
+    var last7Labels = string.Join(",", Model.Last7Days.Select(p => $"\"{p.Date:MMM d}\""));
+    var last7Values = string.Join(",", Model.Last7Days.Select(p => p.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+    var last30Labels = string.Join(",", Model.Last30Days.Select(p => $"\"{p.Date:MMM d}\""));
+    var last30Values = string.Join(",", Model.Last30Days.Select(p => p.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+}
+
+<section class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Earnings</h1>
+        <p class="text-muted mb-0">Track credits earned across your GPU listings.</p>
+    </div>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="profile-card h-100">
+            <div class="text-muted small text-uppercase mb-1">Total earned</div>
+            <div class="h3 mb-0">@FormatCredits(Model.TotalEarnedAllTime) <span class="fs-6 text-muted">credits</span></div>
+            <div class="text-muted small mt-1">@Model.CompletedRentalCount completed rentals</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="profile-card h-100">
+            <div class="text-muted small text-uppercase mb-1">Pending payouts</div>
+            <div class="h3 mb-0">@FormatCredits(Model.PendingPayouts) <span class="fs-6 text-muted">credits</span></div>
+            <div class="text-muted small mt-1">@Model.ActiveRentalCount active rental@(Model.ActiveRentalCount == 1 ? "" : "s")</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="profile-card h-100">
+            <div class="text-muted small text-uppercase mb-1">Listings earning</div>
+            <div class="h3 mb-0">@Model.PerGpu.Count</div>
+            <div class="text-muted small mt-1">GPUs with rental history</div>
+        </div>
+    </div>
+</div>
+
+<div class="profile-card mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="h5 mb-0">Earnings over time</h2>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Chart range">
+            <button type="button" class="btn btn-outline-secondary active" data-range="7" id="rangeBtn7">Last 7 days</button>
+            <button type="button" class="btn btn-outline-secondary" data-range="30" id="rangeBtn30">Last 30 days</button>
+        </div>
+    </div>
+    <div style="position: relative; height: 280px;">
+        <canvas id="earningsChart"></canvas>
+    </div>
+</div>
+
+<div class="profile-card">
+    <h2 class="h5 mb-3">Earnings by GPU</h2>
+    @if (Model.PerGpu.Count == 0)
+    {
+        <p class="text-muted mb-0">No earnings yet. Once a rental on one of your listings is paid out, it will appear here.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">GPU</th>
+                        <th scope="col" class="text-end">Rentals</th>
+                        <th scope="col" class="text-end">Total earnings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var gpu in Model.PerGpu)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (!string.IsNullOrWhiteSpace(gpu.ImagePath))
+                                    {
+                                        <img src="@gpu.ImagePath" alt="" loading="lazy"
+                                             class="rounded-2"
+                                             style="width:48px;height:36px;object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-2 d-flex align-items-center justify-content-center bg-body-secondary text-muted"
+                                             style="width:48px;height:36px;">
+                                            <i class="bi bi-cpu" aria-hidden="true"></i>
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="fw-semibold">@gpu.Model</div>
+                                        <div class="text-muted small">@gpu.Name</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-end">@gpu.RentalCount</td>
+                            <td class="text-end">@FormatCredits(gpu.TotalEarnings)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const labels7 = [@Html.Raw(last7Labels)];
+            const values7 = [@Html.Raw(last7Values)];
+            const labels30 = [@Html.Raw(last30Labels)];
+            const values30 = [@Html.Raw(last30Values)];
+
+            const canvas = document.getElementById("earningsChart");
+            if (!canvas || typeof Chart === "undefined") {
+                return;
+            }
+
+            const themeAccent = getComputedStyle(document.documentElement)
+                .getPropertyValue("--bs-info").trim() || "#0dcaf0";
+
+            const chart = new Chart(canvas.getContext("2d"), {
+                type: "line",
+                data: {
+                    labels: labels7,
+                    datasets: [{
+                        label: "Credits earned",
+                        data: values7,
+                        borderColor: themeAccent,
+                        backgroundColor: themeAccent + "33",
+                        borderWidth: 2,
+                        tension: 0.25,
+                        fill: true,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+
+            function setRange(range) {
+                if (range === "30") {
+                    chart.data.labels = labels30;
+                    chart.data.datasets[0].data = values30;
+                } else {
+                    chart.data.labels = labels7;
+                    chart.data.datasets[0].data = values7;
+                }
+                chart.update();
+            }
+
+            document.querySelectorAll("[data-range]").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    document.querySelectorAll("[data-range]").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    setRange(btn.getAttribute("data-range"));
+                });
+            });
+        })();
+    </script>
+}

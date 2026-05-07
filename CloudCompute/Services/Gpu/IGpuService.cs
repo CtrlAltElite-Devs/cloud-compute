@@ -1,3 +1,4 @@
+using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
 using CloudCompute.ViewModels.Gpus;
 
@@ -15,7 +16,7 @@ public interface IGpuService
 
     Task<RentedGpusViewModel> GetRentedAsync(Guid ownerId);
 
-    Task<ServiceResult> ToggleStatusAsync(Guid ownerId, Guid gpuId);
+    Task<ServiceResult> SetStatusAsync(Guid ownerId, Guid gpuId, GpuStatus status);
 
     Task<ServiceResult> DeleteAsync(Guid ownerId, Guid gpuId);
 

@@ -22,7 +22,8 @@ public class MyListingItemViewModel
         GpuStatus.Pending => "PENDING REVIEW",
         GpuStatus.Available => "LIVE",
         GpuStatus.Rented => "RENTED",
-        GpuStatus.Maintenance => "PAUSED",
+        GpuStatus.Maintenance => "MAINTENANCE",
+        GpuStatus.Unavailable => "UNAVAILABLE",
         GpuStatus.Rejected => "REJECTED",
         _ => Status.ToString().ToUpperInvariant()
     };
@@ -33,13 +34,13 @@ public class MyListingItemViewModel
         GpuStatus.Available => "bg-success",
         GpuStatus.Rented => "bg-info text-dark",
         GpuStatus.Maintenance => "bg-secondary",
+        GpuStatus.Unavailable => "bg-secondary",
         GpuStatus.Rejected => "bg-danger",
         _ => "bg-secondary"
     };
 
-    public bool IsToggleEnabled => Status is GpuStatus.Available or GpuStatus.Maintenance;
-
-    public bool IsToggleOn => Status == GpuStatus.Available;
+    public bool IsStatusSelectorEnabled =>
+        Status is GpuStatus.Available or GpuStatus.Unavailable or GpuStatus.Maintenance;
 
     public bool IsEditEnabled => Status != GpuStatus.Rented;
 

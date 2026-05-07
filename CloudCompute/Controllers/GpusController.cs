@@ -136,9 +136,9 @@ public class GpusController : Controller
         return RedirectToAction(nameof(Mine));
     }
 
-    [HttpPost("gpus/{id:guid}/toggle-status")]
+    [HttpPost("gpus/{id:guid}/set-status")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ToggleStatus(Guid id)
+    public async Task<IActionResult> SetStatus(Guid id, GpuStatus status)
     {
         var userId = GetCurrentUserId();
         if (userId is null)
@@ -146,17 +146,20 @@ public class GpusController : Controller
             return Challenge();
         }
 
-        var result = await _gpuService.ToggleStatusAsync(userId.Value, id);
+        var result = await _gpuService.SetStatusAsync(userId.Value, id, status);
         if (!result.Succeeded)
         {
             SetStatusMessage(FirstErrorMessage(result, GpuConstants.Messages.SaveFailed), success: false);
             return RedirectToAction(nameof(Mine));
         }
 
-        var gpu = await _dbContext.Gpus.AsNoTracking().FirstOrDefaultAsync(g => g.Id == id);
-        var message = gpu?.Status == Models.Enums.GpuStatus.Available
-            ? GpuConstants.Messages.ListingResumed
-            : GpuConstants.Messages.ListingPaused;
+        var message = status switch
+        {
+            GpuStatus.Available => GpuConstants.Messages.ListingResumed,
+            GpuStatus.Unavailable => GpuConstants.Messages.ListingMarkedUnavailable,
+            GpuStatus.Maintenance => GpuConstants.Messages.ListingMarkedMaintenance,
+            _ => GpuConstants.Messages.ListingUpdated
+        };
 
         SetStatusMessage(message, success: true);
         return RedirectToAction(nameof(Mine));
