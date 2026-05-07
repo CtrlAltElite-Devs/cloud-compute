@@ -73,15 +73,14 @@ public class RentalsController : Controller
             return Challenge();
         }
 
-        var model = await _reviewService.GetFormAsync(userId.Value, rentalId);
-        if (model is null)
+        if (await _reviewService.GetFormAsync(userId.Value, rentalId) is null)
         {
             TempData[GpuConstants.Status.TempDataMessageKey] = "This rental cannot be reviewed.";
             TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
             return RedirectToAction(nameof(History));
         }
 
-        return View(model);
+        return RedirectToAction(nameof(History));
     }
 
     [HttpPost("rentals/{rentalId:guid}/review")]
@@ -98,34 +97,17 @@ public class RentalsController : Controller
 
         if (!ModelState.IsValid)
         {
-            var pageModel = await _reviewService.GetFormAsync(userId.Value, rentalId);
-            if (pageModel is null)
-            {
-                TempData[GpuConstants.Status.TempDataMessageKey] = "This rental cannot be reviewed.";
-                TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
-                return RedirectToAction(nameof(History));
-            }
-
-            pageModel.Rating = form.Rating;
-            pageModel.Comment = form.Comment;
-            return View(pageModel);
+            TempData[GpuConstants.Status.TempDataMessageKey] = "Review rating must be between 1 and 5 stars, and comment must be 1000 characters or fewer.";
+            TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
+            return RedirectToAction(nameof(History));
         }
 
         var result = await _reviewService.CreateAsync(userId.Value, form);
         if (!result.Succeeded)
         {
-            AddModelErrors(result);
-            var pageModel = await _reviewService.GetFormAsync(userId.Value, rentalId);
-            if (pageModel is null)
-            {
-                TempData[GpuConstants.Status.TempDataMessageKey] = result.Errors.FirstOrDefault()?.Message ?? "This rental cannot be reviewed.";
-                TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
-                return RedirectToAction(nameof(History));
-            }
-
-            pageModel.Rating = form.Rating;
-            pageModel.Comment = form.Comment;
-            return View(pageModel);
+            TempData[GpuConstants.Status.TempDataMessageKey] = result.Errors.FirstOrDefault()?.Message ?? "This rental cannot be reviewed.";
+            TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
+            return RedirectToAction(nameof(History));
         }
 
         TempData[GpuConstants.Status.TempDataMessageKey] = "Review submitted. Thanks for sharing your feedback.";

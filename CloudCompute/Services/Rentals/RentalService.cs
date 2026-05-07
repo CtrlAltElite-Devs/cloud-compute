@@ -16,11 +16,16 @@ public class RentalService : IRentalService
 
     private readonly AppDbContext _dbContext;
     private readonly INotificationService _notificationService;
+    private readonly IRentalLifecycleService _rentalLifecycleService;
 
-    public RentalService(AppDbContext dbContext, INotificationService notificationService)
+    public RentalService(
+        AppDbContext dbContext,
+        INotificationService notificationService,
+        IRentalLifecycleService rentalLifecycleService)
     {
         _dbContext = dbContext;
         _notificationService = notificationService;
+        _rentalLifecycleService = rentalLifecycleService;
     }
 
     public async Task<RentalConfirmViewModel?> GetConfirmationAsync(Guid renterId, Guid gpuId, int? durationHours = null)
@@ -248,6 +253,8 @@ public class RentalService : IRentalService
 
     public async Task<ActiveRentalsViewModel> GetActiveAsync(Guid renterId)
     {
+        await _rentalLifecycleService.CompleteExpiredActiveRentalsAsync();
+
         var items = await _dbContext.Rentals
             .AsNoTracking()
             .Where(r => r.RenterId == renterId && r.Status == RentalStatus.Active)
@@ -272,6 +279,8 @@ public class RentalService : IRentalService
 
     public async Task<RentalHistoryViewModel> GetHistoryAsync(Guid renterId, RentalHistoryFilterViewModel filter)
     {
+        await _rentalLifecycleService.CompleteExpiredActiveRentalsAsync();
+
         filter = new RentalHistoryFilterViewModel
         {
             Search = filter?.Search?.Trim(),
@@ -324,9 +333,11 @@ public class RentalService : IRentalService
         };
     }
 
-    public Task<RentalReceiptViewModel?> GetReceiptAsync(Guid renterId, Guid rentalId)
+    public async Task<RentalReceiptViewModel?> GetReceiptAsync(Guid renterId, Guid rentalId)
     {
-        return _dbContext.Rentals
+        await _rentalLifecycleService.CompleteExpiredActiveRentalsAsync();
+
+        return await _dbContext.Rentals
             .AsNoTracking()
             .Where(r => r.Id == rentalId && r.RenterId == renterId)
             .Select(r => new RentalReceiptViewModel

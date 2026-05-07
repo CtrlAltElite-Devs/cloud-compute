@@ -99,6 +99,7 @@ public static class ServiceExtensions
         services.AddScoped<IVerificationService, VerificationService>();
         services.AddScoped<IGpuService, GpuService>();
         services.AddScoped<IRentalService, RentalService>();
+        services.AddScoped<IRentalLifecycleService, RentalLifecycleService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IAdminDashboardService, AdminDashboardService>();
         services.AddScoped<IAdminUserService, AdminUserService>();

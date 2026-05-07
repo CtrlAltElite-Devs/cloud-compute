@@ -94,8 +94,11 @@ else
                     .join(":");
             };
 
+            let reloadScheduled = false;
+
             const updateRentalTimers = () => {
                 const now = Date.now();
+                let hasExpiredRental = false;
 
                 document.querySelectorAll(".active-rental-card").forEach((card) => {
                     const start = Date.parse(card.dataset.start);
@@ -125,7 +128,16 @@ else
                     if (usedPercentEl) {
                         usedPercentEl.textContent = `${usedPercent}% used`;
                     }
+
+                    if (now >= end) {
+                        hasExpiredRental = true;
+                    }
                 });
+
+                if (hasExpiredRental && !reloadScheduled) {
+                    reloadScheduled = true;
+                    window.setTimeout(() => window.location.reload(), 1500);
+                }
             };
 
             updateRentalTimers();

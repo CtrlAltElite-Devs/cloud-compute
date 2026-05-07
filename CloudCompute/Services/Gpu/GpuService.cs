@@ -2,6 +2,7 @@ using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
+using CloudCompute.Services.Rentals;
 using CloudCompute.ViewModels.Gpus;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +12,16 @@ public class GpuService : IGpuService
 {
     private readonly AppDbContext _dbContext;
     private readonly IWebHostEnvironment _environment;
+    private readonly IRentalLifecycleService _rentalLifecycleService;
 
-    public GpuService(AppDbContext dbContext, IWebHostEnvironment environment)
+    public GpuService(
+        AppDbContext dbContext,
+        IWebHostEnvironment environment,
+        IRentalLifecycleService rentalLifecycleService)
     {
         _dbContext = dbContext;
         _environment = environment;
+        _rentalLifecycleService = rentalLifecycleService;
     }
 
     public async Task<GpuCatalogViewModel> GetCatalogAsync(Guid currentUserId, string? search)
@@ -186,6 +192,8 @@ public class GpuService : IGpuService
 
     public async Task<RentedGpusViewModel> GetRentedAsync(Guid ownerId)
     {
+        await _rentalLifecycleService.CompleteExpiredActiveRentalsAsync();
+
         var rentals = await _dbContext.Rentals
             .AsNoTracking()
             .Where(r => r.OwnerId == ownerId && r.Status == RentalStatus.Active)
