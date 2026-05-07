@@ -5,6 +5,7 @@ using CloudCompute.Constants;
 using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
 using CloudCompute.Services.Rentals;
+using CloudCompute.Services.Reviews;
 using CloudCompute.ViewModels.Rentals;
 
 namespace CloudCompute.Controllers;
@@ -13,10 +14,12 @@ namespace CloudCompute.Controllers;
 public class RentalsController : Controller
 {
     private readonly IRentalService _rentalService;
+    private readonly IReviewService _reviewService;
 
-    public RentalsController(IRentalService rentalService)
+    public RentalsController(IRentalService rentalService, IReviewService reviewService)
     {
         _rentalService = rentalService;
+        _reviewService = reviewService;
     }
 
     public async Task<IActionResult> Active()
@@ -59,6 +62,75 @@ public class RentalsController : Controller
         }
 
         return View(model);
+    }
+
+    [HttpGet("rentals/{rentalId:guid}/review")]
+    public async Task<IActionResult> Review(Guid rentalId)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var model = await _reviewService.GetFormAsync(userId.Value, rentalId);
+        if (model is null)
+        {
+            TempData[GpuConstants.Status.TempDataMessageKey] = "This rental cannot be reviewed.";
+            TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
+            return RedirectToAction(nameof(History));
+        }
+
+        return View(model);
+    }
+
+    [HttpPost("rentals/{rentalId:guid}/review")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Review(Guid rentalId, RentalReviewFormViewModel form)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        form.RentalId = rentalId;
+
+        if (!ModelState.IsValid)
+        {
+            var pageModel = await _reviewService.GetFormAsync(userId.Value, rentalId);
+            if (pageModel is null)
+            {
+                TempData[GpuConstants.Status.TempDataMessageKey] = "This rental cannot be reviewed.";
+                TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
+                return RedirectToAction(nameof(History));
+            }
+
+            pageModel.Rating = form.Rating;
+            pageModel.Comment = form.Comment;
+            return View(pageModel);
+        }
+
+        var result = await _reviewService.CreateAsync(userId.Value, form);
+        if (!result.Succeeded)
+        {
+            AddModelErrors(result);
+            var pageModel = await _reviewService.GetFormAsync(userId.Value, rentalId);
+            if (pageModel is null)
+            {
+                TempData[GpuConstants.Status.TempDataMessageKey] = result.Errors.FirstOrDefault()?.Message ?? "This rental cannot be reviewed.";
+                TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
+                return RedirectToAction(nameof(History));
+            }
+
+            pageModel.Rating = form.Rating;
+            pageModel.Comment = form.Comment;
+            return View(pageModel);
+        }
+
+        TempData[GpuConstants.Status.TempDataMessageKey] = "Review submitted. Thanks for sharing your feedback.";
+        TempData[GpuConstants.Status.TempDataTypeKey] = "success";
+        return RedirectToAction(nameof(History));
     }
 
     [HttpGet("rentals/confirm/{gpuId:guid}")]

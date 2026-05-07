@@ -92,7 +92,18 @@ public class GpuService : IGpuService
                     ? (decimal)g.Reviews.Average(r => (double)r.Rating)
                     : g.AverageRating,
                 ReviewCount = g.Reviews.Count,
-                CanRent = g.OwnerId != currentUserId && g.Status == GpuStatus.Available
+                CanRent = g.OwnerId != currentUserId && g.Status == GpuStatus.Available,
+                RecentReviews = g.Reviews
+                    .OrderByDescending(r => r.CreatedAt)
+                    .Take(5)
+                    .Select(r => new GpuReviewItemViewModel
+                    {
+                        RenterDisplayName = r.Renter != null ? (r.Renter.FirstName + " " + r.Renter.LastName) : "Unknown renter",
+                        Rating = r.Rating,
+                        Comment = r.Comment,
+                        CreatedAt = r.CreatedAt
+                    })
+                    .ToList()
             })
             .FirstOrDefaultAsync();
     }

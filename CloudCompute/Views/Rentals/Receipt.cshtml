@@ -38,7 +38,7 @@
 
         <div class="mb-4">
             <div class="text-muted small mb-1">Receipt</div>
-            <div class="rental-receipt-total">Php @Model.TotalCost.ToString("N2")</div>
+            <div class="rental-receipt-total">@Model.TotalCost.ToString("N2") credits</div>
             <div class="text-muted small">Reference @Model.ReferenceNumber</div>
         </div>
 
@@ -69,7 +69,7 @@
             </div>
             <div>
                 <dt>Rate</dt>
-                <dd>Php @Model.PricePerHour.ToString("N2") / hour</dd>
+                <dd>@Model.PricePerHour.ToString("N2") credits / hour</dd>
             </div>
         </dl>
 
@@ -86,11 +86,11 @@
             </div>
             <div class="d-flex justify-content-between gap-3">
                 <span class="text-muted">Platform fee</span>
-                <span>Php @Model.PlatformFee.ToString("N2")</span>
+                <span>@Model.PlatformFee.ToString("N2") credits</span>
             </div>
             <div class="d-flex justify-content-between gap-3">
                 <span class="text-muted">Owner earnings</span>
-                <span>Php @Model.OwnerEarnings.ToString("N2")</span>
+                <span>@Model.OwnerEarnings.ToString("N2") credits</span>
             </div>
         </div>
 
@@ -98,7 +98,7 @@
 
         <div class="d-flex justify-content-between align-items-center gap-3">
             <span class="text-muted">Total Paid</span>
-            <strong>Php @Model.TotalCost.ToString("N2")</strong>
+            <strong>@Model.TotalCost.ToString("N2") credits</strong>
         </div>
     </article>
 </section>

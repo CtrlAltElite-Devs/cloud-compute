@@ -138,3 +138,26 @@ public class RentalReceiptViewModel
 
     public decimal OwnerEarnings { get; set; }
 }
+
+public class RentalReviewFormViewModel
+{
+    public Guid RentalId { get; set; }
+
+    public Guid GpuId { get; set; }
+
+    public string GpuName { get; set; } = string.Empty;
+
+    public string GpuModel { get; set; } = string.Empty;
+
+    public string? ImagePath { get; set; }
+
+    public string OwnerDisplayName { get; set; } = string.Empty;
+
+    public string ReferenceNumber { get; set; } = string.Empty;
+
+    [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5 stars.")]
+    public int Rating { get; set; } = 5;
+
+    [StringLength(1000, ErrorMessage = "Comment must be 1000 characters or fewer.")]
+    public string? Comment { get; set; }
+}
