@@ -6,4 +6,14 @@ namespace CloudCompute.Services.Gpu;
 public interface IGpuService
 {
     Task<ServiceResult> CreateAsync(Guid ownerId, GpuCreateViewModel model);
+
+    Task<MyListingsViewModel> GetMineAsync(Guid ownerId);
+
+    Task<ServiceResult> ToggleStatusAsync(Guid ownerId, Guid gpuId);
+
+    Task<ServiceResult> DeleteAsync(Guid ownerId, Guid gpuId);
+
+    Task<GpuEditViewModel?> GetForEditAsync(Guid ownerId, Guid gpuId);
+
+    Task<ServiceResult> UpdateAsync(Guid ownerId, GpuEditViewModel model);
 }

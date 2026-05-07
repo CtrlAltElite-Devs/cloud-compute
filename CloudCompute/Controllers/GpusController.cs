@@ -34,9 +34,16 @@ public class GpusController : Controller
         return View();
     }
 
-    public IActionResult Mine()
+    public async Task<IActionResult> Mine()
     {
-        return View();
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var model = await _gpuService.GetMineAsync(userId.Value);
+        return View(model);
     }
 
     [HttpGet]
@@ -85,8 +92,106 @@ public class GpusController : Controller
             return View(form);
         }
 
-        TempData[GpuConstants.Status.TempDataMessageKey] = GpuConstants.Messages.GpuCreated;
-        TempData[GpuConstants.Status.TempDataTypeKey] = "success";
+        SetStatusMessage(GpuConstants.Messages.GpuCreated, success: true);
+        return RedirectToAction(nameof(Mine));
+    }
+
+    [HttpPost("gpus/{id:guid}/toggle-status")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleStatus(Guid id)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var result = await _gpuService.ToggleStatusAsync(userId.Value, id);
+        if (!result.Succeeded)
+        {
+            SetStatusMessage(FirstErrorMessage(result, GpuConstants.Messages.SaveFailed), success: false);
+            return RedirectToAction(nameof(Mine));
+        }
+
+        var gpu = await _dbContext.Gpus.AsNoTracking().FirstOrDefaultAsync(g => g.Id == id);
+        var message = gpu?.Status == Models.Enums.GpuStatus.Available
+            ? GpuConstants.Messages.ListingResumed
+            : GpuConstants.Messages.ListingPaused;
+
+        SetStatusMessage(message, success: true);
+        return RedirectToAction(nameof(Mine));
+    }
+
+    [HttpPost("gpus/{id:guid}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var result = await _gpuService.DeleteAsync(userId.Value, id);
+        if (!result.Succeeded)
+        {
+            SetStatusMessage(FirstErrorMessage(result, GpuConstants.Messages.SaveFailed), success: false);
+            return RedirectToAction(nameof(Mine));
+        }
+
+        SetStatusMessage(GpuConstants.Messages.ListingDeleted, success: true);
+        return RedirectToAction(nameof(Mine));
+    }
+
+    [HttpGet("gpus/{id:guid}/edit")]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var model = await _gpuService.GetForEditAsync(userId.Value, id);
+        if (model is null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost("gpus/{id:guid}/edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, GpuEditViewModel form)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        form.Id = id;
+
+        if (!ModelState.IsValid)
+        {
+            var existing = await _gpuService.GetForEditAsync(userId.Value, id);
+            form.ExistingImagePath = existing?.ExistingImagePath;
+            form.Status = existing?.Status ?? form.Status;
+            return View(form);
+        }
+
+        var result = await _gpuService.UpdateAsync(userId.Value, form);
+        if (!result.Succeeded)
+        {
+            AddModelErrors(result);
+            var existing = await _gpuService.GetForEditAsync(userId.Value, id);
+            form.ExistingImagePath = existing?.ExistingImagePath;
+            form.Status = existing?.Status ?? form.Status;
+            return View(form);
+        }
+
+        SetStatusMessage(GpuConstants.Messages.ListingUpdated, success: true);
         return RedirectToAction(nameof(Mine));
     }
 
@@ -102,5 +207,16 @@ public class GpusController : Controller
         {
             ModelState.AddModelError(error.Key, error.Message);
         }
+    }
+
+    private void SetStatusMessage(string message, bool success)
+    {
+        TempData[GpuConstants.Status.TempDataMessageKey] = message;
+        TempData[GpuConstants.Status.TempDataTypeKey] = success ? "success" : "danger";
+    }
+
+    private static string FirstErrorMessage(ServiceResult result, string fallback)
+    {
+        return result.Errors.FirstOrDefault()?.Message ?? fallback;
     }
 }

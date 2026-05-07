@@ -23,6 +23,15 @@ public static class GpuConstants
         public const string PhotoTooLarge = "Photo must be 5 MB or smaller.";
         public const string GpuCreated = "Listing submitted for approval.";
         public const string SaveFailed = "We couldn't save your listing. Please try again.";
+        public const string ListingNotFound = "Listing not found.";
+        public const string ListingPaused = "Listing paused. It won't appear in Browse GPUs.";
+        public const string ListingResumed = "Listing is live again.";
+        public const string ListingDeleted = "Listing deleted.";
+        public const string ListingUpdated = "Listing updated.";
+        public const string CannotToggleStatus = "Only approved listings can be paused or resumed.";
+        public const string CannotDeleteWithHistory = "This listing has rental or review history and can't be deleted.";
+        public const string CannotDeleteWhileRented = "This listing is currently rented and can't be deleted.";
+        public const string CannotEditWhileRented = "This listing is currently rented and can't be edited.";
     }
 
     public static class Status
