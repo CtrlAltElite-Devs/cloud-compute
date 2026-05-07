@@ -27,6 +27,7 @@ public static class AuthConstants
         public const string DuplicateEmail = "An account with this email already exists.";
         public const string DuplicateUserName = "Username is already taken.";
         public const string DuplicateAccount = "An account with the same username or email already exists.";
+        public const string InitialCreditReason = "Initial signup credit";
     }
 
     public static class Validation

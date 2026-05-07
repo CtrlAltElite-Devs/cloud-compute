@@ -78,6 +78,14 @@ public class AuthService : IAuthService
         user.PasswordHash = _passwordHasher.HashPassword(user, model.Password);
 
         _dbContext.Users.Add(user);
+        _dbContext.CreditTransactions.Add(new CreditTransaction
+        {
+            UserId = user.Id,
+            Type = CreditTransactionType.Initial,
+            Amount = ApplicationUser.InitialCreditBalance,
+            BalanceAfter = user.CreditBalance,
+            Reason = AuthConstants.Messages.InitialCreditReason
+        });
 
         try
         {
