@@ -66,40 +66,74 @@ public class RentalService : IRentalService
 
     public async Task<RentalCreateResult> CreateAsync(Guid renterId, Guid gpuId, int durationHours)
     {
-        var renter = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == renterId);
-        if (renter is null)
-        {
-            return Fail("Account could not be found.");
-        }
-
-        var gpu = await _dbContext.Gpus
-            .Include(g => g.Owner)
-            .FirstOrDefaultAsync(g => g.Id == gpuId);
-
-        if (gpu is null)
-        {
-            return Fail("GPU listing could not be found.");
-        }
-
-        var validation = Validate(renterId, renter.CreditBalance, gpu, durationHours);
-        if (!validation.Succeeded)
-        {
-            return RentalCreateResult.FromServiceResult(validation);
-        }
-
         await using var tx = await _dbContext.Database.BeginTransactionAsync();
         try
         {
+            var renter = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == renterId);
+            if (renter is null)
+            {
+                return Fail("Account could not be found.");
+            }
+
+            var gpu = await _dbContext.Gpus
+                .AsNoTracking()
+                .Include(g => g.Owner)
+                .FirstOrDefaultAsync(g => g.Id == gpuId);
+
+            if (gpu is null)
+            {
+                return Fail("GPU listing could not be found.");
+            }
+
+            var validation = Validate(renterId, renter.CreditBalance, gpu, durationHours);
+            if (!validation.Succeeded)
+            {
+                return RentalCreateResult.FromServiceResult(validation);
+            }
+
+            var reservedCount = await _dbContext.Gpus
+                .Where(g => g.Id == gpuId && g.Status == GpuStatus.Available && g.OwnerId != renterId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(g => g.Status, GpuStatus.Rented));
+
+            if (reservedCount == 0)
+            {
+                return Fail("This GPU is no longer available.");
+            }
+
             var now = DateTime.UtcNow;
             var totalCost = gpu.PricePerHour * durationHours;
             var platformFee = decimal.Round(totalCost * PlatformFeeRate, 2, MidpointRounding.AwayFromZero);
             var ownerEarnings = totalCost - platformFee;
 
-            renter.CreditBalance -= totalCost;
-            if (gpu.Owner is not null)
+            var renterDebitCount = await _dbContext.Users
+                .Where(u => u.Id == renterId && u.CreditBalance >= totalCost)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.CreditBalance, u => u.CreditBalance - totalCost));
+
+            if (renterDebitCount == 0)
             {
-                gpu.Owner.CreditBalance += ownerEarnings;
+                return Fail("Your credit balance is not enough for this rental.");
             }
+
+            var renterBalanceAfter = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Id == renterId)
+                .Select(u => u.CreditBalance)
+                .FirstAsync();
+
+            var ownerCreditCount = await _dbContext.Users
+                .Where(u => u.Id == gpu.OwnerId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.CreditBalance, u => u.CreditBalance + ownerEarnings));
+
+            if (ownerCreditCount == 0)
+            {
+                return Fail("GPU owner account could not be found.");
+            }
+
+            var ownerBalanceAfter = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Id == gpu.OwnerId)
+                .Select(u => u.CreditBalance)
+                .FirstAsync();
 
             var rental = new Rental
             {
@@ -119,30 +153,26 @@ public class RentalService : IRentalService
             };
 
             _dbContext.Rentals.Add(rental);
-            gpu.Status = GpuStatus.Rented;
 
             _dbContext.CreditTransactions.Add(new CreditTransaction
             {
                 UserId = renter.Id,
                 Type = CreditTransactionType.RentalCharge,
                 Amount = -totalCost,
-                BalanceAfter = renter.CreditBalance,
+                BalanceAfter = renterBalanceAfter,
                 RelatedRentalId = rental.Id,
                 Reason = $"Rental charge for {gpu.Model}"
             });
 
-            if (gpu.Owner is not null)
+            _dbContext.CreditTransactions.Add(new CreditTransaction
             {
-                _dbContext.CreditTransactions.Add(new CreditTransaction
-                {
-                    UserId = gpu.Owner.Id,
-                    Type = CreditTransactionType.RentalEarning,
-                    Amount = ownerEarnings,
-                    BalanceAfter = gpu.Owner.CreditBalance,
-                    RelatedRentalId = rental.Id,
-                    Reason = $"Rental earning for {gpu.Model} after 10% platform fee"
-                });
-            }
+                UserId = gpu.OwnerId,
+                Type = CreditTransactionType.RentalEarning,
+                Amount = ownerEarnings,
+                BalanceAfter = ownerBalanceAfter,
+                RelatedRentalId = rental.Id,
+                Reason = $"Rental earning for {gpu.Model} after 10% platform fee"
+            });
 
             _notificationService.Create(
                 renter.Id,
