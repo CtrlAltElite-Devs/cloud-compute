@@ -173,6 +173,31 @@ public class GpuService : IGpuService
         return new MyListingsViewModel { Listings = listings };
     }
 
+    public async Task<RentedGpusViewModel> GetRentedAsync(Guid ownerId)
+    {
+        var rentals = await _dbContext.Rentals
+            .AsNoTracking()
+            .Where(r => r.OwnerId == ownerId && r.Status == RentalStatus.Active)
+            .OrderBy(r => r.EndTime)
+            .Select(r => new RentedGpuItemViewModel
+            {
+                RentalId = r.Id,
+                ReferenceNumber = r.ReferenceNumber,
+                GpuName = r.Gpu != null ? r.Gpu.Name : string.Empty,
+                GpuModel = r.Gpu != null ? r.Gpu.Model : string.Empty,
+                ImagePath = r.Gpu != null ? r.Gpu.ImagePath : null,
+                RenterDisplayName = r.Renter != null ? (r.Renter.FirstName + " " + r.Renter.LastName) : "Unknown renter",
+                StartTime = r.StartTime,
+                EndTime = r.EndTime,
+                DurationHours = r.DurationHours,
+                OwnerEarnings = r.OwnerEarnings,
+                TotalCost = r.TotalCost
+            })
+            .ToListAsync();
+
+        return new RentedGpusViewModel { Items = rentals };
+    }
+
     public async Task<ServiceResult> ToggleStatusAsync(Guid ownerId, Guid gpuId)
     {
         var gpu = await _dbContext.Gpus.FirstOrDefaultAsync(g => g.Id == gpuId);

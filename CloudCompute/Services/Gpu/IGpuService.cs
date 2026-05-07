@@ -13,6 +13,8 @@ public interface IGpuService
 
     Task<MyListingsViewModel> GetMineAsync(Guid ownerId);
 
+    Task<RentedGpusViewModel> GetRentedAsync(Guid ownerId);
+
     Task<ServiceResult> ToggleStatusAsync(Guid ownerId, Guid gpuId);
 
     Task<ServiceResult> DeleteAsync(Guid ownerId, Guid gpuId);
