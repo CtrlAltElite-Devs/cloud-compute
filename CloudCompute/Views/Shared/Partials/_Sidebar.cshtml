@@ -1,5 +1,6 @@
 @using System.Security.Claims
 @using CloudCompute.Constants
+@using CloudCompute.Models.Enums
 @functions {
     private static string ComputeInitials(string name)
     {
@@ -25,57 +26,117 @@
     var profilePicturePath = User.FindFirst(AuthConstants.Claims.ProfilePicturePath)?.Value;
     var hasProfilePicture = !string.IsNullOrWhiteSpace(profilePicturePath);
     var initials = ComputeInitials(fullName);
+    var isAdmin = User.IsInRole(nameof(UserRole.Admin));
 }
 
 <aside class="app-sidebar offcanvas-md offcanvas-start" id="appSidebar" tabindex="-1" aria-labelledby="appSidebarLabel">
     <div class="app-sidebar-header">
-        <a class="sidebar-brand playfair" asp-controller="Dashboard" asp-action="Index" id="appSidebarLabel">
-            <img class="brand-logo" src="~/images/logo.png" alt="" aria-hidden="true" asp-append-version="true" />
-            <span>CloudCompute</span>
-        </a>
+        @if (isAdmin)
+        {
+            <a class="sidebar-brand playfair" asp-controller="Admin" asp-action="Dashboard" id="appSidebarLabel">
+                <img class="brand-logo" src="~/images/logo.png" alt="" aria-hidden="true" asp-append-version="true" />
+                <span>CloudCompute</span>
+            </a>
+        }
+        else
+        {
+            <a class="sidebar-brand playfair" asp-controller="Dashboard" asp-action="Index" id="appSidebarLabel">
+                <img class="brand-logo" src="~/images/logo.png" alt="" aria-hidden="true" asp-append-version="true" />
+                <span>CloudCompute</span>
+            </a>
+        }
         <button class="btn-close d-md-none" type="button" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Close"></button>
     </div>
 
     <div class="app-sidebar-body">
-        <div class="sidebar-section-label">Platform</div>
-        <nav class="sidebar-nav" aria-label="Platform">
-            <a class="sidebar-link @ActiveIf("Dashboard", "Index")" asp-controller="Dashboard" asp-action="Index">
-                <i class="bi bi-grid-1x2" aria-hidden="true"></i>
-                <span>Dashboard</span>
-            </a>
-            <a class="sidebar-link @ActiveIf("Gpus", "Index")" asp-controller="Gpus" asp-action="Index">
-                <i class="bi bi-cpu" aria-hidden="true"></i>
-                <span>Browse GPUs</span>
-            </a>
-            <a class="sidebar-link @ActiveIf("Rentals", "Active")" asp-controller="Rentals" asp-action="Active">
-                <i class="bi bi-lightning-charge" aria-hidden="true"></i>
-                <span>Active Rentals</span>
-            </a>
-            <a class="sidebar-link @ActiveIf("Rentals", "History")" asp-controller="Rentals" asp-action="History">
-                <i class="bi bi-clock-history" aria-hidden="true"></i>
-                <span>History</span>
-            </a>
-            <a class="sidebar-link @ActiveIf("Notifications", "Index")" asp-controller="Notifications" asp-action="Index">
-                <i class="bi bi-bell" aria-hidden="true"></i>
-                <span>Notifications</span>
-            </a>
-            <a class="sidebar-link @ActiveIf("Profile", "Index")" asp-controller="Profile" asp-action="Index">
-                <i class="bi bi-person" aria-hidden="true"></i>
-                <span>Profile</span>
-            </a>
-        </nav>
+        @if (isAdmin)
+        {
+            <div class="sidebar-section-label">Operations</div>
+            <nav class="sidebar-nav" aria-label="Operations">
+                <a class="sidebar-link @ActiveIf("Admin", "Dashboard")" asp-controller="Admin" asp-action="Dashboard">
+                    <i class="bi bi-speedometer2" aria-hidden="true"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Admin", "Verifications")" asp-controller="Admin" asp-action="Verifications">
+                    <i class="bi bi-patch-check" aria-hidden="true"></i>
+                    <span>Verifications</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Admin", "Users")" asp-controller="Admin" asp-action="Users">
+                    <i class="bi bi-people" aria-hidden="true"></i>
+                    <span>Users</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Admin", "Listings")" asp-controller="Admin" asp-action="Listings">
+                    <i class="bi bi-card-list" aria-hidden="true"></i>
+                    <span>Listings</span>
+                </a>
+            </nav>
 
-        <div class="sidebar-section-label">Owner</div>
-        <nav class="sidebar-nav" aria-label="Owner">
-            <a class="sidebar-link @ActiveIf("Gpus", "Mine")" asp-controller="Gpus" asp-action="Mine">
-                <i class="bi bi-card-list" aria-hidden="true"></i>
-                <span>My Listings</span>
-            </a>
-            <a class="sidebar-link @ActiveIf("Gpus", "Create")" asp-controller="Gpus" asp-action="Create">
-                <i class="bi bi-plus-circle" aria-hidden="true"></i>
-                <span>List a GPU</span>
-            </a>
-        </nav>
+            <div class="sidebar-section-label">Finance</div>
+            <nav class="sidebar-nav" aria-label="Finance">
+                <a class="sidebar-link @ActiveIf("Admin", "Credits")" asp-controller="Admin" asp-action="Credits">
+                    <i class="bi bi-coin" aria-hidden="true"></i>
+                    <span>Credit ledger</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Admin", "GrantCredits")" asp-controller="Admin" asp-action="GrantCredits">
+                    <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                    <span>Grant credits</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Admin", "BulkGrantCredits")" asp-controller="Admin" asp-action="BulkGrantCredits">
+                    <i class="bi bi-people-fill" aria-hidden="true"></i>
+                    <span>Bulk grant</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Admin", "RevokeCredits")" asp-controller="Admin" asp-action="RevokeCredits">
+                    <i class="bi bi-dash-circle" aria-hidden="true"></i>
+                    <span>Revoke credits</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Admin", "Analytics")" asp-controller="Admin" asp-action="Analytics">
+                    <i class="bi bi-graph-up" aria-hidden="true"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+        }
+        else
+        {
+            <div class="sidebar-section-label">Platform</div>
+            <nav class="sidebar-nav" aria-label="Platform">
+                <a class="sidebar-link @ActiveIf("Dashboard", "Index")" asp-controller="Dashboard" asp-action="Index">
+                    <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Gpus", "Index")" asp-controller="Gpus" asp-action="Index">
+                    <i class="bi bi-cpu" aria-hidden="true"></i>
+                    <span>Browse GPUs</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Rentals", "Active")" asp-controller="Rentals" asp-action="Active">
+                    <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+                    <span>Active Rentals</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Rentals", "History")" asp-controller="Rentals" asp-action="History">
+                    <i class="bi bi-clock-history" aria-hidden="true"></i>
+                    <span>History</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Notifications", "Index")" asp-controller="Notifications" asp-action="Index">
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                    <span>Notifications</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Profile", "Index")" asp-controller="Profile" asp-action="Index">
+                    <i class="bi bi-person" aria-hidden="true"></i>
+                    <span>Profile</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-section-label">Owner</div>
+            <nav class="sidebar-nav" aria-label="Owner">
+                <a class="sidebar-link @ActiveIf("Gpus", "Mine")" asp-controller="Gpus" asp-action="Mine">
+                    <i class="bi bi-card-list" aria-hidden="true"></i>
+                    <span>My Listings</span>
+                </a>
+                <a class="sidebar-link @ActiveIf("Gpus", "Create")" asp-controller="Gpus" asp-action="Create">
+                    <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                    <span>List a GPU</span>
+                </a>
+            </nav>
+        }
     </div>
 
     <div class="app-sidebar-user">

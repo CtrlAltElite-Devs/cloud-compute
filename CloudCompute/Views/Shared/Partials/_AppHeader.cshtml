@@ -1,12 +1,19 @@
+@using CloudCompute.Models.Enums
+@{
+    var isAdmin = User.IsInRole(nameof(UserRole.Admin));
+}
 <header class="app-header" role="banner">
-    <div class="app-header-search d-none d-md-flex">
-        <input
-            type="search"
-            class="form-control app-header-search-input"
-            placeholder="Search GPUs, owners, rentals..."
-            aria-label="Search GPUs, owners, rentals"
-            autocomplete="off" />
-    </div>
+    @if (!isAdmin)
+    {
+        <div class="app-header-search d-none d-md-flex">
+            <input
+                type="search"
+                class="form-control app-header-search-input"
+                placeholder="Search GPUs, owners, rentals..."
+                aria-label="Search GPUs, owners, rentals"
+                autocomplete="off" />
+        </div>
+    }
 
     <div class="app-header-actions">
         <div class="dropdown">
@@ -33,7 +40,10 @@
             </ul>
         </div>
 
-        @await Component.InvokeAsync("NotificationBell")
+        @if (!isAdmin)
+        {
+            @await Component.InvokeAsync("NotificationBell")
+        }
 
         <button
             type="button"

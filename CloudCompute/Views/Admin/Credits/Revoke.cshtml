@@ -2,86 +2,86 @@
 @using CloudCompute.ViewModels.Admin
 @model AdminRevokeCreditViewModel
 @{
+    Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
     ViewData["Title"] = "Admin · Revoke credits";
     var hasPreselected = Model.UserId.HasValue && !string.IsNullOrWhiteSpace(Model.UserDisplay);
     var initialBalanceAttr = Model.CurrentBalance?.ToString(CultureInfo.InvariantCulture) ?? "";
     var initialBalanceDisplay = Model.CurrentBalance?.ToString("N2") ?? "—";
 }
 
-<section class="py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-7">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <div>
-                        <p class="text-uppercase text-muted small fw-semibold mb-1">Admin · Credits</p>
-                        <h1 class="h3 mb-0">Revoke credits</h1>
+<section class="dashboard-page">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="dashboard-hero d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-4">
+                <div>
+                    <p class="text-uppercase text-muted small fw-semibold mb-1">Admin · Credits</p>
+                    <h1 class="dashboard-title mb-1">Revoke credits</h1>
+                    <p class="text-muted mb-0">Deduct credits from a single member account.</p>
+                </div>
+                <a class="btn btn-outline-secondary btn-sm" asp-action="Credits">Back to ledger</a>
+            </div>
+
+            <partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
+
+            <form asp-action="RevokeCredits" method="post" class="dashboard-panel"
+                  data-search-url="@Url.Action("SearchMembers", "Admin")">
+                <input type="hidden" asp-for="UserId" />
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold mb-2">Choose a user</label>
+
+                    <div id="user-picker" class="@(hasPreselected ? "d-none" : "")">
+                        <input type="search" id="user-search" class="form-control mb-2"
+                               placeholder="Search by name, username, or email" autocomplete="off" />
+                        <div class="border rounded-3" style="max-height: 260px; overflow-y: auto;">
+                            <div id="user-results" class="list-group list-group-flush"></div>
+                            <div id="user-status" class="p-3 text-center text-muted small">Start typing to search.</div>
+                        </div>
+                        <div class="form-text">Press Enter to pick the first match. Showing up to 20 results.</div>
                     </div>
-                    <a class="btn btn-outline-secondary btn-sm" asp-action="Credits">Back to ledger</a>
+
+                    <div id="user-selected" class="@(hasPreselected ? "" : "d-none")">
+                        <div class="d-flex align-items-center justify-content-between border rounded-3 p-3">
+                            <div>
+                                <div class="text-muted small text-uppercase">Selected user</div>
+                                <strong id="selected-display">@Model.UserDisplay</strong>
+                                <div class="small text-muted mt-1">
+                                    Current balance:
+                                    <span id="current-balance" class="fw-semibold text-body" data-balance="@initialBalanceAttr">@initialBalanceDisplay</span>
+                                </div>
+                            </div>
+                            <button type="button" id="change-user" class="btn btn-sm btn-outline-secondary">Change</button>
+                        </div>
+                    </div>
+
+                    <span asp-validation-for="UserId" class="text-danger small d-block mt-1"></span>
                 </div>
 
-                <partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
-
-                <form asp-action="RevokeCredits" method="post" class="border rounded-3 p-4"
-                      data-search-url="@Url.Action("SearchMembers", "Admin")">
-                    <input type="hidden" asp-for="UserId" />
-
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold mb-2">Choose a user</label>
-
-                        <div id="user-picker" class="@(hasPreselected ? "d-none" : "")">
-                            <input type="search" id="user-search" class="form-control mb-2"
-                                   placeholder="Search by name, username, or email" autocomplete="off" />
-                            <div class="border rounded-3" style="max-height: 260px; overflow-y: auto;">
-                                <div id="user-results" class="list-group list-group-flush"></div>
-                                <div id="user-status" class="p-3 text-center text-muted small">Start typing to search.</div>
-                            </div>
-                            <div class="form-text">Press Enter to pick the first match. Showing up to 20 results.</div>
+                <div id="grant-fields" class="@(hasPreselected ? "" : "d-none")">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" asp-for="Amount">Amount to deduct</label>
+                        <input class="form-control" asp-for="Amount" type="number" step="0.01" min="1" max="100000" />
+                        <div class="form-text">
+                            New balance after revoke:
+                            <span id="new-balance" class="fw-semibold text-body">—</span>
                         </div>
-
-                        <div id="user-selected" class="@(hasPreselected ? "" : "d-none")">
-                            <div class="d-flex align-items-center justify-content-between border rounded-3 p-3">
-                                <div>
-                                    <div class="text-muted small text-uppercase">Selected user</div>
-                                    <strong id="selected-display">@Model.UserDisplay</strong>
-                                    <div class="small text-muted mt-1">
-                                        Current balance:
-                                        <span id="current-balance" class="fw-semibold text-body" data-balance="@initialBalanceAttr">@initialBalanceDisplay</span>
-                                    </div>
-                                </div>
-                                <button type="button" id="change-user" class="btn btn-sm btn-outline-secondary">Change</button>
-                            </div>
+                        <div id="insufficient-warning" class="text-danger small mt-1 d-none">
+                            Amount exceeds the user's current balance.
                         </div>
-
-                        <span asp-validation-for="UserId" class="text-danger small d-block mt-1"></span>
+                        <span asp-validation-for="Amount" class="text-danger small"></span>
                     </div>
-
-                    <div id="grant-fields" class="@(hasPreselected ? "" : "d-none")">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold" asp-for="Amount">Amount to deduct</label>
-                            <input class="form-control" asp-for="Amount" type="number" step="0.01" min="1" max="100000" />
-                            <div class="form-text">
-                                New balance after revoke:
-                                <span id="new-balance" class="fw-semibold text-body">—</span>
-                            </div>
-                            <div id="insufficient-warning" class="text-danger small mt-1 d-none">
-                                Amount exceeds the user's current balance.
-                            </div>
-                            <span asp-validation-for="Amount" class="text-danger small"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold" asp-for="Reason">Reason</label>
-                            <textarea class="form-control" asp-for="Reason" rows="3" placeholder="Why are credits being revoked?"></textarea>
-                            <span asp-validation-for="Reason" class="text-danger small"></span>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" asp-for="Reason">Reason</label>
+                        <textarea class="form-control" asp-for="Reason" rows="3" placeholder="Why are credits being revoked?"></textarea>
+                        <span asp-validation-for="Reason" class="text-danger small"></span>
                     </div>
+                </div>
 
-                    <div class="d-flex justify-content-end gap-2">
-                        <a class="btn btn-link" asp-action="Credits">Cancel</a>
-                        <button type="submit" id="submit-btn" class="btn btn-danger @(hasPreselected ? "" : "d-none")">Revoke credits</button>
-                    </div>
-                </form>
-            </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a class="btn btn-link" asp-action="Credits">Cancel</a>
+                    <button type="submit" id="submit-btn" class="btn btn-danger @(hasPreselected ? "" : "d-none")">Revoke credits</button>
+                </div>
+            </form>
         </div>
     </div>
 </section>
