@@ -3,6 +3,7 @@ using CloudCompute.Data;
 using CloudCompute.Models;
 using CloudCompute.Services.Admin;
 using CloudCompute.Services.Auth;
+using CloudCompute.Services.Dashboard;
 using CloudCompute.Services.Gpu;
 using CloudCompute.Services.Notifications;
 using CloudCompute.Services.Profile;
@@ -91,6 +92,7 @@ public static class ServiceExtensions
     private static void ConfigureApplicationServices(IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IVerificationService, VerificationService>();
         services.AddScoped<IGpuService, GpuService>();

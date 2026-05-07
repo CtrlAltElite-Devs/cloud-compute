@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Member dashboard overview backed by `IDashboardService` / `DashboardService`, showing credit balance, active rental count, current-month spend, lifetime compute hours, active rental previews, and recent notification previews
+- Dashboard-specific view models and `DashboardConstants` preview limits so the page can integrate with rentals, GPU browsing, and notifications without depending on those modules' UI models
 - `RentalExpiryNotifier` background hosted service that polls every 2 minutes for active rentals ending within 1 hour and stages a `RentalExpiring` notification linking the renter to `/rentals/active`; an `ExpiryNotifiedAt` stamp on `Rental` (added via the `AddRentalExpiryNotifiedAt` EF migration) makes the dispatch idempotent so no rental is warned twice
 - In-app notifications page at `/notifications` showing the signed-in user's most recent 100 notifications as cards with type-specific icons, status badges, relative timestamps, an "Open" action that marks-as-read and redirects to the notification's link, per-row mark-as-read, and a header-level "Mark all as read" action
 - Notifications bell in the authenticated app header with an unread-count badge that links to `/notifications`; rendered via the new `NotificationBell` view component so the count refreshes on every authenticated page load
@@ -40,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
 
 ### Changed
+- Replaced the placeholder member dashboard with a responsive card-based overview UI that preserves the authenticated app shell theme and links out to Browse GPUs, Active Rentals, and Notifications
 - Signup now writes an `Initial` `CreditTransaction` for the 500-credit welcome balance so every user's ledger has an opening row that matches `ApplicationUser.CreditBalance`; the user insert and ledger row commit in the same `SaveChangesAsync` call
 - Replaced the static notifications bell `<button>` in `_AppHeader.cshtml` with the new `NotificationBell` view component, and added a Notifications link in the authenticated sidebar Platform nav between History and Profile
 - Split `ApplicationUser.FullName` into separate `FirstName` and `LastName` columns (with `FullName` retained as a `[NotMapped]` computed property); EF migration backfills existing rows

@@ -1,46 +1,141 @@
-@using System.Security.Claims
-@using CloudCompute.Constants
+@model DashboardViewModel
 @{
     Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
     ViewData["Title"] = "Dashboard";
-
-    var fullName = User.FindFirst(AuthConstants.Claims.FullName)?.Value
-                   ?? User.Identity?.Name
-                   ?? "";
 }
 
-<section class="mb-4">
-    <p class="text-uppercase text-muted small fw-semibold mb-1">Dashboard</p>
-    <h1 class="h3 mb-1">Welcome back@(string.IsNullOrWhiteSpace(fullName) ? "" : $", {fullName}").</h1>
-    <p class="text-muted mb-0">Here's a quick look at your marketplace activity. Detailed widgets are coming soon.</p>
-</section>
+<section class="dashboard-page">
+    <div class="dashboard-hero d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Dashboard</p>
+            <h1 class="dashboard-title mb-1">Welcome, @Model.DisplayName</h1>
+            <p class="text-muted mb-0">Here's what's happening on your compute grid today.</p>
+        </div>
+        <a class="btn btn-primary dashboard-primary-action" asp-controller="Gpus" asp-action="Index">
+            Browse GPUs
+        </a>
+    </div>
 
-<div class="row g-3">
-    <div class="col-12 col-md-4">
-        <div class="border rounded-3 p-3 h-100">
-            <div class="d-flex align-items-center gap-2 text-muted small fw-semibold mb-2">
-                <i class="bi bi-lightning-charge" aria-hidden="true"></i>
-                <span class="text-uppercase">Active rentals</span>
-            </div>
-            <p class="h4 mb-0">&mdash;</p>
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="dashboard-stat-card">
+                <div class="dashboard-stat-label">Credit Balance</div>
+                <div class="dashboard-stat-value">@Model.CreditBalance.ToString("N2")</div>
+                <div class="dashboard-stat-caption">credits available</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="dashboard-stat-card">
+                <div class="dashboard-stat-label">Active Rentals</div>
+                <div class="dashboard-stat-value">@Model.ActiveRentalCount</div>
+                <div class="dashboard-stat-caption">GPU@(Model.ActiveRentalCount == 1 ? "" : "s") running</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="dashboard-stat-card">
+                <div class="dashboard-stat-label">This Month Spend</div>
+                <div class="dashboard-stat-value">@Model.CurrentMonthSpend.ToString("N2")</div>
+                <div class="dashboard-stat-caption">current spend</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="dashboard-stat-card">
+                <div class="dashboard-stat-label">Total Hours</div>
+                <div class="dashboard-stat-value">@Model.LifetimeComputeHours</div>
+                <div class="dashboard-stat-caption">lifetime compute</div>
+            </article>
         </div>
     </div>
-    <div class="col-12 col-md-4">
-        <div class="border rounded-3 p-3 h-100">
-            <div class="d-flex align-items-center gap-2 text-muted small fw-semibold mb-2">
-                <i class="bi bi-card-list" aria-hidden="true"></i>
-                <span class="text-uppercase">Your listings</span>
-            </div>
-            <p class="h4 mb-0">&mdash;</p>
+
+    <div class="row g-3 align-items-stretch">
+        <div class="col-12 col-xl-8">
+            <section class="dashboard-panel h-100" aria-labelledby="dashboardActiveRentalsTitle">
+                <div class="dashboard-panel-header">
+                    <h2 class="dashboard-panel-title" id="dashboardActiveRentalsTitle">
+                        <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+                        Active Rentals
+                    </h2>
+                    <a class="dashboard-panel-link" asp-controller="Rentals" asp-action="Active">View All <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                </div>
+
+                @if (Model.ActiveRentals.Count == 0)
+                {
+                    <div class="dashboard-empty-state">
+                        <i class="bi bi-cpu" aria-hidden="true"></i>
+                        <h3>No active rentals yet</h3>
+                        <p>Browse the catalog when you're ready to rent compute power.</p>
+                        <a class="btn btn-sm btn-outline-primary" asp-controller="Gpus" asp-action="Index">Browse GPUs</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="dashboard-rental-list">
+                        @foreach (var rental in Model.ActiveRentals)
+                        {
+                            <article class="dashboard-rental-card">
+                                @if (!string.IsNullOrWhiteSpace(rental.ImagePath))
+                                {
+                                    <img class="dashboard-rental-image" src="@rental.ImagePath" alt="" aria-hidden="true" />
+                                }
+                                else
+                                {
+                                    <div class="dashboard-rental-image dashboard-rental-image-fallback" aria-hidden="true">
+                                        <i class="bi bi-gpu-card"></i>
+                                    </div>
+                                }
+
+                                <div class="dashboard-rental-body min-width-0">
+                                    <div class="dashboard-rental-name">@rental.GpuModel</div>
+                                    <div class="dashboard-rental-owner">@rental.GpuName by @rental.OwnerName</div>
+                                </div>
+
+                                <div class="dashboard-rental-meta">
+                                    <span class="dashboard-rental-meta-label">Time Left</span>
+                                    <strong>@rental.TimeRemainingDisplay</strong>
+                                </div>
+
+                                <span class="dashboard-status-pill">Running</span>
+                            </article>
+                        }
+                    </div>
+                }
+            </section>
+        </div>
+
+        <div class="col-12 col-xl-4">
+            <section class="dashboard-panel h-100" aria-labelledby="dashboardNotificationsTitle">
+                <div class="dashboard-panel-header">
+                    <h2 class="dashboard-panel-title" id="dashboardNotificationsTitle">
+                        <i class="bi bi-bell" aria-hidden="true"></i>
+                        Notifications
+                    </h2>
+                    <a class="dashboard-panel-link" asp-controller="Notifications" asp-action="Index">View All <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                </div>
+
+                @if (Model.Notifications.Count == 0)
+                {
+                    <div class="dashboard-empty-state dashboard-empty-state-compact">
+                        <i class="bi bi-bell-slash" aria-hidden="true"></i>
+                        <h3>No notifications</h3>
+                        <p>Updates about rentals and listings will appear here.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="dashboard-notification-list">
+                        @foreach (var notification in Model.Notifications)
+                        {
+                            <article class="dashboard-notification-card @(notification.IsRead ? "" : "dashboard-notification-unread")">
+                                <i class="bi @notification.IconCssClass" aria-hidden="true"></i>
+                                <div class="min-width-0">
+                                    <div class="dashboard-notification-message">@notification.Message</div>
+                                    <div class="dashboard-notification-time">@notification.RelativeTime</div>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+            </section>
         </div>
     </div>
-    <div class="col-12 col-md-4">
-        <div class="border rounded-3 p-3 h-100">
-            <div class="d-flex align-items-center gap-2 text-muted small fw-semibold mb-2">
-                <i class="bi bi-coin" aria-hidden="true"></i>
-                <span class="text-uppercase">Credit balance</span>
-            </div>
-            <p class="h4 mb-0">&mdash;</p>
-        </div>
-    </div>
-</div>
+</section>
