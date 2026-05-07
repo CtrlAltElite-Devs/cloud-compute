@@ -177,6 +177,31 @@ public class ProfileService : IProfileService
         return ServiceResult.Success();
     }
 
+    public async Task<ServiceResult> RemoveAvatarAsync(Guid userId)
+    {
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null)
+        {
+            return ServiceResult.Failed(CreateModelError(AuthConstants.Profile.UserNotFound));
+        }
+
+        if (string.IsNullOrWhiteSpace(user.ProfilePicturePath))
+        {
+            return ServiceResult.Success();
+        }
+
+        var previousPath = user.ProfilePicturePath;
+        user.ProfilePicturePath = null;
+
+        await _dbContext.SaveChangesAsync();
+
+        TryDeletePhysicalFile(MapToPhysicalPath(previousPath));
+
+        await RefreshSignInAsync(user);
+
+        return ServiceResult.Success();
+    }
+
     public async Task<ServiceResult> DeleteAccountAsync(Guid userId, DeleteAccountViewModel model)
     {
         var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);

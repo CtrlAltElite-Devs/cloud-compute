@@ -11,5 +11,7 @@ public interface IProfileService
 
     Task<ServiceResult> UpdateAvatarAsync(Guid userId, IFormFile? file);
 
+    Task<ServiceResult> RemoveAvatarAsync(Guid userId);
+
     Task<ServiceResult> DeleteAccountAsync(Guid userId, DeleteAccountViewModel model);
 }
