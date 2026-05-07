@@ -4,6 +4,7 @@ using CloudCompute.Models;
 using CloudCompute.Services.Admin;
 using CloudCompute.Services.Auth;
 using CloudCompute.Services.Gpu;
+using CloudCompute.Services.Notifications;
 using CloudCompute.Services.Profile;
 using CloudCompute.Services.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -98,6 +99,7 @@ public static class ServiceExtensions
         services.AddScoped<IAdminCreditService, AdminCreditService>();
         services.AddScoped<IAdminListingService, AdminListingService>();
         services.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
+        services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<DevelopmentAdminSeeder>();
         services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
     }
