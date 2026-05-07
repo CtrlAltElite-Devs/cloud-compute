@@ -1,11 +1,12 @@
 using System.Security.Claims;
 using CloudCompute.Services.Dashboard;
+using CloudCompute.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudCompute.Controllers;
 
-[Authorize]
+[Authorize(Roles = nameof(UserRole.Member))]
 public class DashboardController : Controller
 {
     private readonly IDashboardService _dashboardService;

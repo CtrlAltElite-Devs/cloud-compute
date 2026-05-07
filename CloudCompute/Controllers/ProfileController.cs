@@ -2,6 +2,7 @@ using System.Security.Claims;
 using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models;
+using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
 using CloudCompute.Services.Profile;
 using CloudCompute.ViewModels.Profile;
@@ -11,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CloudCompute.Controllers;
 
-[Authorize]
+[Authorize(Roles = nameof(UserRole.Member))]
 public class ProfileController : Controller
 {
     private const string StatusMessageKey = "ProfileStatusMessage";

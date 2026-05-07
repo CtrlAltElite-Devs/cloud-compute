@@ -5,6 +5,10 @@ namespace CloudCompute.Services.Gpu;
 
 public interface IGpuService
 {
+    Task<GpuCatalogViewModel> GetCatalogAsync(Guid currentUserId, string? search);
+
+    Task<GpuDetailViewModel?> GetDetailAsync(Guid currentUserId, Guid gpuId);
+
     Task<ServiceResult> CreateAsync(Guid ownerId, GpuCreateViewModel model);
 
     Task<MyListingsViewModel> GetMineAsync(Guid ownerId);

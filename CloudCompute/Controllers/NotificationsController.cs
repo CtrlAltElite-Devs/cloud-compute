@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using CloudCompute.Constants;
+using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
 using CloudCompute.Services.Notifications;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CloudCompute.Controllers;
 
-[Authorize]
+[Authorize(Roles = nameof(UserRole.Member))]
 public class NotificationsController : Controller
 {
     private readonly INotificationService _notificationService;

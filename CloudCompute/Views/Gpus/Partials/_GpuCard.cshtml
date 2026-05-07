@@ -1,0 +1,62 @@
+@model GpuCatalogItemViewModel
+
+<article class="profile-card h-100 d-flex flex-column p-0 overflow-hidden">
+    @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+    {
+        <img src="@Model.ImagePath" alt="@Model.Model" style="height:180px;object-fit:cover;" class="w-100" />
+    }
+    else
+    {
+        <div class="d-flex align-items-center justify-content-center bg-body-secondary text-muted" style="height:180px;">
+            <i class="bi bi-cpu fs-1" aria-hidden="true"></i>
+        </div>
+    }
+
+    <div class="p-3 d-flex flex-column gap-3 flex-grow-1">
+        <div>
+            <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+                <h2 class="h5 mb-0">@Model.Model</h2>
+                @if (Model.IsOwnedByCurrentUser)
+                {
+                    <span class="badge text-bg-primary">Your listing</span>
+                }
+                else
+                {
+                    <span class="badge text-bg-success">Available</span>
+                }
+            </div>
+            <div class="text-muted small">@Model.Name</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <span class="badge text-bg-secondary">@Model.VramGb GB VRAM</span>
+            <span class="badge text-bg-secondary">@Model.CudaCores.ToString("N0") CUDA cores</span>
+            <span class="badge text-bg-secondary">@Model.MinRentalHours hr min</span>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between gap-3 mt-auto">
+            <div class="min-width-0">
+                <div class="small text-muted text-truncate">Owner: @Model.OwnerDisplayName</div>
+                <div class="small">
+                    <i class="bi bi-star-fill text-warning" aria-hidden="true"></i>
+                    @if (Model.ReviewCount > 0 || Model.AverageRating > 0)
+                    {
+                        <span>@Model.AverageRating.ToString("0.0") (@Model.ReviewCount)</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No reviews</span>
+                    }
+                </div>
+            </div>
+            <div class="text-end flex-shrink-0">
+                <div class="fw-semibold">@Model.PricePerHour.ToString("N2")</div>
+                <div class="small text-muted">credits/hr</div>
+            </div>
+        </div>
+
+        <a class="btn btn-info w-100" asp-controller="Gpus" asp-action="Detail" asp-route-id="@Model.Id">
+            View
+        </a>
+    </div>
+</article>

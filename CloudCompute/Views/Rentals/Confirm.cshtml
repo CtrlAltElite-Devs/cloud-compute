@@ -1,0 +1,89 @@
+@model RentalConfirmViewModel
+@{
+    Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
+    ViewData["Title"] = "Confirm Rental";
+}
+
+<div class="mb-4">
+    <a class="btn btn-sm btn-outline-secondary" asp-controller="Gpus" asp-action="Detail" asp-route-id="@Model.GpuId">
+        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> GPU detail
+    </a>
+</div>
+
+<section class="mb-4">
+    <p class="text-uppercase text-muted small fw-semibold mb-1">Rental</p>
+    <h1 class="h3 mb-1">Confirm rental</h1>
+    <p class="text-muted mb-0">Review cost and credit balance before starting this rental.</p>
+</section>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-7">
+        <form asp-action="Confirm" asp-route-gpuId="@Model.GpuId" method="post" class="profile-card">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
+
+            <input type="hidden" asp-for="GpuId" />
+
+            <div class="d-flex gap-3 mb-4">
+                @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+                {
+                    <img src="@Model.ImagePath" alt="@Model.GpuModel" class="rounded-3" style="width:128px;height:96px;object-fit:cover;" />
+                }
+                else
+                {
+                    <div class="rounded-3 d-flex align-items-center justify-content-center bg-body-secondary text-muted" style="width:128px;height:96px;">
+                        <i class="bi bi-cpu fs-2" aria-hidden="true"></i>
+                    </div>
+                }
+                <div>
+                    <h2 class="h5 mb-1">@Model.GpuModel</h2>
+                    <div class="text-muted small">@Model.GpuName</div>
+                    <div class="text-muted small">Owner: @Model.OwnerDisplayName</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="DurationHours" class="form-label">Duration in hours</label>
+                <input asp-for="DurationHours" class="form-control" min="@Model.MinRentalHours" max="168" />
+                <div class="form-text">Minimum @Model.MinRentalHours hour(s), maximum 168 hours.</div>
+                <span asp-validation-for="DurationHours" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-info">
+                <i class="bi bi-check2-circle me-1" aria-hidden="true"></i> Confirm rental
+            </button>
+        </form>
+    </div>
+
+    <div class="col-12 col-lg-5">
+        <aside class="profile-card">
+            <h2 class="h5 mb-3">Cost summary</h2>
+            <dl class="row mb-0">
+                <dt class="col-7 text-muted fw-normal">Price per hour</dt>
+                <dd class="col-5 text-end">@Model.PricePerHour.ToString("N2")</dd>
+
+                <dt class="col-7 text-muted fw-normal">Duration</dt>
+                <dd class="col-5 text-end">@Model.DurationHours hour(s)</dd>
+
+                <dt class="col-7 text-muted fw-normal">Starts</dt>
+                <dd class="col-5 text-end">@Model.StartTime.ToLocalTime().ToString("MMM d, h:mm tt")</dd>
+
+                <dt class="col-7 text-muted fw-normal">Ends</dt>
+                <dd class="col-5 text-end">@Model.EndTime.ToLocalTime().ToString("MMM d, h:mm tt")</dd>
+
+                <dt class="col-7 text-muted fw-normal">Current balance</dt>
+                <dd class="col-5 text-end">@Model.CurrentBalance.ToString("N2")</dd>
+
+                <dt class="col-7 text-muted fw-normal">Total cost</dt>
+                <dd class="col-5 text-end">@Model.TotalCost.ToString("N2")</dd>
+
+                <dt class="col-7 border-top pt-3">Balance after rental</dt>
+                <dd class="col-5 text-end border-top pt-3 @(Model.BalanceAfter < 0 ? "text-danger" : "")">@Model.BalanceAfter.ToString("N2")</dd>
+            </dl>
+        </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="~/Views/Shared/Partials/_ValidationScriptsPartial.cshtml" />
+}

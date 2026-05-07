@@ -1,18 +1,69 @@
+@using CloudCompute.Constants
+@model ActiveRentalsViewModel
 @{
     Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
     ViewData["Title"] = "Active Rentals";
+
+    var statusMessage = TempData[GpuConstants.Status.TempDataMessageKey] as string;
+    var statusType = TempData[GpuConstants.Status.TempDataTypeKey] as string;
+    var alertClass = statusType == "danger" ? "alert-danger" : "alert-success";
 }
 
 <section class="mb-4">
     <p class="text-uppercase text-muted small fw-semibold mb-1">Platform</p>
     <h1 class="h3 mb-1">Active Rentals</h1>
-    <p class="text-muted mb-0">Coming soon.</p>
+    <p class="text-muted mb-0">Track your in-progress GPU rentals.</p>
 </section>
 
-<div class="border rounded-3 p-4">
-    <p class="mb-0">
-        Track your in-progress rentals. You'll see remaining hours within the 1&ndash;168 hour
-        window, total cost, and an option to terminate early with a prorated refund of unused time
-        back to your credit balance.
-    </p>
-</div>
+@if (!string.IsNullOrWhiteSpace(statusMessage))
+{
+    <div class="alert @alertClass" role="alert">@statusMessage</div>
+}
+
+@if (Model.Items.Count == 0)
+{
+    <div class="profile-card text-center py-5">
+        <i class="bi bi-lightning-charge fs-1 text-muted" aria-hidden="true"></i>
+        <h2 class="h5 mt-3 mb-2">No active rentals</h2>
+        <p class="text-muted mb-3">Rent an available GPU to start a compute session.</p>
+        <a class="btn btn-info" asp-controller="Gpus" asp-action="Index">Browse GPUs</a>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-3">
+        @foreach (var item in Model.Items)
+        {
+            <article class="profile-card">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    @if (!string.IsNullOrWhiteSpace(item.ImagePath))
+                    {
+                        <img src="@item.ImagePath" alt="@item.GpuModel" class="rounded-3" style="width:104px;height:78px;object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded-3 d-flex align-items-center justify-content-center bg-body-secondary text-muted" style="width:104px;height:78px;">
+                            <i class="bi bi-cpu fs-3" aria-hidden="true"></i>
+                        </div>
+                    }
+
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <h2 class="h6 mb-0">@item.GpuModel</h2>
+                            <span class="badge text-bg-success">Active</span>
+                        </div>
+                        <div class="text-muted small">@item.GpuName · Owner: @item.OwnerDisplayName</div>
+                        <div class="text-muted small mt-1">
+                            @item.ReferenceNumber · @item.DurationHours hour(s) · @item.TotalCost.ToString("N2") credits
+                        </div>
+                    </div>
+
+                    <div class="text-end small flex-shrink-0">
+                        <div class="fw-semibold">Ends @item.EndTime.ToLocalTime().ToString("MMM d, h:mm tt")</div>
+                        <div class="text-muted">Started @item.StartTime.ToLocalTime().ToString("MMM d, h:mm tt")</div>
+                    </div>
+                </div>
+            </article>
+        }
+    </div>
+}

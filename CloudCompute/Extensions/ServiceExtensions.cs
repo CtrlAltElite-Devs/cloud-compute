@@ -7,6 +7,7 @@ using CloudCompute.Services.Dashboard;
 using CloudCompute.Services.Gpu;
 using CloudCompute.Services.Notifications;
 using CloudCompute.Services.Profile;
+using CloudCompute.Services.Rentals;
 using CloudCompute.Services.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -96,6 +97,7 @@ public static class ServiceExtensions
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IVerificationService, VerificationService>();
         services.AddScoped<IGpuService, GpuService>();
+        services.AddScoped<IRentalService, RentalService>();
         services.AddScoped<IAdminDashboardService, AdminDashboardService>();
         services.AddScoped<IAdminUserService, AdminUserService>();
         services.AddScoped<IAdminCreditService, AdminCreditService>();
