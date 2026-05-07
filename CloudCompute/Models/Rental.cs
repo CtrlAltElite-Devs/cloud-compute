@@ -43,6 +43,8 @@ public class Rental
 
     public bool TerminatedEarly { get; set; }
 
+    public DateTime? ExpiryNotifiedAt { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ApplicationUser? Renter { get; set; }

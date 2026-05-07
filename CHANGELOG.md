@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- `RentalExpiryNotifier` background hosted service that polls every 2 minutes for active rentals ending within 1 hour and stages a `RentalExpiring` notification linking the renter to `/rentals/active`; an `ExpiryNotifiedAt` stamp on `Rental` (added via the `AddRentalExpiryNotifiedAt` EF migration) makes the dispatch idempotent so no rental is warned twice
 - In-app notifications page at `/notifications` showing the signed-in user's most recent 100 notifications as cards with type-specific icons, status badges, relative timestamps, an "Open" action that marks-as-read and redirects to the notification's link, per-row mark-as-read, and a header-level "Mark all as read" action
 - Notifications bell in the authenticated app header with an unread-count badge that links to `/notifications`; rendered via the new `NotificationBell` view component so the count refreshes on every authenticated page load
 - Automatic notification creation on admin approval/rejection of a GPU listing (linking the owner to `/gpus/mine`) and on admin credit grants — single or bulk — linking the recipient to `/dashboard`; each notification is staged before the existing `SaveChangesAsync`/transaction so it commits atomically with the source action
