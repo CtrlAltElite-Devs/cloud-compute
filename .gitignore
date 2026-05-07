@@ -63,6 +63,12 @@ artifacts/
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
+# Runtime uploads
+CloudCompute/wwwroot/uploads/**
+!CloudCompute/wwwroot/uploads/
+!CloudCompute/wwwroot/uploads/**/
+!CloudCompute/wwwroot/uploads/**/.gitkeep
+
 # StyleCop
 StyleCopReport.xml
 
