@@ -22,15 +22,16 @@
             @foreach (var status in Enum.GetValues<GpuStatus>())
             {
                 var count = Model.CountsByStatus.TryGetValue(status, out var n) ? n : 0;
-                var isActive = Model.Filter.Status == status;
+                var isActive = !Model.Filter.All && Model.Filter.Status == status;
                 <a class="btn btn-sm @(isActive ? "btn-primary" : "btn-outline-primary")"
                    asp-action="Listings"
                    asp-route-Status="@status">
                     @status <span class="badge @(isActive ? "bg-light text-primary" : "bg-secondary")">@count</span>
                 </a>
             }
-            <a class="btn btn-sm @(Model.Filter.Status is null ? "btn-secondary" : "btn-outline-secondary")"
-               asp-action="Listings">All</a>
+            <a class="btn btn-sm @(Model.Filter.All ? "btn-secondary" : "btn-outline-secondary")"
+               asp-action="Listings"
+               asp-route-all="true">All</a>
         </div>
     </div>
 
@@ -41,7 +42,14 @@
 
     <section class="dashboard-panel mb-3">
         <form method="get" asp-action="Listings" class="row g-2 align-items-end mb-0">
-            <input type="hidden" name="Status" value="@Model.Filter.Status" />
+            @if (Model.Filter.All)
+            {
+                <input type="hidden" name="All" value="true" />
+            }
+            else
+            {
+                <input type="hidden" name="Status" value="@Model.Filter.Status" />
+            }
             <div class="col-md-6">
                 <label class="form-label small">Owner search</label>
                 <input type="search" name="OwnerQuery" value="@Model.Filter.OwnerQuery" class="form-control" placeholder="Owner name, username, or email" />
@@ -117,7 +125,8 @@
                         <li class="page-item @(pageIndex == Model.Filter.Page ? "active" : "")">
                             <a class="page-link"
                                asp-action="Listings"
-                               asp-route-Status="@Model.Filter.Status"
+                               asp-route-Status="@(Model.Filter.All ? null : Model.Filter.Status?.ToString())"
+                               asp-route-all="@(Model.Filter.All ? "true" : null)"
                                asp-route-OwnerQuery="@Model.Filter.OwnerQuery"
                                asp-route-Page="@pageIndex">@pageIndex</a>
                         </li>
