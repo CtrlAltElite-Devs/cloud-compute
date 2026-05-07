@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- My Reviews page at `/reviews/mine`, with a sidebar entry and read-only review cards showing the reviewed GPU, owner, rating, comment, review date, receipt link, and GPU detail link
+- Rental review submission from Rental History: completed, unreviewed rentals now open an inline review modal with star rating buttons and optional comments, backed by renter/completed/one-review-per-rental validation and `ReviewReceived` owner notifications
+- Expired-rental lifecycle sync service that marks elapsed active rentals as `Completed`, restores the GPU to `Available`, and emits completion notifications; Active Rentals, Rental History, rental receipts, owner Rented GPUs, and the background notifier all use the same lifecycle path
+- Active status filter on Rental History so renters can include active rentals in the same history table/filter workflow
 - Rental receipt view linked from Rental History, with renter-scoped receipt lookup and a dedicated receipt card showing payment, GPU, status, start/end timestamps, platform fee, owner earnings, and total paid
 - Active rental early termination flow with a confirmation modal, renter ownership/status validation, `TerminatedEarly` rental updates, GPU availability restoration, and no refund/reversal transactions
 - `NotificationType.RentalTerminated` with distinct notification list/dashboard icon and badge styling so terminated rentals are not categorized as completed
@@ -49,6 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global app header on authenticated pages with a search input, notifications icon button, theme switcher, and Sign Out button that triggers the existing logout confirmation modal
 
 ### Changed
+- Review UX now stays in Rental History instead of navigating to a separate full-page review form; invalid modal submissions return to history with TempData feedback
+- Active rental countdown pages now refresh shortly after a timer reaches zero so completed rentals disappear from active views without waiting for the background polling interval
+- Standardized remaining rental/listing price labels and admin picker balance snippets to credits instead of mixed currency wording
 - Active Rentals now updates each running rental timer and usage progress live in the browser, replaces the disabled termination placeholder with an actionable CTA, and clamps expired cards at `00:00:00` / `100% used`
 - Rental History now renders persisted rental rows with status filters and an enabled Receipt action instead of the placeholder history page
 - GPU catalog cards are now fully clickable, with clearer owner, spec, rating, and per-hour pricing presentation
