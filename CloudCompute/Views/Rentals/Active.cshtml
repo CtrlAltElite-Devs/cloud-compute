@@ -42,8 +42,8 @@ else
             var timeLeftText = $"{(int)timeLeft.TotalHours:00}:{timeLeft.Minutes:00}:{timeLeft.Seconds:00}";
 
             <article class="profile-card active-rental-card" data-start="@DateTime.SpecifyKind(item.StartTime, DateTimeKind.Utc).ToString("O")" data-end="@DateTime.SpecifyKind(item.EndTime, DateTimeKind.Utc).ToString("O")">
-                <div class="d-flex flex-column flex-xl-row align-items-xl-center gap-4">
-                    <div class="d-flex align-items-center gap-3" style="min-width: 280px;">
+                <div class="active-rental-card-grid">
+                    <div class="d-flex align-items-center gap-3">
                         @if (!string.IsNullOrWhiteSpace(item.ImagePath))
                         {
                             <img src="@item.ImagePath" alt="@item.GpuModel" class="rounded-3 flex-shrink-0" style="width:132px;height:92px;object-fit:cover;" />
@@ -57,7 +57,7 @@ else
 
                         <div class="min-width-0">
                             <h2 class="h5 mb-1">@item.GpuModel</h2>
-                            <div class="text-muted">by @item.OwnerDisplayName</div>
+                            <div class="text-muted text-truncate">by @item.OwnerDisplayName</div>
                         </div>
                     </div>
 
@@ -73,7 +73,7 @@ else
                         </div>
                     </div>
 
-                    <div class="d-flex flex-xl-column gap-2 flex-shrink-0">
+                    <div class="d-flex gap-2 flex-shrink-0">
                         <button
                             type="button"
                             class="btn btn-danger"

@@ -76,6 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sidebar avatar shows the user's uploaded profile picture when available, falling back to initials
 - Relocated the theme switcher from a floating top-right button into the new app header action group
 - Authenticated main content area now shares the header's surface color for visual continuity with the header
+- Active Rentals cards now align column edges across rows by laying the row out as a 3-track CSS grid (`320px / 1fr / auto`) at xl widths, so Time Left, progress bars, dates, and the terminate button share the same x-axis regardless of owner-name length; long owner names truncate with ellipsis inside the fixed left column
 
 ### Fixed
 - Duplicate `NotificationType` enum value where `RentalTerminated` and `VerificationApproved` both equaled `8`, which made later switch arms in `NotificationItemViewModel` (icon, badge label, badge css) unreachable and broke the build with `CS8510`; reassigned `RentalTerminated` to `11` while keeping `VerificationApproved`, `VerificationRejected`, and `Welcome` on their existing values
