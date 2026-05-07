@@ -3,6 +3,7 @@ using CloudCompute.Data;
 using CloudCompute.Models;
 using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
+using CloudCompute.Services.Notifications;
 using CloudCompute.ViewModels.Verification;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,11 +13,16 @@ public class VerificationService : IVerificationService
 {
     private readonly AppDbContext _dbContext;
     private readonly IWebHostEnvironment _environment;
+    private readonly INotificationService _notificationService;
 
-    public VerificationService(AppDbContext dbContext, IWebHostEnvironment environment)
+    public VerificationService(
+        AppDbContext dbContext,
+        IWebHostEnvironment environment,
+        INotificationService notificationService)
     {
         _dbContext = dbContext;
         _environment = environment;
+        _notificationService = notificationService;
     }
 
     public async Task<OwnerVerificationStatus?> GetLatestRequestStatusAsync(Guid userId)
@@ -167,6 +173,15 @@ public class VerificationService : IVerificationService
         request.ReviewedById = adminId;
         request.ReviewNotes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
 
+        var approvedMessage = string.IsNullOrWhiteSpace(request.ReviewNotes)
+            ? NotificationConstants.Messages.VerificationApproved
+            : string.Format(NotificationConstants.Messages.VerificationApprovedWithNotesFormat, request.ReviewNotes);
+        _notificationService.Create(
+            user.Id,
+            NotificationType.VerificationApproved,
+            approvedMessage,
+            NotificationConstants.Routes.VerificationPath);
+
         await _dbContext.SaveChangesAsync();
         return ServiceResult.Success();
     }
@@ -188,6 +203,15 @@ public class VerificationService : IVerificationService
         request.ReviewedAt = DateTime.UtcNow;
         request.ReviewedById = adminId;
         request.ReviewNotes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
+
+        var rejectedMessage = string.IsNullOrWhiteSpace(request.ReviewNotes)
+            ? NotificationConstants.Messages.VerificationRejected
+            : string.Format(NotificationConstants.Messages.VerificationRejectedWithNotesFormat, request.ReviewNotes);
+        _notificationService.Create(
+            request.UserId,
+            NotificationType.VerificationRejected,
+            rejectedMessage,
+            NotificationConstants.Routes.VerificationPath);
 
         await _dbContext.SaveChangesAsync();
         return ServiceResult.Success();

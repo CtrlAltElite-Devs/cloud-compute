@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- `NotificationType.VerificationApproved` / `NotificationType.VerificationRejected` with matching message templates and icon/badge classes; admin approval or rejection on `/admin/verifications` now stages an in-app notification (linking to `/verification`) inside the same `SaveChangesAsync` as the status change, and admin reviewer notes are passed through to the notification message when present
+- `NotificationType.Welcome` plus an initial-credit notification staged during signup: every new account now gets a welcome notification and a "received 500 credits" notification committed atomically with the user insert and credit ledger row, both linking to `/dashboard` (Welcome's timestamp is bumped one tick so it sorts above the credit notification on `/notifications`)
 - Member-facing GPU catalog, detail, rental confirmation, and active-rentals flow
 - Transactional rental creation with upfront renter charge, owner earnings after platform fee, credit ledger rows, GPU status updates, and rental notifications
 - `NotificationType.CreditRevoked` with `CreditRevokedFormat` template plus matching icon/badge classes; admin credit revocations now stage an in-app notification (linking to `/dashboard`) inside the same transaction as the ledger entry, mirroring the existing grant flow

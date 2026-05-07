@@ -15,6 +15,7 @@ public static class NotificationConstants
         public const string MyListingsPath = "/gpus/mine";
         public const string DashboardPath = "/dashboard";
         public const string ActiveRentalsPath = "/rentals/active";
+        public const string VerificationPath = "/verification";
     }
 
     public static class Messages
@@ -25,6 +26,12 @@ public static class NotificationConstants
         public const string CreditGrantedFormat = "You received {0:N0} credits. {1}";
         public const string CreditRevokedFormat = "{0:N0} credits were removed from your account. {1}";
         public const string RentalExpiringFormat = "Your rental {0} expires in less than 1 hour.";
+        public const string VerificationApproved = "Your owner verification request has been approved. You can now list GPUs.";
+        public const string VerificationApprovedWithNotesFormat = "Your owner verification request has been approved. Reviewer notes: {0}";
+        public const string VerificationRejected = "Your owner verification request was rejected.";
+        public const string VerificationRejectedWithNotesFormat = "Your owner verification request was rejected: {0}";
+        public const string WelcomeFormat = "Welcome to CloudCompute, {0}! Browse GPUs or list your own to get started.";
+        public const string InitialCreditGrantedFormat = "You received {0:N0} credits to start renting GPUs.";
 
         public const string MarkedAsRead = "Notification marked as read.";
         public const string AllMarkedAsRead = "All notifications marked as read.";
