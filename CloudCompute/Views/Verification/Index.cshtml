@@ -40,7 +40,12 @@ else if (isPending)
         @if (!string.IsNullOrWhiteSpace(Model.LatestJustification))
         {
             <p class="text-uppercase text-muted small fw-semibold mb-1">Your justification</p>
-            <p class="mb-0">@Model.LatestJustification</p>
+            <p class="mb-3">@Model.LatestJustification</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.LatestIdentityImagePath))
+        {
+            <p class="text-uppercase text-muted small fw-semibold mb-1">ID submitted</p>
+            <img src="@Model.LatestIdentityImagePath" alt="Submitted ID" class="img-thumbnail" style="max-width: 320px;" loading="lazy" />
         }
     </div>
 }
@@ -61,11 +66,17 @@ else
 
         <partial name="~/Views/Shared/Partials/_ModelStateAlert.cshtml" />
 
-        <form asp-action="Index" method="post">
+        <form asp-action="Index" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <label asp-for="Form.Justification" class="form-label">Tell us about your setup</label>
                 <textarea asp-for="Form.Justification" class="form-control" rows="6" placeholder="Hardware, internet, location, why you'd like to list..."></textarea>
                 <span asp-validation-for="Form.Justification" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Form.IdentityImage" class="form-label">Government-issued ID photo</label>
+                <input asp-for="Form.IdentityImage" type="file" class="form-control" accept="image/jpeg,image/png,image/webp" />
+                <div class="form-text">JPG, PNG, or WebP. Max 4 MB. Used only for verification &mdash; never shown publicly.</div>
+                <span asp-validation-for="Form.IdentityImage" class="text-danger small"></span>
             </div>
             <button type="submit" class="btn btn-info">Submit request</button>
         </form>

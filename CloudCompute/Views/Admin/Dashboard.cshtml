@@ -1,18 +1,91 @@
+@using CloudCompute.ViewModels.Admin
+@model AdminDashboardViewModel
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
 
 <section class="py-5">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="border rounded-3 p-4 p-md-5">
-                    <p class="text-uppercase text-muted small fw-semibold mb-2">Admin Authenticated</p>
-                    <h1 class="h3 mb-3">Admin Dashboard</h1>
-                    <p class="mb-1">You are logged in as @User.Identity?.Name.</p>
-                    <p class="text-muted mb-0">This page is protected by the Admin role.</p>
-                </div>
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Admin</p>
+                <h1 class="h3 mb-0">Dashboard</h1>
             </div>
+            <div class="text-muted small">Logged in as @User.Identity?.Name</div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <a class="text-decoration-none" asp-action="Verifications">
+                    <div class="border rounded-3 p-4 h-100">
+                        <p class="text-uppercase text-muted small fw-semibold mb-1">Pending verifications</p>
+                        <p class="display-6 mb-0">@Model.PendingVerifications</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a class="text-decoration-none" asp-action="Listings">
+                    <div class="border rounded-3 p-4 h-100">
+                        <p class="text-uppercase text-muted small fw-semibold mb-1">Pending listings</p>
+                        <p class="display-6 mb-0">@Model.PendingListings</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a class="text-decoration-none" asp-action="Users">
+                    <div class="border rounded-3 p-4 h-100">
+                        <p class="text-uppercase text-muted small fw-semibold mb-1">Active / suspended users</p>
+                        <p class="display-6 mb-0">@Model.ActiveUsers <span class="text-muted fs-6">/ @Model.SuspendedUsers</span></p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a class="text-decoration-none" asp-action="Credits">
+                    <div class="border rounded-3 p-4 h-100">
+                        <p class="text-uppercase text-muted small fw-semibold mb-1">Credits in circulation</p>
+                        <p class="display-6 mb-0">@Model.TotalCreditsInCirculation.ToString("N0")</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="border rounded-3 p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="h6 text-uppercase text-muted small fw-semibold mb-0">Recent credit activity</h2>
+                <a class="btn btn-link btn-sm" asp-action="Credits">Open ledger</a>
+            </div>
+            @if (Model.RecentCreditEvents.Count == 0)
+            {
+                <p class="text-muted mb-0">No admin credit activity yet.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>When</th>
+                                <th>User</th>
+                                <th class="text-end">Amount</th>
+                                <th>Reason</th>
+                                <th>Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ev in Model.RecentCreditEvents)
+                            {
+                                <tr>
+                                    <td class="small text-muted">@ev.CreatedAt.ToString("u")</td>
+                                    <td>@ev.UserDisplay</td>
+                                    <td class="text-end @(ev.Amount < 0 ? "text-danger" : "text-success")">@ev.Amount.ToString("+0.##;-0.##;0")</td>
+                                    <td>@ev.Reason</td>
+                                    <td class="small text-muted">@(ev.AdminDisplay ?? "—")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
     </div>
 </section>

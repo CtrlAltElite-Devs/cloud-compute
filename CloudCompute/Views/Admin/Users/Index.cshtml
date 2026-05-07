@@ -1,0 +1,144 @@
+@using CloudCompute.Constants
+@using CloudCompute.Models.Enums
+@using CloudCompute.ViewModels.Admin
+@model AdminUserListViewModel
+@{
+    ViewData["Title"] = "Admin · Users";
+
+    var statusMessage = TempData[AdminConstants.Status.TempDataMessageKey] as string;
+    var statusType = TempData[AdminConstants.Status.TempDataTypeKey] as string;
+    var alertClass = statusType == AdminConstants.Status.Danger ? "alert-danger" : "alert-success";
+}
+
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Admin</p>
+                <h1 class="h3 mb-0">User management</h1>
+            </div>
+            <div class="text-end text-muted small">@Model.TotalCount user(s)</div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(statusMessage))
+        {
+            <div class="alert @alertClass" role="alert">@statusMessage</div>
+        }
+
+        <form method="get" asp-action="Users" class="row g-2 align-items-end mb-4">
+            <div class="col-md-4">
+                <label class="form-label small">Search</label>
+                <input type="search" name="Query" value="@Model.Filter.Query" class="form-control" placeholder="Name, username, or email" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Role</label>
+                <select name="Role" class="form-select">
+                    <option value="">Any</option>
+                    @foreach (var role in Enum.GetValues<UserRole>())
+                    {
+                        <option value="@role" selected="@(Model.Filter.Role == role)">@role</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Status</label>
+                <select name="IsActive" class="form-select">
+                    <option value="">Any</option>
+                    <option value="true" selected="@(Model.Filter.IsActive == true)">Active</option>
+                    <option value="false" selected="@(Model.Filter.IsActive == false)">Suspended</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Verified</label>
+                <select name="IsOwnerVerified" class="form-select">
+                    <option value="">Any</option>
+                    <option value="true" selected="@(Model.Filter.IsOwnerVerified == true)">Verified</option>
+                    <option value="false" selected="@(Model.Filter.IsOwnerVerified == false)">Unverified</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+
+        @if (Model.Rows.Count == 0)
+        {
+            <div class="border rounded-3 p-4 text-center text-muted">No users match those filters.</div>
+        }
+        else
+        {
+            <div class="border rounded-3 overflow-hidden">
+                <table class="table mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Verified</th>
+                            <th class="text-end">Credits</th>
+                            <th>Joined</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@row.FullName</div>
+                                    <div class="text-muted small">@row.UserName · @row.Email</div>
+                                </td>
+                                <td>@row.Role</td>
+                                <td>
+                                    @if (row.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger">Suspended</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (row.IsOwnerVerified)
+                                    {
+                                        <span class="badge bg-info-subtle text-info">Verified</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">&mdash;</span>
+                                    }
+                                </td>
+                                <td class="text-end">@row.CreditBalance.ToString("N0")</td>
+                                <td class="text-muted small">@row.CreatedAt.ToString("u")</td>
+                                <td class="text-end">
+                                    <a class="btn btn-outline-primary btn-sm" asp-action="UserDetail" asp-route-id="@row.Id">Open</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="mt-3" aria-label="User pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        @for (var pageIndex = 1; pageIndex <= Model.TotalPages; pageIndex++)
+                        {
+                            <li class="page-item @(pageIndex == Model.Filter.Page ? "active" : "")">
+                                <a class="page-link"
+                                   asp-action="Users"
+                                   asp-route-Query="@Model.Filter.Query"
+                                   asp-route-Role="@Model.Filter.Role"
+                                   asp-route-IsActive="@Model.Filter.IsActive"
+                                   asp-route-IsOwnerVerified="@Model.Filter.IsOwnerVerified"
+                                   asp-route-Page="@pageIndex">@pageIndex</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</section>

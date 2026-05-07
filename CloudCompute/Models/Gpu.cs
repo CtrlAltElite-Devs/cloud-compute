@@ -40,6 +40,9 @@ public class Gpu
 
     public GpuStatus Status { get; set; } = GpuStatus.Pending;
 
+    [StringLength(1000)]
+    public string? RejectionReason { get; set; }
+
     [Column(TypeName = "decimal(3,2)")]
     public decimal AverageRating { get; set; }
 

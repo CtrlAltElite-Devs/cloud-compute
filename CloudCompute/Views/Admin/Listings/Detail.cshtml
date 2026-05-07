@@ -1,0 +1,99 @@
+@using CloudCompute.Constants
+@using CloudCompute.Models.Enums
+@using CloudCompute.ViewModels.Admin
+@model AdminListingDetailViewModel
+@{
+    ViewData["Title"] = $"Admin · {Model.Name}";
+
+    var statusMessage = TempData[AdminConstants.Status.TempDataMessageKey] as string;
+    var statusType = TempData[AdminConstants.Status.TempDataTypeKey] as string;
+    var alertClass = statusType == AdminConstants.Status.Danger ? "alert-danger" : "alert-success";
+}
+
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Admin · Listing review</p>
+                <h1 class="h3 mb-0">@Model.Name</h1>
+                <div class="text-muted small">@Model.Model · submitted @Model.CreatedAt.ToString("u")</div>
+            </div>
+            <a class="btn btn-outline-secondary btn-sm" asp-action="Listings">Back to listings</a>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(statusMessage))
+        {
+            <div class="alert @alertClass" role="alert">@statusMessage</div>
+        }
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="border rounded-3 p-4">
+                    @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+                    {
+                        <img src="@Model.ImagePath" alt="@Model.Name" class="img-fluid rounded mb-3" loading="lazy" />
+                    }
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted small">VRAM</dt>
+                        <dd class="col-sm-8">@Model.VramGb GB</dd>
+                        <dt class="col-sm-4 text-muted small">CUDA cores</dt>
+                        <dd class="col-sm-8">@Model.CudaCores.ToString("N0")</dd>
+                        <dt class="col-sm-4 text-muted small">Price / hour</dt>
+                        <dd class="col-sm-8">@Model.PricePerHour.ToString("N2")</dd>
+                        <dt class="col-sm-4 text-muted small">Min rental hours</dt>
+                        <dd class="col-sm-8">@Model.MinRentalHours</dd>
+                        <dt class="col-sm-4 text-muted small">Status</dt>
+                        <dd class="col-sm-8">@Model.Status</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.RejectionReason))
+                        {
+                            <dt class="col-sm-4 text-muted small">Rejection reason</dt>
+                            <dd class="col-sm-8">@Model.RejectionReason</dd>
+                        }
+                    </dl>
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <hr />
+                        <p class="mb-0">@Model.Description</p>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="border rounded-3 p-4">
+                    <h2 class="h6 text-uppercase text-muted small fw-semibold mb-3">Owner</h2>
+                    <p class="mb-1 fw-semibold">@Model.OwnerDisplay</p>
+                    <p class="text-muted small mb-2">@Model.OwnerEmail</p>
+                    @if (Model.OwnerIsVerified)
+                    {
+                        <span class="badge bg-info-subtle text-info">Owner verified</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning-subtle text-warning">Not verified</span>
+                    }
+                </div>
+
+                @if (Model.Status == GpuStatus.Pending)
+                {
+                    <div class="border rounded-3 p-4 mt-3">
+                        <h2 class="h6 text-uppercase text-muted small fw-semibold mb-3">Decision</h2>
+
+                        <form asp-action="ApproveListing" method="post" class="mb-3">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-success w-100">Approve listing</button>
+                        </form>
+
+                        <form asp-action="RejectListing" method="post">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <div class="mb-3">
+                                <label class="form-label small" for="reject-reason-@Model.Id">Rejection reason (optional)</label>
+                                <textarea class="form-control" id="reject-reason-@Model.Id" name="reason" rows="3" placeholder="Why is this being rejected?"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-outline-danger w-100">Reject listing</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

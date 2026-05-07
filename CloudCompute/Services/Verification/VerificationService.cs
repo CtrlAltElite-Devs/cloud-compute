@@ -11,10 +11,12 @@ namespace CloudCompute.Services.Verification;
 public class VerificationService : IVerificationService
 {
     private readonly AppDbContext _dbContext;
+    private readonly IWebHostEnvironment _environment;
 
-    public VerificationService(AppDbContext dbContext)
+    public VerificationService(AppDbContext dbContext, IWebHostEnvironment environment)
     {
         _dbContext = dbContext;
+        _environment = environment;
     }
 
     public async Task<OwnerVerificationStatus?> GetLatestRequestStatusAsync(Guid userId)
@@ -43,6 +45,7 @@ public class VerificationService : IVerificationService
             LatestSubmittedAt = latest?.SubmittedAt,
             LatestJustification = latest?.Justification,
             LatestReviewNotes = latest?.ReviewNotes,
+            LatestIdentityImagePath = latest?.IdentityImagePath,
             Form = new RequestVerificationViewModel()
         };
     }
@@ -67,16 +70,54 @@ public class VerificationService : IVerificationService
             return ServiceResult.Failed(CreateModelError(VerificationConstants.Messages.PendingRequestExists));
         }
 
+        if (model.IdentityImage is not { Length: > 0 })
+        {
+            return ServiceResult.Failed(CreateModelError(VerificationConstants.Messages.IdentityImageRequired));
+        }
+
+        if (model.IdentityImage.Length > VerificationConstants.IdentityImage.MaxBytes)
+        {
+            return ServiceResult.Failed(CreateModelError(VerificationConstants.Messages.IdentityImageTooLarge));
+        }
+
+        var extension = Path.GetExtension(model.IdentityImage.FileName);
+        if (string.IsNullOrEmpty(extension) || !VerificationConstants.IdentityImage.AllowedExtensions.Contains(extension))
+        {
+            return ServiceResult.Failed(CreateModelError(VerificationConstants.Messages.IdentityImageUnsupportedFormat));
+        }
+
+        var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
+        var directoryPath = Path.Combine(_environment.WebRootPath, "uploads", "verification");
+        Directory.CreateDirectory(directoryPath);
+        var savedFullPath = Path.Combine(directoryPath, fileName);
+
+        await using (var stream = new FileStream(savedFullPath, FileMode.Create))
+        {
+            await model.IdentityImage.CopyToAsync(stream);
+        }
+
+        var imagePath = $"/{VerificationConstants.IdentityImage.DirectorySegment}/{fileName}";
+
         var newRequest = new OwnerVerificationRequest
         {
             UserId = userId,
             Justification = model.Justification.Trim(),
+            IdentityImagePath = imagePath,
             Status = OwnerVerificationStatus.Pending,
             SubmittedAt = DateTime.UtcNow
         };
 
         _dbContext.OwnerVerificationRequests.Add(newRequest);
-        await _dbContext.SaveChangesAsync();
+
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            TryDeletePhysicalFile(savedFullPath);
+            return ServiceResult.Failed(CreateModelError(VerificationConstants.Messages.SaveFailed));
+        }
 
         return ServiceResult.Success();
     }
@@ -94,6 +135,7 @@ public class VerificationService : IVerificationService
                 UserFullName = request.User!.FirstName + " " + request.User.LastName,
                 UserEmail = request.User!.Email,
                 Justification = request.Justification,
+                IdentityImagePath = request.IdentityImagePath,
                 SubmittedAt = request.SubmittedAt,
                 Status = request.Status
             })
@@ -149,6 +191,26 @@ public class VerificationService : IVerificationService
 
         await _dbContext.SaveChangesAsync();
         return ServiceResult.Success();
+    }
+
+    private static void TryDeletePhysicalFile(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch
+        {
+            // Best-effort cleanup; failures here should not break the user-facing operation.
+        }
     }
 
     private static ServiceError CreateModelError(string message)

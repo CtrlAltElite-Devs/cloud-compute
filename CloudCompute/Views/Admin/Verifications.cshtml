@@ -34,6 +34,7 @@
                         <tr>
                             <th scope="col">User</th>
                             <th scope="col">Justification</th>
+                            <th scope="col">ID</th>
                             <th scope="col">Submitted</th>
                             <th scope="col" class="text-end">Actions</th>
                         </tr>
@@ -48,6 +49,18 @@
                                 </td>
                                 <td style="max-width: 32rem;">
                                     <div class="text-truncate" style="white-space: pre-line;" title="@row.Justification">@row.Justification</div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(row.IdentityImagePath))
+                                    {
+                                        <a href="@row.IdentityImagePath" target="_blank" rel="noopener">
+                                            <img src="@row.IdentityImagePath" alt="ID for @row.UserFullName" class="img-thumbnail" style="max-width: 96px; max-height: 64px;" loading="lazy" />
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">&mdash;</span>
+                                    }
                                 </td>
                                 <td class="text-muted small">@row.SubmittedAt.ToString("u")</td>
                                 <td class="text-end">
@@ -73,6 +86,11 @@
                             </div>
                             <div class="modal-body">
                                 <p class="mb-3">Mark <strong>@row.UserFullName</strong> as a verified owner.</p>
+                                @if (!string.IsNullOrWhiteSpace(row.IdentityImagePath))
+                                {
+                                    <p class="text-uppercase text-muted small fw-semibold mb-1">Submitted ID</p>
+                                    <img src="@row.IdentityImagePath" alt="ID for @row.UserFullName" class="img-fluid img-thumbnail mb-3" loading="lazy" />
+                                }
                                 <input type="hidden" name="id" value="@row.Id" />
                                 <div class="mb-0">
                                     <label class="form-label" for="approve-notes-@row.Id">Reviewer notes (optional)</label>
@@ -96,6 +114,11 @@
                             </div>
                             <div class="modal-body">
                                 <p class="mb-3">Reject the verification request from <strong>@row.UserFullName</strong>.</p>
+                                @if (!string.IsNullOrWhiteSpace(row.IdentityImagePath))
+                                {
+                                    <p class="text-uppercase text-muted small fw-semibold mb-1">Submitted ID</p>
+                                    <img src="@row.IdentityImagePath" alt="ID for @row.UserFullName" class="img-fluid img-thumbnail mb-3" loading="lazy" />
+                                }
                                 <input type="hidden" name="id" value="@row.Id" />
                                 <div class="mb-0">
                                     <label class="form-label" for="reject-notes-@row.Id">Reviewer notes (optional)</label>

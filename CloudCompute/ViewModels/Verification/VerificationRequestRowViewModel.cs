@@ -14,6 +14,8 @@ public class VerificationRequestRowViewModel
 
     public string Justification { get; set; } = string.Empty;
 
+    public string? IdentityImagePath { get; set; }
+
     public DateTime SubmittedAt { get; set; }
 
     public OwnerVerificationStatus Status { get; set; }

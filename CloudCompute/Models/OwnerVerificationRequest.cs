@@ -16,6 +16,9 @@ public class OwnerVerificationRequest
     [StringLength(2000)]
     public string Justification { get; set; } = string.Empty;
 
+    [StringLength(300)]
+    public string? IdentityImagePath { get; set; }
+
     public OwnerVerificationStatus Status { get; set; } = OwnerVerificationStatus.Pending;
 
     public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
