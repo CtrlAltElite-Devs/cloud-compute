@@ -83,9 +83,9 @@ else
                                 <span class="badge rounded-pill @StatusBadgeClass(item.Status)">@item.Status</span>
                             </td>
                             <td class="text-end pe-4">
-                                <a class="btn btn-sm btn-outline-info" asp-controller="Rentals" asp-action="Receipt" asp-route-rentalId="@item.Id">
-                                    <i class="bi bi-receipt me-1" aria-hidden="true"></i>
-                                    Receipt
+                                <a class="btn btn-sm btn-outline-info" asp-controller="Rentals" asp-action="Receipt" asp-route-rentalId="@item.Id"
+                                   aria-label="View receipt" title="View receipt">
+                                    <i class="bi bi-receipt" aria-hidden="true"></i>
                                 </a>
                             </td>
                         </tr>
