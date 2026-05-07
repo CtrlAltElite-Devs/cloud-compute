@@ -28,6 +28,9 @@ public class NotificationItemViewModel
         NotificationType.RentalExpiring => "bi-clock-history text-warning",
         NotificationType.RentalCompleted => "bi-check2-circle text-success",
         NotificationType.ReviewReceived => "bi-star text-warning",
+        NotificationType.VerificationApproved => "bi-patch-check text-success",
+        NotificationType.VerificationRejected => "bi-patch-exclamation text-danger",
+        NotificationType.Welcome => "bi-stars text-info",
         _ => "bi-bell text-secondary"
     };
 
@@ -41,6 +44,9 @@ public class NotificationItemViewModel
         NotificationType.RentalExpiring => "RENTAL EXPIRING",
         NotificationType.RentalCompleted => "RENTAL COMPLETED",
         NotificationType.ReviewReceived => "REVIEW",
+        NotificationType.VerificationApproved => "VERIFIED",
+        NotificationType.VerificationRejected => "VERIFICATION REJECTED",
+        NotificationType.Welcome => "WELCOME",
         _ => "NOTIFICATION"
     };
 
@@ -54,6 +60,9 @@ public class NotificationItemViewModel
         NotificationType.RentalExpiring => "bg-warning text-dark",
         NotificationType.RentalCompleted => "bg-success",
         NotificationType.ReviewReceived => "bg-info text-dark",
+        NotificationType.VerificationApproved => "bg-success",
+        NotificationType.VerificationRejected => "bg-danger",
+        NotificationType.Welcome => "bg-info text-dark",
         _ => "bg-secondary"
     };
 

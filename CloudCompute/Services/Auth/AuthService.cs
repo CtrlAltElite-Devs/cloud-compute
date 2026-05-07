@@ -87,6 +87,26 @@ public class AuthService : IAuthService
             Reason = AuthConstants.Messages.InitialCreditReason
         });
 
+        var now = DateTime.UtcNow;
+        _dbContext.Notifications.Add(new Notification
+        {
+            UserId = user.Id,
+            Type = NotificationType.CreditGranted,
+            Message = string.Format(NotificationConstants.Messages.InitialCreditGrantedFormat, ApplicationUser.InitialCreditBalance),
+            Link = NotificationConstants.Routes.DashboardPath,
+            IsRead = false,
+            CreatedAt = now
+        });
+        _dbContext.Notifications.Add(new Notification
+        {
+            UserId = user.Id,
+            Type = NotificationType.Welcome,
+            Message = string.Format(NotificationConstants.Messages.WelcomeFormat, user.FirstName),
+            Link = NotificationConstants.Routes.DashboardPath,
+            IsRead = false,
+            CreatedAt = now.AddTicks(1)
+        });
+
         try
         {
             await _dbContext.SaveChangesAsync();

@@ -9,5 +9,8 @@ public enum NotificationType
     CreditGranted = 4,
     ListingApproved = 5,
     ListingRejected = 6,
-    CreditRevoked = 7
+    CreditRevoked = 7,
+    VerificationApproved = 8,
+    VerificationRejected = 9,
+    Welcome = 10
 }
