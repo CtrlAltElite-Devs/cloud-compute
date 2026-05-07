@@ -193,11 +193,12 @@ public class AdminController : Controller
         var model = new AdminGrantCreditViewModel();
         if (userId.HasValue)
         {
-            var detail = await _userService.GetDetailAsync(userId.Value);
-            if (detail is not null)
+            var info = await GetMemberDisplayAsync(userId.Value);
+            if (info is not null)
             {
-                model.UserId = detail.Id;
-                model.UserDisplay = $"{detail.FullName} · {detail.Email}";
+                model.UserId = info.Value.Id;
+                model.UserDisplay = info.Value.Display;
+                model.CurrentBalance = info.Value.Balance;
             }
         }
 
@@ -211,6 +212,7 @@ public class AdminController : Controller
     {
         if (!ModelState.IsValid)
         {
+            await ApplySelectedMemberAsync(model);
             return View("Credits/Grant", model);
         }
 
@@ -221,11 +223,36 @@ public class AdminController : Controller
         if (!result.Succeeded)
         {
             AddModelErrors(result);
+            await ApplySelectedMemberAsync(model);
             return View("Credits/Grant", model);
         }
 
         SetAdminStatus(AdminConstants.Messages.CreditsGranted, success: true);
         return RedirectToAction(nameof(Credits));
+    }
+
+    private async Task ApplySelectedMemberAsync(AdminGrantCreditViewModel model)
+    {
+        if (!model.UserId.HasValue) return;
+        var info = await GetMemberDisplayAsync(model.UserId.Value);
+        if (info is null) return;
+        model.UserDisplay = info.Value.Display;
+        model.CurrentBalance = info.Value.Balance;
+    }
+
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    [HttpGet]
+    public async Task<IActionResult> SearchMembers(string? q)
+    {
+        var results = await _userService.SearchMembersAsync(q, limit: 20);
+        return Json(results.Select(r => new { id = r.Id, display = r.DisplayName, balance = r.Balance }));
+    }
+
+    private async Task<(Guid Id, string Display, decimal Balance)?> GetMemberDisplayAsync(Guid userId)
+    {
+        var detail = await _userService.GetDetailAsync(userId);
+        if (detail is null) return null;
+        return (detail.Id, $"{detail.FullName} · {detail.Email}", detail.CreditBalance);
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -266,11 +293,12 @@ public class AdminController : Controller
         var model = new AdminRevokeCreditViewModel();
         if (userId.HasValue)
         {
-            var detail = await _userService.GetDetailAsync(userId.Value);
-            if (detail is not null)
+            var info = await GetMemberDisplayAsync(userId.Value);
+            if (info is not null)
             {
-                model.UserId = detail.Id;
-                model.UserDisplay = $"{detail.FullName} · {detail.Email}";
+                model.UserId = info.Value.Id;
+                model.UserDisplay = info.Value.Display;
+                model.CurrentBalance = info.Value.Balance;
             }
         }
 
@@ -284,6 +312,7 @@ public class AdminController : Controller
     {
         if (!ModelState.IsValid)
         {
+            await ApplySelectedMemberAsync(model);
             return View("Credits/Revoke", model);
         }
 
@@ -294,11 +323,21 @@ public class AdminController : Controller
         if (!result.Succeeded)
         {
             AddModelErrors(result);
+            await ApplySelectedMemberAsync(model);
             return View("Credits/Revoke", model);
         }
 
         SetAdminStatus(AdminConstants.Messages.CreditsRevoked, success: true);
         return RedirectToAction(nameof(Credits));
+    }
+
+    private async Task ApplySelectedMemberAsync(AdminRevokeCreditViewModel model)
+    {
+        if (!model.UserId.HasValue) return;
+        var info = await GetMemberDisplayAsync(model.UserId.Value);
+        if (info is null) return;
+        model.UserDisplay = info.Value.Display;
+        model.CurrentBalance = info.Value.Balance;
     }
 
     // ----- Listing Moderation -----

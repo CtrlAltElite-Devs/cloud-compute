@@ -7,9 +7,11 @@ namespace CloudCompute.ViewModels.Admin;
 public class AdminGrantCreditViewModel
 {
     [Required(ErrorMessage = "Choose a user.")]
-    public Guid UserId { get; set; }
+    public Guid? UserId { get; set; }
 
     public string? UserDisplay { get; set; }
+
+    public decimal? CurrentBalance { get; set; }
 
     [Required]
     [Range(typeof(decimal), "1", "100000", ErrorMessage = "Amount must be between 1 and 100,000.")]
@@ -19,6 +21,13 @@ public class AdminGrantCreditViewModel
     [StringLength(AdminConstants.Validation.MaxReasonLength, MinimumLength = AdminConstants.Validation.MinReasonLength,
         ErrorMessage = "Please provide between 5 and 500 characters.")]
     public string Reason { get; set; } = string.Empty;
+}
+
+public class AdminUserOption
+{
+    public Guid Id { get; set; }
+    public string DisplayName { get; set; } = string.Empty;
+    public decimal Balance { get; set; }
 }
 
 public class AdminBulkGrantViewModel
@@ -37,10 +46,12 @@ public class AdminBulkGrantViewModel
 
 public class AdminRevokeCreditViewModel
 {
-    [Required]
-    public Guid UserId { get; set; }
+    [Required(ErrorMessage = "Choose a user.")]
+    public Guid? UserId { get; set; }
 
     public string? UserDisplay { get; set; }
+
+    public decimal? CurrentBalance { get; set; }
 
     [Required]
     [Range(typeof(decimal), "1", "100000", ErrorMessage = "Amount must be between 1 and 100,000.")]

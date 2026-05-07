@@ -8,5 +8,6 @@ public enum NotificationType
     ReviewReceived = 3,
     CreditGranted = 4,
     ListingApproved = 5,
-    ListingRejected = 6
+    ListingRejected = 6,
+    CreditRevoked = 7
 }
