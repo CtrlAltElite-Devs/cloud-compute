@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Review prompt on early termination: terminating an active rental now redirects to Rental History with the review modal auto-opened for that rental, and Rental History shows the Review/Reviewed states for `Terminated` rentals alongside `Completed` ones
 - My Reviews page at `/reviews/mine`, with a sidebar entry and read-only review cards showing the reviewed GPU, owner, rating, comment, review date, receipt link, and GPU detail link
 - Rental review submission from Rental History: completed, unreviewed rentals now open an inline review modal with star rating buttons and optional comments, backed by renter/completed/one-review-per-rental validation and `ReviewReceived` owner notifications
 - Expired-rental lifecycle sync service that marks elapsed active rentals as `Completed`, restores the GPU to `Available`, and emits completion notifications; Active Rentals, Rental History, rental receipts, owner Rented GPUs, and the background notifier all use the same lifecycle path

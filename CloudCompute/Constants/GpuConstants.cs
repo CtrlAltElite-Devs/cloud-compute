@@ -38,5 +38,6 @@ public static class GpuConstants
     {
         public const string TempDataMessageKey = "GpuStatusMessage";
         public const string TempDataTypeKey = "GpuStatusType";
+        public const string ReviewPromptRentalIdKey = "ReviewPromptRentalId";
     }
 }
