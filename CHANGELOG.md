@@ -77,6 +77,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Relocated the theme switcher from a floating top-right button into the new app header action group
 - Authenticated main content area now shares the header's surface color for visual continuity with the header
 
+### Fixed
+- Duplicate `NotificationType` enum value where `RentalTerminated` and `VerificationApproved` both equaled `8`, which made later switch arms in `NotificationItemViewModel` (icon, badge label, badge css) unreachable and broke the build with `CS8510`; reassigned `RentalTerminated` to `11` while keeping `VerificationApproved`, `VerificationRejected`, and `Welcome` on their existing values
+
 ## [Unreleased] - 2026-05-06
 
 ### Added

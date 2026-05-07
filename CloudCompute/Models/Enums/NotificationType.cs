@@ -10,8 +10,8 @@ public enum NotificationType
     ListingApproved = 5,
     ListingRejected = 6,
     CreditRevoked = 7,
-    RentalTerminated = 8,
     VerificationApproved = 8,
     VerificationRejected = 9,
-    Welcome = 10
+    Welcome = 10,
+    RentalTerminated = 11
 }
