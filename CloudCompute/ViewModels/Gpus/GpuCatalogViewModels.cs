@@ -2,11 +2,67 @@ using CloudCompute.Models.Enums;
 
 namespace CloudCompute.ViewModels.Gpus;
 
-public class GpuCatalogViewModel
+public enum GpuCatalogSort
 {
+    Newest = 0,
+    PriceAsc = 1,
+    PriceDesc = 2,
+    RatingDesc = 3
+}
+
+public class GpuCatalogFilter
+{
+    public const int DefaultPageSize = 12;
+    public const int MaxPageSize = 48;
+
     public string? Search { get; set; }
 
+    public GpuCatalogSort Sort { get; set; } = GpuCatalogSort.Newest;
+
+    public decimal? MinPrice { get; set; }
+
+    public decimal? MaxPrice { get; set; }
+
+    public int? MinVramGb { get; set; }
+
+    public bool AvailableOnly { get; set; } = true;
+
+    public int Page { get; set; } = 1;
+
+    public int PageSize { get; set; } = DefaultPageSize;
+
+    public bool HasActiveFilters =>
+        !string.IsNullOrWhiteSpace(Search) ||
+        Sort != GpuCatalogSort.Newest ||
+        MinPrice.HasValue ||
+        MaxPrice.HasValue ||
+        MinVramGb.HasValue ||
+        !AvailableOnly;
+}
+
+public class GpuCatalogViewModel
+{
+    public GpuCatalogFilter Filter { get; set; } = new();
+
     public IReadOnlyList<GpuCatalogItemViewModel> Items { get; set; } = Array.Empty<GpuCatalogItemViewModel>();
+
+    public int TotalCount { get; set; }
+
+    public int TotalPages { get; set; }
+
+    public int Page => Filter.Page;
+
+    public int PageSize => Filter.PageSize;
+
+    public bool HasPreviousPage => Filter.Page > 1;
+
+    public bool HasNextPage => Filter.Page < TotalPages;
+
+    public string? Search
+    {
+        get => Filter.Search;
+        set => Filter.Search = value;
+    }
 }
 
 public class GpuCatalogItemViewModel

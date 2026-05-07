@@ -31,7 +31,7 @@ public class GpusController : Controller
     }
 
     [HttpGet("gpus")]
-    public async Task<IActionResult> Index(string? search)
+    public async Task<IActionResult> Index([FromQuery] GpuCatalogFilter filter)
     {
         var userId = GetCurrentUserId();
         if (userId is null)
@@ -39,7 +39,7 @@ public class GpusController : Controller
             return Challenge();
         }
 
-        var model = await _gpuService.GetCatalogAsync(userId.Value, search);
+        var model = await _gpuService.GetCatalogAsync(userId.Value, filter ?? new GpuCatalogFilter());
         return View(model);
     }
 

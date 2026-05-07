@@ -36,6 +36,8 @@ public class RentalConfirmViewModel
 public class ActiveRentalsViewModel
 {
     public IReadOnlyList<ActiveRentalItemViewModel> Items { get; set; } = Array.Empty<ActiveRentalItemViewModel>();
+
+    public decimal CurrentBalance { get; set; }
 }
 
 public class ActiveRentalItemViewModel
@@ -58,7 +60,13 @@ public class ActiveRentalItemViewModel
 
     public int DurationHours { get; set; }
 
+    public decimal PricePerHour { get; set; }
+
     public decimal TotalCost { get; set; }
+
+    public int MaxAdditionalHours => Math.Max(0, 168 - DurationHours);
+
+    public bool CanExtend => MaxAdditionalHours > 0;
 }
 
 public class RentalHistoryViewModel
@@ -66,6 +74,8 @@ public class RentalHistoryViewModel
     public RentalHistoryFilterViewModel Filter { get; set; } = new();
 
     public IReadOnlyList<RentalHistoryItemViewModel> Items { get; set; } = Array.Empty<RentalHistoryItemViewModel>();
+
+    public IReadOnlyList<string> AvailableGpuModels { get; set; } = Array.Empty<string>();
 
     public bool HasAnyRentals { get; set; }
 }
@@ -105,9 +115,18 @@ public class RentalHistoryFilterViewModel
 
     public RentalStatus? Status { get; set; }
 
+    public string? GpuModel { get; set; }
+
+    public DateTime? DateFrom { get; set; }
+
+    public DateTime? DateTo { get; set; }
+
     public bool HasActiveFilters =>
         !string.IsNullOrWhiteSpace(Search) ||
-        Status.HasValue;
+        Status.HasValue ||
+        !string.IsNullOrWhiteSpace(GpuModel) ||
+        DateFrom.HasValue ||
+        DateTo.HasValue;
 }
 
 public class RentalReceiptViewModel

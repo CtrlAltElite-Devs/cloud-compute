@@ -6,7 +6,7 @@ namespace CloudCompute.Services.Gpu;
 
 public interface IGpuService
 {
-    Task<GpuCatalogViewModel> GetCatalogAsync(Guid currentUserId, string? search);
+    Task<GpuCatalogViewModel> GetCatalogAsync(Guid currentUserId, GpuCatalogFilter filter);
 
     Task<GpuDetailViewModel?> GetDetailAsync(Guid currentUserId, Guid gpuId);
 

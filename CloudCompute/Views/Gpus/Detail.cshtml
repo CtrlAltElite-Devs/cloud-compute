@@ -18,7 +18,7 @@
         <div class="col-12 col-lg-6 d-flex">
             @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
             {
-                <img src="@Model.ImagePath" alt="@Model.Model" class="rounded-3 w-100 h-100" style="min-height:360px;object-fit:cover;" />
+                <img src="@Model.ImagePath" alt="@Model.Model" loading="lazy" decoding="async" class="rounded-3 w-100 h-100" style="min-height:360px;object-fit:cover;" />
             }
             else
             {

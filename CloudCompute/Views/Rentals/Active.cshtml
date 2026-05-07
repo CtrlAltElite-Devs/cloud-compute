@@ -74,6 +74,22 @@ else
                     </div>
 
                     <div class="d-flex gap-2 flex-shrink-0">
+                        @if (item.CanExtend)
+                        {
+                            <button
+                                type="button"
+                                class="btn btn-outline-info"
+                                data-bs-toggle="modal"
+                                data-bs-target="#extendRentalModal"
+                                data-rental-reference="@item.ReferenceNumber"
+                                data-rental-title="@item.GpuModel"
+                                data-rental-action="@Url.Action("Extend", "Rentals", new { rentalId = item.Id })"
+                                data-rental-price="@item.PricePerHour.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                data-rental-duration="@item.DurationHours"
+                                data-rental-max-additional="@item.MaxAdditionalHours">
+                                <i class="bi bi-clock-history me-1" aria-hidden="true"></i> Extend
+                            </button>
+                        }
                         <button
                             type="button"
                             class="btn btn-danger"
@@ -92,6 +108,53 @@ else
         }
     </div>
 
+    <div class="modal fade" id="extendRentalModal" tabindex="-1" aria-labelledby="extendRentalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="post" data-extend-rental-form>
+                    @Html.AntiForgeryToken()
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="extendRentalModalLabel">Extend rental</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">Extend <strong data-extend-rental-title></strong> for additional hours.</p>
+                        <p class="text-muted small mb-3">
+                            Rental <span data-extend-rental-reference></span> &middot;
+                            current duration <span data-extend-rental-duration></span> hr &middot;
+                            max additional <span data-extend-rental-max-additional></span> hr (168 hr cap).
+                        </p>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="extend-additional-hours">Additional hours</label>
+                            <input type="number" min="1" step="1"
+                                   id="extend-additional-hours"
+                                   name="additionalHours"
+                                   class="form-control"
+                                   value="1"
+                                   required />
+                        </div>
+
+                        <dl class="row mb-0 small">
+                            <dt class="col-7 text-muted fw-normal">Hourly rate</dt>
+                            <dd class="col-5 text-end" data-extend-rental-rate></dd>
+                            <dt class="col-7 text-muted fw-normal">Estimated cost</dt>
+                            <dd class="col-5 text-end" data-extend-rental-cost></dd>
+                            <dt class="col-7 text-muted fw-normal">Current balance</dt>
+                            <dd class="col-5 text-end">@Model.CurrentBalance.ToString("N2") credits</dd>
+                        </dl>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-info">
+                            <i class="bi bi-clock-history me-1" aria-hidden="true"></i> Extend rental
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="terminateRentalModal" tabindex="-1" aria-labelledby="terminateRentalModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -101,7 +164,7 @@ else
                 </div>
                 <div class="modal-body">
                     <p class="mb-2">This will end <strong data-terminate-rental-title></strong> immediately and make the GPU available again.</p>
-                    <p class="text-muted small mb-0">Rental <span data-terminate-rental-reference></span> will be marked as terminated. Credits will not be refunded.</p>
+                    <p class="text-muted small mb-0">Rental <span data-terminate-rental-reference></span> will be marked as terminated. Unused hours will be refunded to your credit balance (rounded up to whole hours used).</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -177,6 +240,78 @@ else
 
             updateRentalTimers();
             window.setInterval(updateRentalTimers, 1000);
+
+            const extendModal = document.getElementById("extendRentalModal");
+            if (extendModal) {
+                const form = extendModal.querySelector("[data-extend-rental-form]");
+                const titleEl = extendModal.querySelector("[data-extend-rental-title]");
+                const referenceEl = extendModal.querySelector("[data-extend-rental-reference]");
+                const durationEl = extendModal.querySelector("[data-extend-rental-duration]");
+                const maxAdditionalEl = extendModal.querySelector("[data-extend-rental-max-additional]");
+                const rateEl = extendModal.querySelector("[data-extend-rental-rate]");
+                const costEl = extendModal.querySelector("[data-extend-rental-cost]");
+                const hoursInput = extendModal.querySelector("#extend-additional-hours");
+
+                let activePrice = 0;
+                let activeMax = 0;
+
+                const numberFormatter = new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+                const recomputeCost = () => {
+                    if (!costEl || !hoursInput) {
+                        return;
+                    }
+                    const hours = Number.parseInt(hoursInput.value, 10);
+                    if (!Number.isFinite(hours) || hours <= 0) {
+                        costEl.textContent = "—";
+                        return;
+                    }
+                    costEl.textContent = `${numberFormatter.format(hours * activePrice)} credits`;
+                };
+
+                extendModal.addEventListener("show.bs.modal", (event) => {
+                    const button = event.relatedTarget;
+                    if (!button) {
+                        return;
+                    }
+
+                    const action = button.dataset.rentalAction || "";
+                    const title = button.dataset.rentalTitle || "this rental";
+                    const reference = button.dataset.rentalReference || "";
+                    const duration = button.dataset.rentalDuration || "0";
+                    const maxAdditional = Number.parseInt(button.dataset.rentalMaxAdditional || "0", 10) || 0;
+                    const price = Number.parseFloat(button.dataset.rentalPrice || "0") || 0;
+
+                    activePrice = price;
+                    activeMax = maxAdditional;
+
+                    if (form) form.action = action;
+                    if (titleEl) titleEl.textContent = title;
+                    if (referenceEl) referenceEl.textContent = reference;
+                    if (durationEl) durationEl.textContent = duration;
+                    if (maxAdditionalEl) maxAdditionalEl.textContent = maxAdditional.toString();
+                    if (rateEl) rateEl.textContent = `${numberFormatter.format(price)} credits/hr`;
+                    if (hoursInput) {
+                        hoursInput.max = maxAdditional > 0 ? maxAdditional.toString() : "1";
+                        const initialValue = Math.max(1, Math.min(1, maxAdditional || 1));
+                        hoursInput.value = initialValue.toString();
+                    }
+                    recomputeCost();
+                });
+
+                if (hoursInput) {
+                    hoursInput.addEventListener("input", () => {
+                        const value = Number.parseInt(hoursInput.value, 10);
+                        if (Number.isFinite(value) && activeMax > 0 && value > activeMax) {
+                            hoursInput.value = activeMax.toString();
+                        }
+                        recomputeCost();
+                    });
+                }
+            }
 
             const terminateModal = document.getElementById("terminateRentalModal");
             if (terminateModal) {

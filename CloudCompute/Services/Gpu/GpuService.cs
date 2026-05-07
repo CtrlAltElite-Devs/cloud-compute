@@ -24,14 +24,22 @@ public class GpuService : IGpuService
         _rentalLifecycleService = rentalLifecycleService;
     }
 
-    public async Task<GpuCatalogViewModel> GetCatalogAsync(Guid currentUserId, string? search)
+    public async Task<GpuCatalogViewModel> GetCatalogAsync(Guid currentUserId, GpuCatalogFilter filter)
     {
-        var normalizedSearch = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+        filter ??= new GpuCatalogFilter();
+
+        var normalizedSearch = string.IsNullOrWhiteSpace(filter.Search) ? null : filter.Search.Trim();
+        var pageSize = Math.Clamp(filter.PageSize <= 0 ? GpuCatalogFilter.DefaultPageSize : filter.PageSize, 1, GpuCatalogFilter.MaxPageSize);
+        var page = filter.Page < 1 ? 1 : filter.Page;
+
+        var visibleStatuses = filter.AvailableOnly
+            ? new[] { GpuStatus.Available }
+            : new[] { GpuStatus.Available, GpuStatus.Unavailable, GpuStatus.Maintenance, GpuStatus.Rented };
 
         var query = _dbContext.Gpus
             .AsNoTracking()
             .Include(g => g.Owner)
-            .Where(g => g.Status == GpuStatus.Available);
+            .Where(g => visibleStatuses.Contains(g.Status));
 
         if (normalizedSearch is not null)
         {
@@ -43,8 +51,45 @@ public class GpuService : IGpuService
                     EF.Functions.Like(g.Owner.FirstName + " " + g.Owner.LastName, $"%{normalizedSearch}%"))));
         }
 
+        if (filter.MinPrice.HasValue)
+        {
+            var minPrice = filter.MinPrice.Value;
+            query = query.Where(g => g.PricePerHour >= minPrice);
+        }
+
+        if (filter.MaxPrice.HasValue)
+        {
+            var maxPrice = filter.MaxPrice.Value;
+            query = query.Where(g => g.PricePerHour <= maxPrice);
+        }
+
+        if (filter.MinVramGb.HasValue)
+        {
+            var minVram = filter.MinVramGb.Value;
+            query = query.Where(g => g.VramGb >= minVram);
+        }
+
+        var totalCount = await query.CountAsync();
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+        if (totalPages > 0 && page > totalPages)
+        {
+            page = totalPages;
+        }
+
+        query = filter.Sort switch
+        {
+            GpuCatalogSort.PriceAsc => query.OrderBy(g => g.PricePerHour).ThenByDescending(g => g.CreatedAt),
+            GpuCatalogSort.PriceDesc => query.OrderByDescending(g => g.PricePerHour).ThenByDescending(g => g.CreatedAt),
+            GpuCatalogSort.RatingDesc => query
+                .OrderByDescending(g => g.Reviews.Any() ? (decimal)g.Reviews.Average(r => (double)r.Rating) : g.AverageRating)
+                .ThenByDescending(g => g.Reviews.Count)
+                .ThenByDescending(g => g.CreatedAt),
+            _ => query.OrderByDescending(g => g.CreatedAt)
+        };
+
         var items = await query
-            .OrderByDescending(g => g.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(g => new GpuCatalogItemViewModel
             {
                 Id = g.Id,
@@ -68,8 +113,20 @@ public class GpuService : IGpuService
 
         return new GpuCatalogViewModel
         {
-            Search = normalizedSearch,
-            Items = items
+            Filter = new GpuCatalogFilter
+            {
+                Search = normalizedSearch,
+                Sort = filter.Sort,
+                MinPrice = filter.MinPrice,
+                MaxPrice = filter.MaxPrice,
+                MinVramGb = filter.MinVramGb,
+                AvailableOnly = filter.AvailableOnly,
+                Page = page < 1 ? 1 : page,
+                PageSize = pageSize
+            },
+            Items = items,
+            TotalCount = totalCount,
+            TotalPages = totalPages
         };
     }
 
@@ -77,7 +134,11 @@ public class GpuService : IGpuService
     {
         return await _dbContext.Gpus
             .AsNoTracking()
-            .Where(g => g.Id == gpuId && g.Status == GpuStatus.Available)
+            .Where(g => g.Id == gpuId
+                && (g.Status == GpuStatus.Available
+                    || g.Status == GpuStatus.Unavailable
+                    || g.Status == GpuStatus.Maintenance
+                    || g.Status == GpuStatus.Rented))
             .Select(g => new GpuDetailViewModel
             {
                 Id = g.Id,
