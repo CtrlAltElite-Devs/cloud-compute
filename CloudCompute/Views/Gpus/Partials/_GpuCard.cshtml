@@ -1,9 +1,19 @@
 @model GpuCatalogItemViewModel
+@{
+    var (statusLabel, statusClass) = Model.Status switch
+    {
+        GpuStatus.Available => ("Available", "text-bg-success"),
+        GpuStatus.Rented => ("Rented", "text-bg-warning"),
+        GpuStatus.Maintenance => ("Maintenance", "text-bg-secondary"),
+        GpuStatus.Unavailable => ("Unavailable", "text-bg-secondary"),
+        _ => (Model.Status.ToString(), "text-bg-light")
+    };
+}
 
 <a class="gpu-card-link profile-card h-100 d-flex flex-column p-0 overflow-hidden" asp-controller="Gpus" asp-action="Detail" asp-route-id="@Model.Id" aria-label="View @Model.Model details">
     @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
     {
-        <img src="@Model.ImagePath" alt="@Model.Model" style="height:180px;object-fit:cover;" class="w-100" />
+        <img src="@Model.ImagePath" alt="@Model.Model" loading="lazy" decoding="async" style="height:180px;object-fit:cover;" class="w-100" />
     }
     else
     {
@@ -19,10 +29,7 @@
                 {
                     <span class="badge text-bg-primary">Your listing</span>
                 }
-                else
-                {
-                    <span class="badge text-bg-success">Available</span>
-                }
+                <span class="badge @statusClass">@statusLabel</span>
                 <span class="badge text-bg-secondary">@Model.Name</span>
             </div>
             <h2 class="h5 mb-1">@Model.Model</h2>

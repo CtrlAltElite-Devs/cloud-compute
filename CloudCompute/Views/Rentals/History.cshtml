@@ -28,21 +28,54 @@
     <div class="alert @alertClass" role="alert">@statusMessage</div>
 }
 
-<form method="get" class="mb-4">
-    <div class="d-flex flex-wrap gap-2">
-        <input type="hidden" name="Search" value="@Model.Filter.Search" />
-        <button type="submit" name="Status" value="" class="btn btn-sm @(Model.Filter.Status is null ? "btn-info" : "btn-outline-info")">
-            All
+<form method="get" class="profile-card mb-4">
+    <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-4">
+            <label class="form-label small text-muted" for="history-search">Search</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+                <input id="history-search" name="Search" class="form-control" value="@Model.Filter.Search"
+                       placeholder="GPU model or reference #" />
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label small text-muted" for="history-status">Status</label>
+            <select id="history-status" name="Status" class="form-select">
+                <option value="" selected="@(!Model.Filter.Status.HasValue)">All</option>
+                <option value="@RentalStatus.Active" selected="@(Model.Filter.Status == RentalStatus.Active)">Active</option>
+                <option value="@RentalStatus.Completed" selected="@(Model.Filter.Status == RentalStatus.Completed)">Completed</option>
+                <option value="@RentalStatus.Terminated" selected="@(Model.Filter.Status == RentalStatus.Terminated)">Terminated</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label small text-muted" for="history-gpu-model">GPU model</label>
+            <select id="history-gpu-model" name="GpuModel" class="form-select">
+                <option value="" selected="@(string.IsNullOrWhiteSpace(Model.Filter.GpuModel))">Any model</option>
+                @foreach (var modelName in Model.AvailableGpuModels)
+                {
+                    <option value="@modelName" selected="@(string.Equals(Model.Filter.GpuModel, modelName, StringComparison.OrdinalIgnoreCase))">@modelName</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label small text-muted" for="history-date-from">From</label>
+            <input id="history-date-from" type="date" name="DateFrom" class="form-control"
+                   value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label small text-muted" for="history-date-to">To</label>
+            <input id="history-date-to" type="date" name="DateTo" class="form-control"
+                   value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd"))" />
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+        <button type="submit" class="btn btn-info btn-sm">
+            <i class="bi bi-funnel me-1" aria-hidden="true"></i> Apply
         </button>
-        <button type="submit" name="Status" value="@RentalStatus.Active" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Active ? "btn-info" : "btn-outline-info")">
-            Active
-        </button>
-        <button type="submit" name="Status" value="@RentalStatus.Completed" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Completed ? "btn-info" : "btn-outline-info")">
-            Completed
-        </button>
-        <button type="submit" name="Status" value="@RentalStatus.Terminated" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Terminated ? "btn-info" : "btn-outline-info")">
-            Terminated
-        </button>
+        @if (Model.Filter.HasActiveFilters)
+        {
+            <a class="btn btn-outline-secondary btn-sm" asp-action="History">Clear filters</a>
+        }
     </div>
 </form>
 

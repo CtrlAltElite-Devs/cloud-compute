@@ -166,6 +166,29 @@ public class RentalsController : Controller
         return RedirectToAction(nameof(Active));
     }
 
+    [HttpPost("rentals/extend/{rentalId:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Extend(Guid rentalId, int additionalHours)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var result = await _rentalService.ExtendAsync(userId.Value, rentalId, additionalHours);
+        if (!result.Succeeded)
+        {
+            TempData[GpuConstants.Status.TempDataMessageKey] = result.Errors.FirstOrDefault()?.Message ?? "Rental could not be extended.";
+            TempData[GpuConstants.Status.TempDataTypeKey] = "danger";
+            return RedirectToAction(nameof(Active));
+        }
+
+        TempData[GpuConstants.Status.TempDataMessageKey] = $"Rental extended by {additionalHours} hour(s).";
+        TempData[GpuConstants.Status.TempDataTypeKey] = "success";
+        return RedirectToAction(nameof(Active));
+    }
+
     [HttpPost("rentals/terminate/{rentalId:guid}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Terminate(Guid rentalId)

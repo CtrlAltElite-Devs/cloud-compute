@@ -20,28 +20,28 @@ Tracks remaining work to fully satisfy `CloudCompute-spec.pdf`. Grouped by spec 
 
 ## 5.3 GPU Rental Module (Renter)
 
-- [ ] **Catalog sorting** — add `Sort` enum to `GpuCatalogFilter` (PriceAsc, PriceDesc, RatingDesc, Newest). Replace hardcoded `OrderByDescending(CreatedAt)` in `GpuService.GetCatalogAsync`.
-- [ ] **Catalog filtering** — add to filter VM and apply in service:
+- [x] **Catalog sorting** — add `Sort` enum to `GpuCatalogFilter` (PriceAsc, PriceDesc, RatingDesc, Newest). Replace hardcoded `OrderByDescending(CreatedAt)` in `GpuService.GetCatalogAsync`.
+- [x] **Catalog filtering** — add to filter VM and apply in service:
   - GPU model (multi-select dropdown of distinct models)
   - Price range (min/max credits per hour)
   - VRAM (min GB)
   - Availability (Available only / include all)
-- [ ] **Catalog pagination** — 12 GPUs per page; add `Page` + `PageSize` to filter VM, return `TotalCount` + `TotalPages` in `GpuCatalogViewModel`, add Bootstrap pagination partial.
-- [ ] **Lazy-loaded GPU images** — add `loading="lazy"` to `<img>` in catalog cards and detail page.
-- [ ] **Extend rental** — `RentalService.ExtendAsync(renterId, rentalId, additionalHours)`:
+- [x] **Catalog pagination** — 12 GPUs per page; add `Page` + `PageSize` to filter VM, return `TotalCount` + `TotalPages` in `GpuCatalogViewModel`, add Bootstrap pagination partial.
+- [x] **Lazy-loaded GPU images** — add `loading="lazy"` to `<img>` in catalog cards and detail page.
+- [x] **Extend rental** — `RentalService.ExtendAsync(renterId, rentalId, additionalHours)`:
   - Validate active rental, balance covers extra cost, total duration ≤ 168h
   - Wrap in DB transaction: deduct credits, log `RentalCharge`, log owner `RentalEarning` (90/10), bump `EndTime` and `DurationHours` and `TotalCost`/`PlatformFee`/`OwnerEarnings`
   - Notify renter + owner
   - Add "Extend" button + modal on Active Rentals view
-- [ ] **Prorated early termination refund** — extend `RentalService.TerminateAsync`:
+- [x] **Prorated early termination refund** — extend `RentalService.TerminateAsync`:
   - Compute used hours = `ceil((now - StartTime).TotalHours)` (or per-minute proration — pick and document)
   - `refund = TotalCost - (usedHours * PricePerHour)`; clamp ≥ 0
   - Inside the existing transaction: credit renter, debit owner (or only refund the unused share of `OwnerEarnings`), insert `CreditTransaction` rows of type `Refund` for renter and `Revoke` for owner with `RelatedRentalId`
   - Update `Rental.TotalCost` / `OwnerEarnings` / `PlatformFee` to reflect actual usage
   - Cover with a unit/integration test if a test project exists
-- [ ] **Rental history search by reference number** — extend the search predicate in `RentalService.GetHistoryAsync` to also match `ReferenceNumber`.
-- [ ] **Rental history date-range filter** — add `DateFrom` / `DateTo` to `RentalHistoryFilterViewModel` and apply on `StartTime`.
-- [ ] **Rental history GPU model filter** — spec calls this out separately from search; add `GpuModel` filter.
+- [x] **Rental history search by reference number** — extend the search predicate in `RentalService.GetHistoryAsync` to also match `ReferenceNumber`.
+- [x] **Rental history date-range filter** — add `DateFrom` / `DateTo` to `RentalHistoryFilterViewModel` and apply on `StartTime`.
+- [x] **Rental history GPU model filter** — spec calls this out separately from search; add `GpuModel` filter.
 
 ## 5.4 Review & Rating System
 

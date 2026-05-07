@@ -224,19 +224,103 @@ public class RentalService : IRentalService
             }
 
             var now = DateTime.UtcNow;
+            var originalDurationHours = rental.DurationHours;
+
+            // Prorate by whole hours used (rounded up) to give renters a fair share back
+            // when they terminate before the rental window ends.
+            var elapsedHoursRaw = (now - rental.StartTime).TotalHours;
+            var usedHours = (int)Math.Ceiling(Math.Max(elapsedHoursRaw, 0));
+            usedHours = Math.Clamp(usedHours, 0, originalDurationHours);
+
+            var newTotalCost = decimal.Round(rental.PricePerHour * usedHours, 2, MidpointRounding.AwayFromZero);
+            var newPlatformFee = decimal.Round(newTotalCost * PlatformFeeRate, 2, MidpointRounding.AwayFromZero);
+            var newOwnerEarnings = newTotalCost - newPlatformFee;
+
+            var renterRefund = rental.TotalCost - newTotalCost;
+            if (renterRefund < 0)
+            {
+                renterRefund = 0;
+            }
+
+            var ownerClawback = rental.OwnerEarnings - newOwnerEarnings;
+            if (ownerClawback < 0)
+            {
+                ownerClawback = 0;
+            }
+
+            decimal renterBalanceAfter = 0;
+            if (renterRefund > 0)
+            {
+                await _dbContext.Users
+                    .Where(u => u.Id == rental.RenterId)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.CreditBalance, u => u.CreditBalance + renterRefund));
+
+                renterBalanceAfter = await _dbContext.Users
+                    .AsNoTracking()
+                    .Where(u => u.Id == rental.RenterId)
+                    .Select(u => u.CreditBalance)
+                    .FirstAsync();
+            }
+
+            decimal ownerBalanceAfter = 0;
+            if (ownerClawback > 0)
+            {
+                await _dbContext.Users
+                    .Where(u => u.Id == rental.OwnerId)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.CreditBalance, u => u.CreditBalance - ownerClawback));
+
+                ownerBalanceAfter = await _dbContext.Users
+                    .AsNoTracking()
+                    .Where(u => u.Id == rental.OwnerId)
+                    .Select(u => u.CreditBalance)
+                    .FirstAsync();
+            }
+
             rental.Status = RentalStatus.Terminated;
             rental.TerminatedEarly = true;
             rental.EndTime = now;
+            rental.DurationHours = Math.Max(usedHours, 0);
+            rental.TotalCost = newTotalCost;
+            rental.PlatformFee = newPlatformFee;
+            rental.OwnerEarnings = newOwnerEarnings;
 
             if (rental.Gpu is not null)
             {
                 rental.Gpu.Status = GpuStatus.Available;
             }
 
+            if (renterRefund > 0)
+            {
+                _dbContext.CreditTransactions.Add(new CreditTransaction
+                {
+                    UserId = rental.RenterId,
+                    Type = CreditTransactionType.Refund,
+                    Amount = renterRefund,
+                    BalanceAfter = renterBalanceAfter,
+                    RelatedRentalId = rental.Id,
+                    Reason = $"Refund for early termination of rental {rental.ReferenceNumber} ({usedHours} of {originalDurationHours} hour(s) used)"
+                });
+            }
+
+            if (ownerClawback > 0)
+            {
+                _dbContext.CreditTransactions.Add(new CreditTransaction
+                {
+                    UserId = rental.OwnerId,
+                    Type = CreditTransactionType.Revoke,
+                    Amount = -ownerClawback,
+                    BalanceAfter = ownerBalanceAfter,
+                    RelatedRentalId = rental.Id,
+                    Reason = $"Owner earnings adjusted for early termination of rental {rental.ReferenceNumber}"
+                });
+            }
+
             _notificationService.Create(
                 rental.RenterId,
                 NotificationType.RentalTerminated,
-                $"Rental {rental.ReferenceNumber} was terminated.",
+                renterRefund > 0
+                    ? $"Rental {rental.ReferenceNumber} was terminated. {renterRefund:N2} credits refunded."
+                    : $"Rental {rental.ReferenceNumber} was terminated.",
                 "/rentals/history");
 
             _notificationService.Create(
@@ -256,9 +340,125 @@ public class RentalService : IRentalService
         }
     }
 
+    public async Task<ServiceResult> ExtendAsync(Guid renterId, Guid rentalId, int additionalHours)
+    {
+        if (additionalHours < 1)
+        {
+            return ServiceResult.Failed(ModelError("Extension must be at least 1 hour."));
+        }
+
+        await using var tx = await _dbContext.Database.BeginTransactionAsync();
+        try
+        {
+            var rental = await _dbContext.Rentals
+                .Include(r => r.Gpu)
+                .Include(r => r.Renter)
+                .FirstOrDefaultAsync(r => r.Id == rentalId && r.RenterId == renterId && r.Status == RentalStatus.Active);
+
+            if (rental is null)
+            {
+                await tx.RollbackAsync();
+                return ServiceResult.Failed(ModelError("Active rental could not be found."));
+            }
+
+            var newDuration = rental.DurationHours + additionalHours;
+            if (newDuration > MaxRentalHours)
+            {
+                await tx.RollbackAsync();
+                return ServiceResult.Failed(ModelError($"Total rental duration cannot exceed {MaxRentalHours} hours."));
+            }
+
+            var extraCost = decimal.Round(rental.PricePerHour * additionalHours, 2, MidpointRounding.AwayFromZero);
+            var extraPlatformFee = decimal.Round(extraCost * PlatformFeeRate, 2, MidpointRounding.AwayFromZero);
+            var extraOwnerEarnings = extraCost - extraPlatformFee;
+
+            var renterDebitCount = await _dbContext.Users
+                .Where(u => u.Id == renterId && u.CreditBalance >= extraCost)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.CreditBalance, u => u.CreditBalance - extraCost));
+
+            if (renterDebitCount == 0)
+            {
+                await tx.RollbackAsync();
+                return ServiceResult.Failed(ModelError("Your credit balance is not enough to extend this rental."));
+            }
+
+            var renterBalanceAfter = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Id == renterId)
+                .Select(u => u.CreditBalance)
+                .FirstAsync();
+
+            await _dbContext.Users
+                .Where(u => u.Id == rental.OwnerId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.CreditBalance, u => u.CreditBalance + extraOwnerEarnings));
+
+            var ownerBalanceAfter = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Id == rental.OwnerId)
+                .Select(u => u.CreditBalance)
+                .FirstAsync();
+
+            rental.DurationHours = newDuration;
+            rental.EndTime = rental.StartTime.AddHours(newDuration);
+            rental.TotalCost += extraCost;
+            rental.PlatformFee += extraPlatformFee;
+            rental.OwnerEarnings += extraOwnerEarnings;
+            rental.ExpiryNotifiedAt = null;
+
+            var gpuModel = rental.Gpu?.Model ?? "GPU";
+
+            _dbContext.CreditTransactions.Add(new CreditTransaction
+            {
+                UserId = rental.RenterId,
+                Type = CreditTransactionType.RentalCharge,
+                Amount = -extraCost,
+                BalanceAfter = renterBalanceAfter,
+                RelatedRentalId = rental.Id,
+                Reason = $"Rental extension ({additionalHours} hr) for {gpuModel}"
+            });
+
+            _dbContext.CreditTransactions.Add(new CreditTransaction
+            {
+                UserId = rental.OwnerId,
+                Type = CreditTransactionType.RentalEarning,
+                Amount = extraOwnerEarnings,
+                BalanceAfter = ownerBalanceAfter,
+                RelatedRentalId = rental.Id,
+                Reason = $"Rental extension earning ({additionalHours} hr) for {gpuModel} after 10% platform fee"
+            });
+
+            _notificationService.Create(
+                rental.RenterId,
+                NotificationType.RentalConfirmed,
+                $"Rental {rental.ReferenceNumber} extended by {additionalHours} hour(s).",
+                "/rentals/active");
+
+            _notificationService.Create(
+                rental.OwnerId,
+                NotificationType.RentalConfirmed,
+                $"{rental.Renter?.FullName ?? "A renter"} extended rental {rental.ReferenceNumber} by {additionalHours} hour(s).",
+                "/gpus/mine");
+
+            await _dbContext.SaveChangesAsync();
+            await tx.CommitAsync();
+            return ServiceResult.Success();
+        }
+        catch (DbUpdateException)
+        {
+            await tx.RollbackAsync();
+            return ServiceResult.Failed(ModelError("We couldn't extend the rental. Please try again."));
+        }
+    }
+
     public async Task<ActiveRentalsViewModel> GetActiveAsync(Guid renterId)
     {
         await _rentalLifecycleService.CompleteExpiredActiveRentalsAsync();
+
+        var balance = await _dbContext.Users
+            .AsNoTracking()
+            .Where(u => u.Id == renterId)
+            .Select(u => (decimal?)u.CreditBalance)
+            .FirstOrDefaultAsync() ?? 0m;
 
         var items = await _dbContext.Rentals
             .AsNoTracking()
@@ -275,11 +475,12 @@ public class RentalService : IRentalService
                 StartTime = r.StartTime,
                 EndTime = r.EndTime,
                 DurationHours = r.DurationHours,
+                PricePerHour = r.PricePerHour,
                 TotalCost = r.TotalCost
             })
             .ToListAsync();
 
-        return new ActiveRentalsViewModel { Items = items };
+        return new ActiveRentalsViewModel { Items = items, CurrentBalance = balance };
     }
 
     public async Task<RentalHistoryViewModel> GetHistoryAsync(Guid renterId, RentalHistoryFilterViewModel filter)
@@ -289,7 +490,10 @@ public class RentalService : IRentalService
         filter = new RentalHistoryFilterViewModel
         {
             Search = filter?.Search?.Trim(),
-            Status = filter?.Status
+            Status = filter?.Status,
+            GpuModel = string.IsNullOrWhiteSpace(filter?.GpuModel) ? null : filter.GpuModel.Trim(),
+            DateFrom = filter?.DateFrom,
+            DateTo = filter?.DateTo
         };
 
         var baseQuery = _dbContext.Rentals
@@ -298,16 +502,44 @@ public class RentalService : IRentalService
 
         var hasAnyRentals = await baseQuery.AnyAsync();
 
+        var availableGpuModels = await baseQuery
+            .Where(r => r.Gpu != null)
+            .Select(r => r.Gpu!.Model)
+            .Distinct()
+            .OrderBy(m => m)
+            .ToListAsync();
+
         var query = baseQuery;
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
-            query = query.Where(r => r.Gpu != null && r.Gpu.Model.Contains(filter.Search));
+            var search = filter.Search;
+            query = query.Where(r =>
+                (r.Gpu != null && EF.Functions.Like(r.Gpu.Model, $"%{search}%")) ||
+                EF.Functions.Like(r.ReferenceNumber, $"%{search}%"));
         }
 
         if (filter.Status.HasValue)
         {
             query = query.Where(r => r.Status == filter.Status.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.GpuModel))
+        {
+            var modelName = filter.GpuModel;
+            query = query.Where(r => r.Gpu != null && r.Gpu.Model == modelName);
+        }
+
+        if (filter.DateFrom.HasValue)
+        {
+            var fromUtc = DateTime.SpecifyKind(filter.DateFrom.Value.Date, DateTimeKind.Utc);
+            query = query.Where(r => r.StartTime >= fromUtc);
+        }
+
+        if (filter.DateTo.HasValue)
+        {
+            var toUtc = DateTime.SpecifyKind(filter.DateTo.Value.Date.AddDays(1), DateTimeKind.Utc);
+            query = query.Where(r => r.StartTime < toUtc);
         }
 
         var items = await query
@@ -334,6 +566,7 @@ public class RentalService : IRentalService
         {
             Filter = filter,
             Items = items,
+            AvailableGpuModels = availableGpuModels,
             HasAnyRentals = hasAnyRentals
         };
     }
