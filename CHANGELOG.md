@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Owner-side "My Listings" page at `/gpus/mine` that shows each of the signed-in user's GPUs as a card with photo, model, status badge (PENDING REVIEW / LIVE / RENTED / PAUSED / REJECTED), specs, rental count, average rating, and (for rejected listings) the admin's rejection reason
+- Inline owner actions on `/gpus/mine`: an Available toggle that flips a listing between `Available` and `Maintenance` (`POST /gpus/{id}/toggle-status`), an edit shortcut, and a delete action (`POST /gpus/{id}/delete`) that refuses listings with rental or review history and cleans up the photo file from disk on success
+- "Edit Listing" page at `/gpus/{id}/edit` that reuses the List a GPU form fields for hardware, pricing, description, and an optional photo replacement (the previous photo is deleted only after the database update succeeds)
+- Empty-state CTA on `/gpus/mine` for owners with no listings yet, plus a "+ New Listing" header button that links straight to `/gpus/create`
 - Admin dashboard at `/admin/dashboard` with at-a-glance cards (pending verifications, pending listings, active/suspended users, credits in circulation) and a recent admin credit-activity table
 - Admin user management at `/admin/users` with name/username/email search, role/status/verification filters, paged list, and `/admin/users/{id}` detail view showing recent credit transactions and owned GPUs
 - Admin user actions: suspend/reactivate (with self-action and admin-on-admin guards) and a manual `IsOwnerVerified` toggle that bypasses the verification queue

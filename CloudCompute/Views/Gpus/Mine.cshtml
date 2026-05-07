@@ -1,18 +1,138 @@
+@using CloudCompute.Constants
+@using CloudCompute.Models.Enums
+@model MyListingsViewModel
 @{
     Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
     ViewData["Title"] = "My Listings";
+
+    var statusMessage = TempData[GpuConstants.Status.TempDataMessageKey] as string;
+    var statusType = TempData[GpuConstants.Status.TempDataTypeKey] as string;
+    var alertClass = statusType == "danger" ? "alert-danger" : "alert-success";
 }
 
-<section class="mb-4">
-    <p class="text-uppercase text-muted small fw-semibold mb-1">Owner</p>
-    <h1 class="h3 mb-1">My Listings</h1>
-    <p class="text-muted mb-0">Coming soon.</p>
+<section class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">My Listings</h1>
+        <p class="text-muted mb-0">Manage the GPUs you've made available for rent.</p>
+    </div>
+    <a class="btn btn-info" asp-action="Create">
+        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> New Listing
+    </a>
 </section>
 
-<div class="border rounded-3 p-4">
-    <p class="mb-0">
-        Manage the GPUs you've listed for rent. You'll see each listing's approval status
-        (pending, approved, or rejected), hourly price, and any active rentals,
-        plus the ability to edit or retire a listing.
-    </p>
-</div>
+@if (!string.IsNullOrWhiteSpace(statusMessage))
+{
+    <div class="alert @alertClass" role="alert">@statusMessage</div>
+}
+
+@if (Model.Listings.Count == 0)
+{
+    <div class="profile-card text-center py-5">
+        <i class="bi bi-cpu fs-1 text-muted" aria-hidden="true"></i>
+        <h2 class="h5 mt-3 mb-2">No listings yet</h2>
+        <p class="text-muted mb-3">Submit your first GPU and start earning credits once it's approved.</p>
+        <a class="btn btn-info" asp-action="Create">
+            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> List a GPU
+        </a>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-3">
+        @foreach (var item in Model.Listings)
+        {
+            <div class="profile-card">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <div class="flex-shrink-0">
+                        @if (!string.IsNullOrWhiteSpace(item.ImagePath))
+                        {
+                            <img src="@item.ImagePath" alt="@item.Model" class="rounded-3"
+                                 style="width:96px;height:72px;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-3 d-flex align-items-center justify-content-center bg-body-secondary text-muted"
+                                 style="width:96px;height:72px;">
+                                <i class="bi bi-cpu fs-3" aria-hidden="true"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <h2 class="h6 mb-0">@item.Model</h2>
+                            <span class="badge @item.BadgeCssClass">@item.BadgeLabel</span>
+                        </div>
+                        <div class="text-muted small">
+                            @item.VramGb GB &middot; @item.CudaCores.ToString("N0") cores &middot; $@item.PricePerHour.ToString("0.##")/hr
+                        </div>
+                        <div class="text-muted small mt-1">
+                            @item.RentalCount rentals
+                            @if (item.HasReviews || item.AverageRating > 0)
+                            {
+                                <span class="mx-1">&middot;</span>
+                                <i class="bi bi-star-fill text-warning" aria-hidden="true"></i>
+                                <span>@item.AverageRating.ToString("0.0")</span>
+                            }
+                        </div>
+                        @if (item.Status == GpuStatus.Rejected && !string.IsNullOrWhiteSpace(item.RejectionReason))
+                        {
+                            <div class="text-danger small mt-1">
+                                <i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>@item.RejectionReason
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                        <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post" class="m-0">
+                            @Html.AntiForgeryToken()
+                            <label class="form-check form-switch d-flex align-items-center gap-2 mb-0
+                                          @(item.IsToggleEnabled ? "" : "opacity-50")"
+                                   title="@(item.IsToggleEnabled ? "Toggle availability" : "Available only for approved listings")">
+                                <input class="form-check-input m-0" type="checkbox"
+                                       checked="@item.IsToggleOn"
+                                       disabled="@(!item.IsToggleEnabled)"
+                                       onchange="this.form.submit()" />
+                                <span class="form-check-label small">Available</span>
+                            </label>
+                        </form>
+
+                        @if (item.IsEditEnabled)
+                        {
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.Id"
+                               aria-label="Edit listing" title="Edit">
+                                <i class="bi bi-pencil" aria-hidden="true"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="btn btn-sm btn-outline-secondary disabled" aria-disabled="true"
+                                  title="Cannot edit while rented">
+                                <i class="bi bi-pencil" aria-hidden="true"></i>
+                            </span>
+                        }
+
+                        @if (item.IsDeleteEnabled)
+                        {
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="m-0"
+                                  onsubmit="return confirm('Delete this listing? This cannot be undone.');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        aria-label="Delete listing" title="Delete">
+                                    <i class="bi bi-trash" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="btn btn-sm btn-outline-danger disabled" aria-disabled="true"
+                                  title="Cannot delete listings with rental or review history">
+                                <i class="bi bi-trash" aria-hidden="true"></i>
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
