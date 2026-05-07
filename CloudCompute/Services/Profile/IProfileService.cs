@@ -10,4 +10,6 @@ public interface IProfileService
     Task<ServiceResult> ChangePasswordAsync(Guid userId, ChangePasswordViewModel model);
 
     Task<ServiceResult> UpdateAvatarAsync(Guid userId, IFormFile? file);
+
+    Task<ServiceResult> DeleteAccountAsync(Guid userId, DeleteAccountViewModel model);
 }

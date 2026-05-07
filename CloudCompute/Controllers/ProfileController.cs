@@ -93,6 +93,33 @@ public class ProfileController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAccount(DeleteAccountViewModel model)
+    {
+        var user = await LoadCurrentUserAsync();
+        if (user is null)
+        {
+            return Challenge();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            SetStatus(AuthConstants.Profile.AccountDeletePasswordRequired, success: false);
+            return RedirectToAction(nameof(Index));
+        }
+
+        var result = await _profileService.DeleteAccountAsync(user.Id, model);
+        if (!result.Succeeded)
+        {
+            var message = result.Errors.FirstOrDefault()?.Message ?? AuthConstants.Profile.AccountDeletePasswordRequired;
+            SetStatus(message, success: false);
+            return RedirectToAction(nameof(Index));
+        }
+
+        return Redirect(AuthConstants.Routes.MemberLoginPath);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadAvatar(IFormFile? avatar)
     {
         var userId = GetCurrentUserId();

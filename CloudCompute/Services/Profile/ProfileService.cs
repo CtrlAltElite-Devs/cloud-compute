@@ -2,6 +2,7 @@ using System.Security.Claims;
 using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models;
+using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
 using CloudCompute.ViewModels.Profile;
 using Microsoft.AspNetCore.Authentication;
@@ -172,6 +173,69 @@ public class ProfileService : IProfileService
         }
 
         await RefreshSignInAsync(user);
+
+        return ServiceResult.Success();
+    }
+
+    public async Task<ServiceResult> DeleteAccountAsync(Guid userId, DeleteAccountViewModel model)
+    {
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null)
+        {
+            return ServiceResult.Failed(CreateModelError(AuthConstants.Profile.UserNotFound));
+        }
+
+        if (string.IsNullOrEmpty(user.PasswordHash) ||
+            _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.CurrentPassword) == PasswordVerificationResult.Failed)
+        {
+            return ServiceResult.Failed(new ServiceError(
+                nameof(DeleteAccountViewModel.CurrentPassword),
+                AuthConstants.Profile.IncorrectCurrentPassword));
+        }
+
+        var hasActiveRentals = await _dbContext.Rentals
+            .AnyAsync(r => r.RenterId == userId && r.Status == RentalStatus.Active);
+        if (hasActiveRentals)
+        {
+            return ServiceResult.Failed(CreateModelError(AuthConstants.Profile.AccountDeleteHasActiveRentals));
+        }
+
+        await using var tx = await _dbContext.Database.BeginTransactionAsync();
+        try
+        {
+            await _dbContext.Gpus
+                .Where(g => g.OwnerId == userId &&
+                            (g.Status == GpuStatus.Available || g.Status == GpuStatus.Pending))
+                .ExecuteUpdateAsync(setters => setters.SetProperty(g => g.Status, GpuStatus.Maintenance));
+
+            var anonymizationSuffix = Guid.NewGuid().ToString("N").Substring(0, 12);
+            var previousAvatarPath = user.ProfilePicturePath;
+
+            user.IsActive = false;
+            user.IsOwnerVerified = false;
+            user.FirstName = "Deleted";
+            user.LastName = "User";
+            user.UserName = $"deleted-{anonymizationSuffix}";
+            user.Email = $"deleted-{anonymizationSuffix}@deleted.local";
+            user.Bio = null;
+            user.ProfilePicturePath = null;
+            user.PasswordHash = string.Empty;
+
+            await _dbContext.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            if (!string.IsNullOrWhiteSpace(previousAvatarPath))
+            {
+                TryDeletePhysicalFile(MapToPhysicalPath(previousAvatarPath));
+            }
+        }
+        catch (DbUpdateException)
+        {
+            await tx.RollbackAsync();
+            return ServiceResult.Failed(CreateModelError(AuthConstants.Messages.DuplicateAccount));
+        }
+
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
         return ServiceResult.Success();
     }

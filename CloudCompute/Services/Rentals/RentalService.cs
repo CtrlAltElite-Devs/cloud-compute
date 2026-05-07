@@ -80,6 +80,11 @@ public class RentalService : IRentalService
                 return Fail("Account could not be found.");
             }
 
+            if (!renter.IsActive)
+            {
+                return Fail(AuthConstants.Messages.SuspendedAccountAction);
+            }
+
             var gpu = await _dbContext.Gpus
                 .AsNoTracking()
                 .Include(g => g.Owner)
