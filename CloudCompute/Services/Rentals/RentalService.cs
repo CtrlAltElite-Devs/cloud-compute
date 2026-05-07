@@ -16,11 +16,16 @@ public class RentalService : IRentalService
 
     private readonly AppDbContext _dbContext;
     private readonly INotificationService _notificationService;
+    private readonly IRentalLifecycleService _rentalLifecycleService;
 
-    public RentalService(AppDbContext dbContext, INotificationService notificationService)
+    public RentalService(
+        AppDbContext dbContext,
+        INotificationService notificationService,
+        IRentalLifecycleService rentalLifecycleService)
     {
         _dbContext = dbContext;
         _notificationService = notificationService;
+        _rentalLifecycleService = rentalLifecycleService;
     }
 
     public async Task<RentalConfirmViewModel?> GetConfirmationAsync(Guid renterId, Guid gpuId, int? durationHours = null)
@@ -197,8 +202,59 @@ public class RentalService : IRentalService
         }
     }
 
+    public async Task<ServiceResult> TerminateAsync(Guid renterId, Guid rentalId)
+    {
+        await using var tx = await _dbContext.Database.BeginTransactionAsync();
+        try
+        {
+            var rental = await _dbContext.Rentals
+                .Include(r => r.Gpu)
+                .Include(r => r.Renter)
+                .FirstOrDefaultAsync(r => r.Id == rentalId && r.RenterId == renterId && r.Status == RentalStatus.Active);
+
+            if (rental is null)
+            {
+                await tx.RollbackAsync();
+                return ServiceResult.Failed(ModelError("Active rental could not be found."));
+            }
+
+            var now = DateTime.UtcNow;
+            rental.Status = RentalStatus.Terminated;
+            rental.TerminatedEarly = true;
+            rental.EndTime = now;
+
+            if (rental.Gpu is not null)
+            {
+                rental.Gpu.Status = GpuStatus.Available;
+            }
+
+            _notificationService.Create(
+                rental.RenterId,
+                NotificationType.RentalTerminated,
+                $"Rental {rental.ReferenceNumber} was terminated.",
+                "/rentals/history");
+
+            _notificationService.Create(
+                rental.OwnerId,
+                NotificationType.RentalTerminated,
+                $"{rental.Renter?.FullName ?? "A renter"} terminated rental {rental.ReferenceNumber}.",
+                "/gpus/mine");
+
+            await _dbContext.SaveChangesAsync();
+            await tx.CommitAsync();
+            return ServiceResult.Success();
+        }
+        catch (DbUpdateException)
+        {
+            await tx.RollbackAsync();
+            return ServiceResult.Failed(ModelError("We couldn't terminate the rental. Please try again."));
+        }
+    }
+
     public async Task<ActiveRentalsViewModel> GetActiveAsync(Guid renterId)
     {
+        await _rentalLifecycleService.CompleteExpiredActiveRentalsAsync();
+
         var items = await _dbContext.Rentals
             .AsNoTracking()
             .Where(r => r.RenterId == renterId && r.Status == RentalStatus.Active)
@@ -219,6 +275,88 @@ public class RentalService : IRentalService
             .ToListAsync();
 
         return new ActiveRentalsViewModel { Items = items };
+    }
+
+    public async Task<RentalHistoryViewModel> GetHistoryAsync(Guid renterId, RentalHistoryFilterViewModel filter)
+    {
+        await _rentalLifecycleService.CompleteExpiredActiveRentalsAsync();
+
+        filter = new RentalHistoryFilterViewModel
+        {
+            Search = filter?.Search?.Trim(),
+            Status = filter?.Status
+        };
+
+        var baseQuery = _dbContext.Rentals
+            .AsNoTracking()
+            .Where(r => r.RenterId == renterId);
+
+        var hasAnyRentals = await baseQuery.AnyAsync();
+
+        var query = baseQuery;
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            query = query.Where(r => r.Gpu != null && r.Gpu.Model.Contains(filter.Search));
+        }
+
+        if (filter.Status.HasValue)
+        {
+            query = query.Where(r => r.Status == filter.Status.Value);
+        }
+
+        var items = await query
+            .OrderByDescending(r => r.StartTime)
+            .Select(r => new RentalHistoryItemViewModel
+            {
+                Id = r.Id,
+                ReferenceNumber = r.ReferenceNumber,
+                GpuName = r.Gpu != null ? r.Gpu.Name : string.Empty,
+                GpuModel = r.Gpu != null ? r.Gpu.Model : string.Empty,
+                ImagePath = r.Gpu != null ? r.Gpu.ImagePath : null,
+                OwnerDisplayName = r.Owner != null ? (r.Owner.FirstName + " " + r.Owner.LastName) : "Unknown owner",
+                Status = r.Status,
+                StartTime = r.StartTime,
+                EndTime = r.EndTime,
+                DurationHours = r.DurationHours,
+                PricePerHour = r.PricePerHour,
+                TotalCost = r.TotalCost,
+                HasReview = r.Review != null
+            })
+            .ToListAsync();
+
+        return new RentalHistoryViewModel
+        {
+            Filter = filter,
+            Items = items,
+            HasAnyRentals = hasAnyRentals
+        };
+    }
+
+    public async Task<RentalReceiptViewModel?> GetReceiptAsync(Guid renterId, Guid rentalId)
+    {
+        await _rentalLifecycleService.CompleteExpiredActiveRentalsAsync();
+
+        return await _dbContext.Rentals
+            .AsNoTracking()
+            .Where(r => r.Id == rentalId && r.RenterId == renterId)
+            .Select(r => new RentalReceiptViewModel
+            {
+                Id = r.Id,
+                ReferenceNumber = r.ReferenceNumber,
+                GpuName = r.Gpu != null ? r.Gpu.Name : string.Empty,
+                GpuModel = r.Gpu != null ? r.Gpu.Model : string.Empty,
+                OwnerDisplayName = r.Owner != null ? (r.Owner.FirstName + " " + r.Owner.LastName) : "Unknown owner",
+                Status = r.Status,
+                StartTime = r.StartTime,
+                EndTime = r.EndTime,
+                DurationHours = r.DurationHours,
+                PricePerHour = r.PricePerHour,
+                TotalCost = r.TotalCost,
+                PlatformFee = r.PlatformFee,
+                OwnerEarnings = r.OwnerEarnings
+            })
+            .FirstOrDefaultAsync();
     }
 
     private static ServiceResult Validate(Guid renterId, decimal balance, CloudCompute.Models.Gpu gpu, int durationHours)

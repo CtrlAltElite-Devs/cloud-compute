@@ -141,3 +141,39 @@
         </section>
     </div>
 </div>
+
+<section class="profile-card mt-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="h5 mb-0">Recent reviews</h2>
+        <span class="text-muted small">@Model.ReviewCount total</span>
+    </div>
+
+    @if (Model.RecentReviews.Count == 0)
+    {
+        <div class="text-muted">No reviews yet.</div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var review in Model.RecentReviews)
+            {
+                <article class="border rounded-3 p-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                        <div class="fw-semibold">@review.RenterDisplayName</div>
+                        <div class="text-warning" aria-label="@review.Rating out of 5 stars">
+                            @for (var i = 1; i <= 5; i++)
+                            {
+                                <i class="bi @(i <= review.Rating ? "bi-star-fill" : "bi-star")" aria-hidden="true"></i>
+                            }
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(review.Comment))
+                    {
+                        <p class="mb-2 text-muted">@review.Comment</p>
+                    }
+                    <div class="small text-muted">@review.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</div>
+                </article>
+            }
+        </div>
+    }
+</section>

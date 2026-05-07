@@ -2,6 +2,7 @@ using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models.Enums;
 using CloudCompute.Services.Common;
+using CloudCompute.Services.Rentals;
 using CloudCompute.ViewModels.Gpus;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +12,16 @@ public class GpuService : IGpuService
 {
     private readonly AppDbContext _dbContext;
     private readonly IWebHostEnvironment _environment;
+    private readonly IRentalLifecycleService _rentalLifecycleService;
 
-    public GpuService(AppDbContext dbContext, IWebHostEnvironment environment)
+    public GpuService(
+        AppDbContext dbContext,
+        IWebHostEnvironment environment,
+        IRentalLifecycleService rentalLifecycleService)
     {
         _dbContext = dbContext;
         _environment = environment;
+        _rentalLifecycleService = rentalLifecycleService;
     }
 
     public async Task<GpuCatalogViewModel> GetCatalogAsync(Guid currentUserId, string? search)
@@ -92,7 +98,18 @@ public class GpuService : IGpuService
                     ? (decimal)g.Reviews.Average(r => (double)r.Rating)
                     : g.AverageRating,
                 ReviewCount = g.Reviews.Count,
-                CanRent = g.OwnerId != currentUserId && g.Status == GpuStatus.Available
+                CanRent = g.OwnerId != currentUserId && g.Status == GpuStatus.Available,
+                RecentReviews = g.Reviews
+                    .OrderByDescending(r => r.CreatedAt)
+                    .Take(5)
+                    .Select(r => new GpuReviewItemViewModel
+                    {
+                        RenterDisplayName = r.Renter != null ? (r.Renter.FirstName + " " + r.Renter.LastName) : "Unknown renter",
+                        Rating = r.Rating,
+                        Comment = r.Comment,
+                        CreatedAt = r.CreatedAt
+                    })
+                    .ToList()
             })
             .FirstOrDefaultAsync();
     }
@@ -171,6 +188,33 @@ public class GpuService : IGpuService
             .ToListAsync();
 
         return new MyListingsViewModel { Listings = listings };
+    }
+
+    public async Task<RentedGpusViewModel> GetRentedAsync(Guid ownerId)
+    {
+        await _rentalLifecycleService.CompleteExpiredActiveRentalsAsync();
+
+        var rentals = await _dbContext.Rentals
+            .AsNoTracking()
+            .Where(r => r.OwnerId == ownerId && r.Status == RentalStatus.Active)
+            .OrderBy(r => r.EndTime)
+            .Select(r => new RentedGpuItemViewModel
+            {
+                RentalId = r.Id,
+                ReferenceNumber = r.ReferenceNumber,
+                GpuName = r.Gpu != null ? r.Gpu.Name : string.Empty,
+                GpuModel = r.Gpu != null ? r.Gpu.Model : string.Empty,
+                ImagePath = r.Gpu != null ? r.Gpu.ImagePath : null,
+                RenterDisplayName = r.Renter != null ? (r.Renter.FirstName + " " + r.Renter.LastName) : "Unknown renter",
+                StartTime = r.StartTime,
+                EndTime = r.EndTime,
+                DurationHours = r.DurationHours,
+                OwnerEarnings = r.OwnerEarnings,
+                TotalCost = r.TotalCost
+            })
+            .ToListAsync();
+
+        return new RentedGpusViewModel { Items = rentals };
     }
 
     public async Task<ServiceResult> ToggleStatusAsync(Guid ownerId, Guid gpuId)

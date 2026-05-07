@@ -22,8 +22,8 @@ public class GpuCreateViewModel
     [Display(Name = "CUDA / Stream Cores")]
     public int CudaCores { get; set; }
 
-    [Range(typeof(decimal), "1", "100000", ErrorMessage = "Price per hour must be between $1 and $100,000.")]
-    [Display(Name = "Price per hour ($)")]
+    [Range(typeof(decimal), "1", "100000", ErrorMessage = "Price per hour must be between 1 and 100,000 credits.")]
+    [Display(Name = "Price per hour (credits)")]
     public decimal PricePerHour { get; set; }
 
     [Range(1, 168, ErrorMessage = "Min rental duration must be between 1 and 168 hours.")]

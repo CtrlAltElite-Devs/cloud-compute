@@ -35,6 +35,7 @@ public class DashboardNotificationPreviewViewModel
         NotificationType.RentalConfirmed => "bi-lightning-charge text-info",
         NotificationType.RentalExpiring => "bi-clock-history text-warning",
         NotificationType.RentalCompleted => "bi-check2-circle text-success",
+        NotificationType.RentalTerminated => "bi-x-circle text-danger",
         NotificationType.ReviewReceived => "bi-star text-warning",
         _ => "bi-bell text-secondary"
     };

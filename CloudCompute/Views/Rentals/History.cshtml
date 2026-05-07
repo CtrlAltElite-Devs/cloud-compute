@@ -1,17 +1,194 @@
+@using CloudCompute.Constants
+@model RentalHistoryViewModel
 @{
     Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
-    ViewData["Title"] = "History";
+    ViewData["Title"] = "Rental History";
+    var statusMessage = TempData[GpuConstants.Status.TempDataMessageKey] as string;
+    var statusType = TempData[GpuConstants.Status.TempDataTypeKey] as string;
+    var alertClass = statusType == "danger" ? "alert-danger" : "alert-success";
+
+    string StatusBadgeClass(RentalStatus status) => status switch
+    {
+        RentalStatus.Active => "text-bg-success",
+        RentalStatus.Completed => "text-bg-success",
+        RentalStatus.Terminated => "text-bg-warning",
+        _ => "text-bg-light"
+    };
 }
 
 <section class="mb-4">
     <p class="text-uppercase text-muted small fw-semibold mb-1">Platform</p>
-    <h1 class="h3 mb-1">History</h1>
-    <p class="text-muted mb-0">Coming soon.</p>
+    <h1 class="h3 mb-1">Rental History</h1>
+    <p class="text-muted mb-0">Search and filter the GPU rentals tied to your account.</p>
 </section>
 
-<div class="border rounded-3 p-4">
-    <p class="mb-0">
-        Browse your completed rentals with reference numbers, durations, total costs, and the
-        option to leave a review. Every charge and refund is recorded in your credit ledger.
-    </p>
-</div>
+@if (!string.IsNullOrWhiteSpace(statusMessage))
+{
+    <div class="alert @alertClass" role="alert">@statusMessage</div>
+}
+
+<form method="get" class="mb-4">
+    <div class="d-flex flex-wrap gap-2">
+        <input type="hidden" name="Search" value="@Model.Filter.Search" />
+        <button type="submit" name="Status" value="" class="btn btn-sm @(Model.Filter.Status is null ? "btn-info" : "btn-outline-info")">
+            All
+        </button>
+        <button type="submit" name="Status" value="@RentalStatus.Active" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Active ? "btn-info" : "btn-outline-info")">
+            Active
+        </button>
+        <button type="submit" name="Status" value="@RentalStatus.Completed" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Completed ? "btn-info" : "btn-outline-info")">
+            Completed
+        </button>
+        <button type="submit" name="Status" value="@RentalStatus.Terminated" class="btn btn-sm @(Model.Filter.Status == RentalStatus.Terminated ? "btn-info" : "btn-outline-info")">
+            Terminated
+        </button>
+    </div>
+</form>
+
+@if (!Model.HasAnyRentals)
+{
+    <div class="profile-card text-center py-5">
+        <i class="bi bi-lightning-charge fs-1 text-muted" aria-hidden="true"></i>
+        <h2 class="h5 mt-3 mb-2">No rental history yet</h2>
+        <p class="text-muted mb-3">Rent an available GPU to start building your history.</p>
+        <a class="btn btn-info" asp-controller="Gpus" asp-action="Index">Browse GPUs</a>
+    </div>
+}
+else if (Model.Items.Count == 0)
+{
+    <div class="profile-card text-center py-5">
+        <i class="bi bi-funnel fs-1 text-muted" aria-hidden="true"></i>
+        <h2 class="h5 mt-3 mb-2">No rentals match these filters</h2>
+        <p class="text-muted mb-3">Adjust your search terms or clear the filters to see every rental.</p>
+        <a class="btn btn-outline-secondary" asp-controller="Rentals" asp-action="History">Clear filters</a>
+    </div>
+}
+else
+{
+    <section class="profile-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-sm mb-0 align-middle rental-history-table">
+                <thead>
+                    <tr>
+                        <th class="ps-4">GPU</th>
+                        <th>Rental window</th>
+                        <th>Duration</th>
+                        <th>Cost</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        var modalId = $"reviewModal-{item.Id:N}";
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-semibold">@item.GpuModel</div>
+                                <div class="text-muted small">@item.ReferenceNumber</div>
+                            </td>
+                            <td>
+                                @item.StartTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt") -> @item.EndTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                            </td>
+                            <td>@item.DurationHours h</td>
+                            <td>@item.TotalCost.ToString("N2") credits</td>
+                            <td>
+                                <span class="badge rounded-pill @StatusBadgeClass(item.Status)">@item.Status</span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-inline-flex align-items-center justify-content-end gap-2">
+                                    @if (item.Status == RentalStatus.Completed && !item.HasReview)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#@modalId">
+                                            <i class="bi bi-star me-1" aria-hidden="true"></i> Review
+                                        </button>
+                                    }
+                                    else if (item.Status == RentalStatus.Completed && item.HasReview)
+                                    {
+                                        <span class="badge rounded-pill text-bg-light border text-muted">Reviewed</span>
+                                    }
+
+                                    <a class="btn btn-sm btn-outline-info" asp-controller="Rentals" asp-action="Receipt" asp-route-rentalId="@item.Id"
+                                       aria-label="View receipt" title="View receipt">
+                                        <i class="bi bi-receipt" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    @foreach (var item in Model.Items.Where(item => item.Status == RentalStatus.Completed && !item.HasReview))
+    {
+        var modalId = $"reviewModal-{item.Id:N}";
+        <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@(modalId)-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form asp-controller="Rentals" asp-action="Review" asp-route-rentalId="@item.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="RentalId" value="@item.Id" />
+
+                        <div class="modal-header">
+                            <div>
+                                <h2 class="modal-title fs-5" id="@(modalId)-title">Review GPU rental</h2>
+                                <div class="text-muted small">@item.ReferenceNumber</div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="d-flex gap-3 mb-4">
+                                @if (!string.IsNullOrWhiteSpace(item.ImagePath))
+                                {
+                                    <img src="@item.ImagePath" alt="@item.GpuModel" class="rounded-3 flex-shrink-0" style="width:112px;height:84px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center bg-body-secondary text-muted flex-shrink-0" style="width:112px;height:84px;">
+                                        <i class="bi bi-cpu fs-3" aria-hidden="true"></i>
+                                    </div>
+                                }
+                                <div class="min-width-0">
+                                    <div class="fw-semibold text-truncate">@item.GpuModel</div>
+                                    <div class="text-muted small text-truncate">@item.GpuName</div>
+                                    <div class="text-muted small text-truncate">Owner: @item.OwnerDisplayName</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-label">Rating</div>
+                                <div class="btn-group d-flex w-100" role="radiogroup" aria-label="Review rating">
+                                    @for (var rating = 1; rating <= 5; rating++)
+                                    {
+                                        var ratingId = $"{modalId}-rating-{rating}";
+                                        <input class="btn-check" type="radio" name="Rating" id="@ratingId" value="@rating" autocomplete="off" checked="@(rating == 5)" />
+                                        <label class="btn btn-outline-warning flex-fill" for="@ratingId" aria-label="@rating star@(rating == 1 ? "" : "s")">
+                                            <i class="bi bi-star-fill" aria-hidden="true"></i>
+                                            <span class="visually-hidden">@rating star@(rating == 1 ? "" : "s")</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="form-label" for="@(modalId)-comment">Comment</label>
+                                <textarea class="form-control" id="@(modalId)-comment" name="Comment" rows="4" maxlength="1000"></textarea>
+                                <div class="form-text">Optional, up to 1000 characters.</div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-info">
+                                <i class="bi bi-send me-1" aria-hidden="true"></i> Submit review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}

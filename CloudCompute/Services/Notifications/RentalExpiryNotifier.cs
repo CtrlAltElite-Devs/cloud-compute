@@ -1,6 +1,7 @@
 using CloudCompute.Constants;
 using CloudCompute.Data;
 using CloudCompute.Models.Enums;
+using CloudCompute.Services.Rentals;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudCompute.Services.Notifications;
@@ -45,9 +46,16 @@ public class RentalExpiryNotifier : BackgroundService
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+        var lifecycleService = scope.ServiceProvider.GetRequiredService<IRentalLifecycleService>();
 
         var now = DateTime.UtcNow;
         var threshold = now.Add(_warningWindow);
+
+        var completedCount = await lifecycleService.CompleteExpiredActiveRentalsAsync(cancellationToken);
+        if (completedCount > 0)
+        {
+            _logger.LogInformation("RentalExpiryNotifier completed {Count} expired rentals", completedCount);
+        }
 
         var expiring = await dbContext.Rentals
             .Where(r => r.Status == RentalStatus.Active

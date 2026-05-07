@@ -73,6 +73,19 @@ public class GpusController : Controller
         return View(model);
     }
 
+    [HttpGet("gpus/rented")]
+    public async Task<IActionResult> Rented()
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var model = await _gpuService.GetRentedAsync(userId.Value);
+        return View(model);
+    }
+
     [HttpGet]
     public async Task<IActionResult> Create()
     {

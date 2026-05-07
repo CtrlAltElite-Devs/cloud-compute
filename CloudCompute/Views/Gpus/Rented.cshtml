@@ -1,33 +1,24 @@
-@using CloudCompute.Constants
-@model ActiveRentalsViewModel
+@model RentedGpusViewModel
 @{
     Layout = "~/Views/Shared/Layouts/_AppLayout.cshtml";
-    ViewData["Title"] = "Active Rentals";
+    ViewData["Title"] = "Rented GPUs";
 
-    var statusMessage = TempData[GpuConstants.Status.TempDataMessageKey] as string;
-    var statusType = TempData[GpuConstants.Status.TempDataTypeKey] as string;
-    var alertClass = statusType == "danger" ? "alert-danger" : "alert-success";
     var now = DateTime.UtcNow;
 }
 
 <section class="mb-4">
-    <p class="text-uppercase text-muted small fw-semibold mb-1">Platform</p>
-    <h1 class="h3 mb-1">Active Rentals</h1>
-    <p class="text-muted mb-0">Track your in-progress GPU rentals.</p>
+    <p class="text-uppercase text-muted small fw-semibold mb-1">Owner</p>
+    <h1 class="h3 mb-1">Rented GPUs</h1>
+    <p class="text-muted mb-0">Track active rentals currently running on your GPU listings.</p>
 </section>
-
-@if (!string.IsNullOrWhiteSpace(statusMessage))
-{
-    <div class="alert @alertClass" role="alert">@statusMessage</div>
-}
 
 @if (Model.Items.Count == 0)
 {
     <div class="profile-card text-center py-5">
-        <i class="bi bi-lightning-charge fs-1 text-muted" aria-hidden="true"></i>
-        <h2 class="h5 mt-3 mb-2">No active rentals</h2>
-        <p class="text-muted mb-3">Rent an available GPU to start a compute session.</p>
-        <a class="btn btn-info" asp-controller="Gpus" asp-action="Index">Browse GPUs</a>
+        <i class="bi bi-hdd-network fs-1 text-muted" aria-hidden="true"></i>
+        <h2 class="h5 mt-3 mb-2">No GPUs are currently rented</h2>
+        <p class="text-muted mb-3">Active rentals for your listings will appear here.</p>
+        <a class="btn btn-info" asp-controller="Gpus" asp-action="Mine">View My Listings</a>
     </div>
 }
 else
@@ -57,12 +48,22 @@ else
 
                         <div class="min-width-0">
                             <h2 class="h5 mb-1">@item.GpuModel</h2>
-                            <div class="text-muted">by @item.OwnerDisplayName</div>
+                            <div class="text-muted mb-3">@item.GpuName</div>
+                            <div class="text-muted small">
+                                <span class="d-block text-uppercase fw-semibold" style="font-size: .7rem;">Renter</span>
+                                <span class="text-body">@item.RenterDisplayName</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="flex-grow-1 min-width-0">
-                        <div class="text-muted small mb-2">Time Left</div>
+                        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-2">
+                            <div class="text-muted small">Time Left</div>
+                            <div class="d-flex flex-wrap justify-content-end gap-2">
+                                <span class="badge rounded-pill text-bg-success">Running</span>
+                                <span class="badge rounded-pill text-bg-light">@item.ReferenceNumber</span>
+                            </div>
+                        </div>
                         <div class="h3 mb-2 text-info" data-rental-time-left>@timeLeftText</div>
                         <div class="progress mb-2" role="progressbar" aria-label="Rental usage" aria-valuenow="@usedPercent" aria-valuemin="0" aria-valuemax="100" style="height: 6px;" data-rental-progress>
                             <div class="progress-bar bg-info" style="width: @usedPercent%" data-rental-progress-bar></div>
@@ -73,45 +74,9 @@ else
                         </div>
                     </div>
 
-                    <div class="d-flex flex-xl-column gap-2 flex-shrink-0">
-                        <button
-                            type="button"
-                            class="btn btn-danger"
-                            data-bs-toggle="modal"
-                            data-bs-target="#terminateRentalModal"
-                            data-rental-reference="@item.ReferenceNumber"
-                            data-rental-title="@item.GpuModel"
-                            data-rental-action="@Url.Action("Terminate", "Rentals", new { rentalId = item.Id })"
-                            aria-label="Terminate rental"
-                            title="Terminate rental">
-                            <i class="bi bi-stop-circle" aria-hidden="true"></i>
-                        </button>
-                    </div>
                 </div>
             </article>
         }
-    </div>
-
-    <div class="modal fade" id="terminateRentalModal" tabindex="-1" aria-labelledby="terminateRentalModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="terminateRentalModalLabel">Terminate rental?</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="mb-2">This will end <strong data-terminate-rental-title></strong> immediately and make the GPU available again.</p>
-                    <p class="text-muted small mb-0">Rental <span data-terminate-rental-reference></span> will be marked as terminated. Credits will not be refunded.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form method="post" data-terminate-rental-form>
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-danger">Terminate rental</button>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 }
 
@@ -177,32 +142,6 @@ else
 
             updateRentalTimers();
             window.setInterval(updateRentalTimers, 1000);
-
-            const terminateModal = document.getElementById("terminateRentalModal");
-            if (terminateModal) {
-                terminateModal.addEventListener("show.bs.modal", (event) => {
-                    const button = event.relatedTarget;
-                    if (!button) {
-                        return;
-                    }
-
-                    const form = terminateModal.querySelector("[data-terminate-rental-form]");
-                    const title = terminateModal.querySelector("[data-terminate-rental-title]");
-                    const reference = terminateModal.querySelector("[data-terminate-rental-reference]");
-
-                    if (form) {
-                        form.action = button.dataset.rentalAction || "";
-                    }
-
-                    if (title) {
-                        title.textContent = button.dataset.rentalTitle || "this rental";
-                    }
-
-                    if (reference) {
-                        reference.textContent = button.dataset.rentalReference || "";
-                    }
-                });
-            }
         })();
     </script>
 }
