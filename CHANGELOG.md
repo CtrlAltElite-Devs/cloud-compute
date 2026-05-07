@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-05-07
 
 ### Added
+- Account deletion (soft delete) on the Profile page: a new "Delete Account" Danger Zone card opens a confirmation modal that requires the current password; on submit the account is deactivated (`IsActive=false`, `IsOwnerVerified=false`), PII (first/last name, username, email, bio, avatar, password hash) is anonymized to a `deleted-{guid}` placeholder, the avatar file is removed from disk, any `Available` or `Pending` listings owned by the user are flipped to `Maintenance`, the user is signed out, and the request is rejected if the renter still has active rentals
+- Suspension enforcement on the rent path: `RentalService.CreateAsync` now returns a form-level error when the signed-in renter's `IsActive` is false, so suspended accounts cannot create new rentals even if their session is still valid
+- Suspension enforcement on the listing path: `GpuService.CreateAsync` now returns a form-level error when the signed-in owner's `IsActive` is false, so suspended owners cannot submit new GPU listings for approval
 - Review prompt on early termination: terminating an active rental now redirects to Rental History with the review modal auto-opened for that rental, and Rental History shows the Review/Reviewed states for `Terminated` rentals alongside `Completed` ones
 - My Reviews page at `/reviews/mine`, with a sidebar entry and read-only review cards showing the reviewed GPU, owner, rating, comment, review date, receipt link, and GPU detail link
 - Rental review submission from Rental History: completed, unreviewed rentals now open an inline review modal with star rating buttons and optional comments, backed by renter/completed/one-review-per-rental validation and `ReviewReceived` owner notifications

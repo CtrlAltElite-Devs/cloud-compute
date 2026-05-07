@@ -24,6 +24,7 @@ public static class AuthConstants
         public const string InvalidCredentials = "Invalid email/username or password.";
         public const string InvalidAdminCredentials = "Invalid admin email/username or password.";
         public const string InactiveAccount = "This account is inactive. Please contact support.";
+        public const string SuspendedAccountAction = "Your account is suspended. Please contact support.";
         public const string DuplicateEmail = "An account with this email already exists.";
         public const string DuplicateUserName = "Username is already taken.";
         public const string DuplicateAccount = "An account with the same username or email already exists.";
@@ -53,6 +54,9 @@ public static class AuthConstants
         public const string PasswordUpdated = "Password updated.";
         public const string AvatarUpdated = "Profile picture updated.";
         public const string AvatarRemoved = "Profile picture removed.";
+        public const string AccountDeleted = "Your account has been deleted.";
+        public const string AccountDeleteHasActiveRentals = "Please terminate your active rentals before deleting your account.";
+        public const string AccountDeletePasswordRequired = "Enter your current password to confirm account deletion.";
         public const string IncorrectCurrentPassword = "Current password is incorrect.";
         public const string DuplicateEmail = "Another account already uses this email.";
         public const string DuplicateUserName = "Another account already uses this username.";

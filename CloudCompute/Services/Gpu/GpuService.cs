@@ -122,6 +122,11 @@ public class GpuService : IGpuService
             return ServiceResult.Failed(CreateModelError(GpuConstants.Messages.UserNotFound));
         }
 
+        if (!user.IsActive)
+        {
+            return ServiceResult.Failed(CreateModelError(AuthConstants.Messages.SuspendedAccountAction));
+        }
+
         if (!user.IsOwnerVerified)
         {
             return ServiceResult.Failed(CreateModelError(GpuConstants.Messages.NotOwnerVerified));
