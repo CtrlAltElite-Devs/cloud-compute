@@ -17,6 +17,26 @@ html {
   min-height: 100%;
 }
 
+.btn-black {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #000;
+  --bs-btn-border-color: #000;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #1a1a1a;
+  --bs-btn-hover-border-color: #1a1a1a;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #000;
+  --bs-btn-active-border-color: #000;
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #000;
+  --bs-btn-disabled-border-color: #000;
+}
+
+[data-bs-theme="light"] .theme-dark-only,
+[data-bs-theme="dark"] .theme-light-only {
+  display: none !important;
+}
+
 [data-bs-theme="light"] .btn.btn-info,
 [data-bs-theme="light"] .btn.btn-outline-info {
   --bs-btn-color: #000;
