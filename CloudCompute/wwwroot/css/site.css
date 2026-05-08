@@ -17,6 +17,29 @@ html {
   min-height: 100%;
 }
 
+[data-bs-theme="light"] .btn.btn-info,
+[data-bs-theme="light"] .btn.btn-outline-info {
+  --bs-btn-color: #000;
+  --bs-btn-hover-color: #000;
+  --bs-btn-active-color: #000;
+  --bs-btn-disabled-color: #000;
+}
+
+[data-bs-theme="light"] .btn.btn-info,
+[data-bs-theme="light"] .btn.btn-info:hover,
+[data-bs-theme="light"] .btn.btn-info:focus,
+[data-bs-theme="light"] .btn.btn-info:active,
+[data-bs-theme="light"] .btn.btn-info.active,
+[data-bs-theme="light"] .btn.btn-info.show,
+[data-bs-theme="light"] .btn.btn-outline-info,
+[data-bs-theme="light"] .btn.btn-outline-info:hover,
+[data-bs-theme="light"] .btn.btn-outline-info:focus,
+[data-bs-theme="light"] .btn.btn-outline-info:active,
+[data-bs-theme="light"] .btn.btn-outline-info.active,
+[data-bs-theme="light"] .btn.btn-outline-info.show {
+  color: #000;
+}
+
 [data-bs-theme="dark"] {
   --app-page-bg: #202020;
   --app-surface-bg: #171717;
@@ -29,6 +52,29 @@ html {
   --bs-secondary-bg: var(--app-surface-bg);
   --bs-border-color: #303030;
   --bs-border-color-translucent: rgba(255, 255, 255, .12);
+}
+
+[data-bs-theme="dark"] .btn.btn-info,
+[data-bs-theme="dark"] .btn.btn-outline-info {
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  --bs-btn-disabled-color: #fff;
+}
+
+[data-bs-theme="dark"] .btn.btn-info,
+[data-bs-theme="dark"] .btn.btn-info:hover,
+[data-bs-theme="dark"] .btn.btn-info:focus,
+[data-bs-theme="dark"] .btn.btn-info:active,
+[data-bs-theme="dark"] .btn.btn-info.active,
+[data-bs-theme="dark"] .btn.btn-info.show,
+[data-bs-theme="dark"] .btn.btn-outline-info,
+[data-bs-theme="dark"] .btn.btn-outline-info:hover,
+[data-bs-theme="dark"] .btn.btn-outline-info:focus,
+[data-bs-theme="dark"] .btn.btn-outline-info:active,
+[data-bs-theme="dark"] .btn.btn-outline-info.active,
+[data-bs-theme="dark"] .btn.btn-outline-info.show {
+  color: #fff;
 }
 
 [data-bs-theme="dark"] .accordion {
