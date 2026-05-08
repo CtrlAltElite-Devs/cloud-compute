@@ -82,7 +82,7 @@
                         @foreach (var ev in Model.RecentCreditEvents)
                         {
                             <tr>
-                                <td class="small text-muted">@ev.CreatedAt.ToString("u")</td>
+                                <td class="small text-muted">@ev.CreatedAt.ToFriendlyDateTime()</td>
                                 <td>@ev.UserDisplay</td>
                                 <td class="text-end @(ev.Amount < 0 ? "text-danger" : "text-success")">@ev.Amount.ToString("+0.##;-0.##;0")</td>
                                 <td>@ev.Reason</td>

@@ -9,6 +9,28 @@
     var statusMessage = TempData[AdminConstants.Status.TempDataMessageKey] as string;
     var statusType = TempData[AdminConstants.Status.TempDataTypeKey] as string;
     var alertClass = statusType == AdminConstants.Status.Danger ? "alert-danger" : "alert-success";
+
+    string GpuStatusVariant(GpuStatus s) => s switch
+    {
+        GpuStatus.Available => "success",
+        GpuStatus.Rented => "warning",
+        GpuStatus.Maintenance => "warning",
+        GpuStatus.Pending => "info",
+        GpuStatus.Rejected => "danger",
+        GpuStatus.Unavailable => "secondary",
+        _ => "secondary"
+    };
+
+    (string Variant, string Label) CreditTypeBadge(CreditTransactionType type) => type switch
+    {
+        CreditTransactionType.Initial => ("secondary", "Initial"),
+        CreditTransactionType.AdminGrant => ("primary", "Admin grant"),
+        CreditTransactionType.RentalCharge => ("danger", "Rental charge"),
+        CreditTransactionType.RentalEarning => ("success", "Rental earning"),
+        CreditTransactionType.Refund => ("info", "Refund"),
+        CreditTransactionType.Revoke => ("warning", "Revoke"),
+        _ => ("secondary", type.ToString())
+    };
 }
 
 <section class="dashboard-page">
@@ -35,26 +57,36 @@
                         Profile
                     </h2>
                 </div>
-                <dl class="mb-0">
-                    <dt class="small text-muted">Role</dt>
-                    <dd>@Model.Role</dd>
-                    <dt class="small text-muted">Status</dt>
-                    <dd>
-                        @if (Model.IsActive)
-                        {
-                            <span class="badge bg-success-subtle text-success">Active</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger-subtle text-danger">Suspended</span>
-                        }
-                    </dd>
-                    <dt class="small text-muted">Owner verified</dt>
-                    <dd>@(Model.IsOwnerVerified ? "Yes" : "No")</dd>
-                    <dt class="small text-muted">Credit balance</dt>
-                    <dd>@Model.CreditBalance.ToString("N2")</dd>
-                    <dt class="small text-muted">Joined</dt>
-                    <dd class="mb-0">@Model.CreatedAt.ToString("u")</dd>
+                <dl class="row g-3 mb-0">
+                    <div class="col-6">
+                        <dt class="small text-muted fw-normal">Role</dt>
+                        <dd class="mb-0">@Model.Role</dd>
+                    </div>
+                    <div class="col-6">
+                        <dt class="small text-muted fw-normal">Status</dt>
+                        <dd class="mb-0">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success-subtle text-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger-subtle text-danger">Suspended</span>
+                            }
+                        </dd>
+                    </div>
+                    <div class="col-6">
+                        <dt class="small text-muted fw-normal">Owner verified</dt>
+                        <dd class="mb-0">@(Model.IsOwnerVerified ? "Yes" : "No")</dd>
+                    </div>
+                    <div class="col-6">
+                        <dt class="small text-muted fw-normal">Credit balance</dt>
+                        <dd class="mb-0">@Model.CreditBalance.ToString("N2")</dd>
+                    </div>
+                    <div class="col-12">
+                        <dt class="small text-muted fw-normal">Joined</dt>
+                        <dd class="mb-0">@Model.CreatedAt.ToFriendlyDateTime()</dd>
+                    </div>
                 </dl>
             </section>
 
@@ -67,7 +99,7 @@
                             Account actions
                         </h2>
                     </div>
-                    <div class="d-flex flex-wrap gap-2">
+                    <div class="d-flex flex-wrap gap-3">
                         @if (Model.IsActive)
                         {
                             <form asp-action="SuspendUser" method="post">
@@ -91,7 +123,7 @@
                             </button>
                         </form>
 
-                        <a class="btn btn-outline-primary btn-sm" asp-action="GrantCredits" asp-route-userId="@Model.Id">Grant credits</a>
+                        <a class="btn btn-primary btn-sm" asp-action="GrantCredits" asp-route-userId="@Model.Id">Grant credits</a>
                     </div>
                 </section>
             }
@@ -112,7 +144,7 @@
                 else
                 {
                     <div class="table-responsive">
-                        <table class="table table-sm mb-0 align-middle">
+                        <table class="table table-sm table-striped mb-0 align-middle">
                             <thead>
                                 <tr>
                                     <th>When</th>
@@ -126,8 +158,11 @@
                                 @foreach (var t in Model.RecentCredits)
                                 {
                                     <tr>
-                                        <td class="small text-muted">@t.CreatedAt.ToString("u")</td>
-                                        <td>@t.Type</td>
+                                        <td class="small text-muted">@t.CreatedAt.ToFriendlyDateTime()</td>
+                                        <td>
+                                            @{ var typeBadge = CreditTypeBadge(t.Type); }
+                                            <span class="badge bg-@(typeBadge.Variant)-subtle text-@(typeBadge.Variant)">@typeBadge.Label</span>
+                                        </td>
                                         <td class="text-end @(t.Amount < 0 ? "text-danger" : "text-success")">@t.Amount.ToString("+0.##;-0.##;0")</td>
                                         <td class="text-end">@t.BalanceAfter.ToString("N2")</td>
                                         <td>@t.Reason</td>
@@ -153,7 +188,7 @@
                 else
                 {
                     <div class="table-responsive">
-                        <table class="table table-sm mb-0 align-middle">
+                        <table class="table table-sm table-striped mb-0 align-middle">
                             <thead>
                                 <tr>
                                     <th>Name</th>
@@ -169,9 +204,12 @@
                                     <tr>
                                         <td>@g.Name</td>
                                         <td>@g.Model</td>
-                                        <td>@g.Status</td>
+                                        <td>
+                                            @{ var variant = GpuStatusVariant(g.Status); }
+                                            <span class="badge bg-@(variant)-subtle text-@(variant)">@g.Status</span>
+                                        </td>
                                         <td class="text-end">@g.PricePerHour.ToString("N2") credits</td>
-                                        <td class="small text-muted">@g.CreatedAt.ToString("u")</td>
+                                        <td class="small text-muted">@g.CreatedAt.ToFriendlyDateTime()</td>
                                     </tr>
                                 }
                             </tbody>

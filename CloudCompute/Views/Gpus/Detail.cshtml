@@ -5,6 +5,14 @@
     var isOwnerView = !Model.CanRent;
     var minimumEstimate = Model.PricePerHour * Model.MinRentalHours;
     var dayEstimate = Model.PricePerHour * 24;
+    var (statusLabel, statusClass) = Model.Status switch
+    {
+        GpuStatus.Available => ("Available", "text-bg-success"),
+        GpuStatus.Rented => ("Rented", "text-bg-warning"),
+        GpuStatus.Maintenance => ("Maintenance", "text-bg-warning"),
+        GpuStatus.Unavailable => ("Unavailable", "text-bg-secondary"),
+        _ => (Model.Status.ToString(), "text-bg-light")
+    };
 }
 
 <div class="mb-4">
@@ -33,7 +41,7 @@
                     <h1 class="h3 mb-1">@Model.Model</h1>
                     <p class="text-muted mb-0">@Model.Name</p>
                 </div>
-                <span class="badge text-bg-success">@Model.Status</span>
+                <span class="badge @statusClass">@statusLabel</span>
             </div>
 
             <div class="row g-3 mb-4">
@@ -171,7 +179,7 @@
                     {
                         <p class="mb-2 text-muted">@review.Comment</p>
                     }
-                    <div class="small text-muted">@review.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</div>
+                    <div class="small text-muted">@review.CreatedAt.ToFriendlyDate()</div>
                 </article>
             }
         </div>

@@ -68,7 +68,7 @@ else
                             <div class="progress-bar bg-info" style="width: @usedPercent%" data-rental-progress-bar></div>
                         </div>
                         <div class="d-flex flex-wrap justify-content-between gap-2 text-muted small">
-                            <span>@item.StartTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt") -> @item.EndTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</span>
+                            <span>@item.StartTime.ToFriendlyDateTime() -> @item.EndTime.ToFriendlyDateTime()</span>
                             <span data-rental-used-percent>@usedPercent% used</span>
                         </div>
                     </div>

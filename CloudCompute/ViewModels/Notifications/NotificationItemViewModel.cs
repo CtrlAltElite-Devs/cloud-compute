@@ -1,3 +1,4 @@
+using CloudCompute.Extensions;
 using CloudCompute.Models.Enums;
 
 namespace CloudCompute.ViewModels.Notifications;
@@ -54,19 +55,19 @@ public class NotificationItemViewModel
 
     public string BadgeCssClass => Type switch
     {
-        NotificationType.ListingApproved => "bg-success",
-        NotificationType.ListingRejected => "bg-danger",
-        NotificationType.CreditGranted => "bg-warning text-dark",
-        NotificationType.CreditRevoked => "bg-danger",
-        NotificationType.RentalConfirmed => "bg-info text-dark",
-        NotificationType.RentalExpiring => "bg-warning text-dark",
-        NotificationType.RentalCompleted => "bg-success",
-        NotificationType.RentalTerminated => "bg-danger",
-        NotificationType.ReviewReceived => "bg-info text-dark",
-        NotificationType.VerificationApproved => "bg-success",
-        NotificationType.VerificationRejected => "bg-danger",
-        NotificationType.Welcome => "bg-info text-dark",
-        _ => "bg-secondary"
+        NotificationType.ListingApproved => "border border-success text-success bg-transparent",
+        NotificationType.ListingRejected => "border border-danger text-danger bg-transparent",
+        NotificationType.CreditGranted => "border border-warning text-warning bg-transparent",
+        NotificationType.CreditRevoked => "border border-danger text-danger bg-transparent",
+        NotificationType.RentalConfirmed => "border border-info text-info bg-transparent",
+        NotificationType.RentalExpiring => "border border-warning text-warning bg-transparent",
+        NotificationType.RentalCompleted => "border border-success text-success bg-transparent",
+        NotificationType.RentalTerminated => "border border-danger text-danger bg-transparent",
+        NotificationType.ReviewReceived => "border border-info text-info bg-transparent",
+        NotificationType.VerificationApproved => "border border-success text-success bg-transparent",
+        NotificationType.VerificationRejected => "border border-danger text-danger bg-transparent",
+        NotificationType.Welcome => "border border-info text-info bg-transparent",
+        _ => "border border-secondary text-secondary bg-transparent"
     };
 
     public string RowCssClass => IsRead
@@ -97,7 +98,7 @@ public class NotificationItemViewModel
                 var days = (int)delta.TotalDays;
                 return $"{days} day{(days == 1 ? "" : "s")} ago";
             }
-            return CreatedAt.ToString("MMM d, yyyy");
+            return CreatedAt.ToFriendlyDate();
         }
     }
 }

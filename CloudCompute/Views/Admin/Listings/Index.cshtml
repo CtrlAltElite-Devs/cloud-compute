@@ -9,6 +9,17 @@
     var statusMessage = TempData[AdminConstants.Status.TempDataMessageKey] as string;
     var statusType = TempData[AdminConstants.Status.TempDataTypeKey] as string;
     var alertClass = statusType == AdminConstants.Status.Danger ? "alert-danger" : "alert-success";
+
+    string GpuStatusVariant(GpuStatus s) => s switch
+    {
+        GpuStatus.Available => "success",
+        GpuStatus.Rented => "warning",
+        GpuStatus.Maintenance => "warning",
+        GpuStatus.Pending => "info",
+        GpuStatus.Rejected => "danger",
+        GpuStatus.Unavailable => "secondary",
+        _ => "secondary"
+    };
 }
 
 <section class="dashboard-page">
@@ -18,18 +29,18 @@
             <h1 class="dashboard-title mb-1">Listing moderation</h1>
             <p class="text-muted mb-0">Review and act on submitted GPU listings.</p>
         </div>
-        <div class="d-flex flex-wrap gap-2">
+        <div class="btn-group flex-wrap" role="group" aria-label="Listing status filter">
             @foreach (var status in Enum.GetValues<GpuStatus>())
             {
                 var count = Model.CountsByStatus.TryGetValue(status, out var n) ? n : 0;
                 var isActive = !Model.Filter.All && Model.Filter.Status == status;
-                <a class="btn btn-sm @(isActive ? "btn-primary" : "btn-outline-primary")"
+                <a class="btn btn-sm @(isActive ? "btn-primary" : "bg-primary-subtle text-white border-primary-subtle")"
                    asp-action="Listings"
                    asp-route-Status="@status">
-                    @status <span class="badge @(isActive ? "bg-light text-primary" : "bg-secondary")">@count</span>
+                    @status <span class="badge text-bg-primary ms-1">@count</span>
                 </a>
             }
-            <a class="btn btn-sm @(Model.Filter.All ? "btn-secondary" : "btn-outline-secondary")"
+            <a class="btn btn-sm @(Model.Filter.All ? "btn-primary" : "bg-primary-subtle text-white border-primary-subtle")"
                asp-action="Listings"
                asp-route-all="true">All</a>
         </div>
@@ -72,7 +83,7 @@
     {
         <section class="dashboard-panel p-0 overflow-hidden">
             <div class="table-responsive">
-                <table class="table mb-0 align-middle">
+                <table class="table table-striped mb-0 align-middle">
                     <thead>
                         <tr>
                             <th class="ps-4">Photo</th>
@@ -81,7 +92,7 @@
                             <th>Status</th>
                             <th class="text-end">Price/hr</th>
                             <th>Submitted</th>
-                            <th class="text-end pe-4">Actions</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -103,11 +114,16 @@
                                     <div class="text-muted small">@row.Model</div>
                                 </td>
                                 <td>@row.OwnerDisplay</td>
-                                <td>@row.Status</td>
+                                <td>
+                                    @{ var variant = GpuStatusVariant(row.Status); }
+                                    <span class="badge bg-@(variant)-subtle text-@(variant)">@row.Status</span>
+                                </td>
                                 <td class="text-end">@row.PricePerHour.ToString("N2")</td>
-                                <td class="small text-muted">@row.CreatedAt.ToString("u")</td>
-                                <td class="text-end pe-4">
-                                    <a class="btn btn-outline-primary btn-sm" asp-action="ListingDetail" asp-route-id="@row.Id">Review</a>
+                                <td class="small text-muted">@row.CreatedAt.ToFriendlyDateTime()</td>
+                                <td class="text-center">
+                                    <a class="btn btn-link btn-sm text-secondary p-0" asp-action="ListingDetail" asp-route-id="@row.Id" aria-label="Review listing" title="Review">
+                                        <i class="bi bi-eye-fill" aria-hidden="true"></i>
+                                    </a>
                                 </td>
                             </tr>
                         }

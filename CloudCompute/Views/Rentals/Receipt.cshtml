@@ -5,15 +5,15 @@
 
     string StatusBadgeClass(RentalStatus status) => status switch
     {
-        RentalStatus.Active => "text-bg-info",
+        RentalStatus.Active => "text-bg-success",
         RentalStatus.Completed => "text-bg-success",
-        RentalStatus.Terminated => "text-bg-warning",
+        RentalStatus.Terminated => "text-bg-danger",
         _ => "text-bg-secondary"
     };
 
-    var rentalDate = Model.StartTime.ToLocalTime().ToString("yyyy-MM-dd");
-    var startTime = Model.StartTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
-    var endTime = Model.EndTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
+    var rentalDate = Model.StartTime.ToFriendlyDate();
+    var startTime = Model.StartTime.ToFriendlyDateTime();
+    var endTime = Model.EndTime.ToFriendlyDateTime();
 }
 
 <section class="mb-4">

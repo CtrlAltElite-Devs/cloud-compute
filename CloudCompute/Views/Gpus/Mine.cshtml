@@ -99,7 +99,7 @@ else
                                 </select>
                             </form>
                         }
-                        else
+                        else if (item.Status != GpuStatus.Rejected)
                         {
                             <select class="form-select form-select-sm" disabled style="min-width: 9.5rem;"
                                     title="Status is locked while @item.BadgeLabel.ToLower()">

@@ -33,7 +33,7 @@ public class MyListingItemViewModel
         GpuStatus.Pending => "bg-warning text-dark",
         GpuStatus.Available => "bg-success",
         GpuStatus.Rented => "bg-info text-dark",
-        GpuStatus.Maintenance => "bg-secondary",
+        GpuStatus.Maintenance => "bg-warning text-dark",
         GpuStatus.Unavailable => "bg-secondary",
         GpuStatus.Rejected => "bg-danger",
         _ => "bg-secondary"

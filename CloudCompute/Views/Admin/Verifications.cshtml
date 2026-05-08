@@ -67,7 +67,7 @@
                                         <span class="text-muted small">&mdash;</span>
                                     }
                                 </td>
-                                <td class="text-muted small">@row.SubmittedAt.ToString("u")</td>
+                                <td class="text-muted small">@row.SubmittedAt.ToFriendlyDateTime()</td>
                                 <td class="text-end pe-4">
                                     <div class="d-flex gap-2 justify-content-end">
                                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#approve-@row.Id">Approve</button>
