@@ -4,7 +4,7 @@
     {
         GpuStatus.Available => ("Available", "text-bg-success"),
         GpuStatus.Rented => ("Rented", "text-bg-warning"),
-        GpuStatus.Maintenance => ("Maintenance", "text-bg-secondary"),
+        GpuStatus.Maintenance => ("Maintenance", "text-bg-warning"),
         GpuStatus.Unavailable => ("Unavailable", "text-bg-secondary"),
         _ => (Model.Status.ToString(), "text-bg-light")
     };
@@ -30,9 +30,8 @@
                     <span class="badge text-bg-primary">Your listing</span>
                 }
                 <span class="badge @statusClass">@statusLabel</span>
-                <span class="badge text-bg-secondary">@Model.Name</span>
             </div>
-            <h2 class="h5 mb-1">@Model.Model</h2>
+            <h2 class="h5 mb-1">@Model.Model <span class="text-muted fw-normal">· @Model.Name</span></h2>
             <div class="text-muted small">by @Model.OwnerDisplayName</div>
         </div>
 

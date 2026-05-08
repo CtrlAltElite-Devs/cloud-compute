@@ -75,7 +75,7 @@
     {
         <section class="dashboard-panel p-0 overflow-hidden">
             <div class="table-responsive">
-                <table class="table mb-0 align-middle">
+                <table class="table table-striped mb-0 align-middle">
                     <thead>
                         <tr>
                             <th class="ps-4">User</th>
@@ -84,7 +84,7 @@
                             <th>Verified</th>
                             <th class="text-end">Credits</th>
                             <th>Joined</th>
-                            <th class="text-end pe-4">Actions</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -117,9 +117,11 @@
                                     }
                                 </td>
                                 <td class="text-end">@row.CreditBalance.ToString("N0")</td>
-                                <td class="text-muted small">@row.CreatedAt.ToString("u")</td>
-                                <td class="text-end pe-4">
-                                    <a class="btn btn-outline-primary btn-sm" asp-action="UserDetail" asp-route-id="@row.Id">Open</a>
+                                <td class="text-muted small">@row.CreatedAt.ToFriendlyDateTime()</td>
+                                <td class="text-center">
+                                    <a class="btn btn-link btn-sm text-secondary p-0" asp-action="UserDetail" asp-route-id="@row.Id" aria-label="View user" title="View">
+                                        <i class="bi bi-eye-fill" aria-hidden="true"></i>
+                                    </a>
                                 </td>
                             </tr>
                         }

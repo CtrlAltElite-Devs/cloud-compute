@@ -213,6 +213,11 @@
   border-bottom-width: 0;
 }
 
+.rental-history-table .badge {
+  min-width: 6.5rem;
+  text-align: center;
+}
+
 .rental-receipt-wrap {
   display: flex;
   justify-content: center;
@@ -297,19 +302,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.sidebar-user-kebab {
-  border: none;
-  background: transparent;
-  color: var(--bs-secondary-color);
-  padding: 0.25rem 0.5rem;
-  flex-shrink: 0;
-}
-
-.sidebar-user-kebab:disabled {
-  opacity: 0.6;
-  cursor: default;
 }
 
 /* Main content */

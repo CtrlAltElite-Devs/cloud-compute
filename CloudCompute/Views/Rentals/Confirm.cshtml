@@ -66,10 +66,10 @@
                 <dd class="col-5 text-end">@Model.DurationHours hour(s)</dd>
 
                 <dt class="col-7 text-muted fw-normal">Starts</dt>
-                <dd class="col-5 text-end">@Model.StartTime.ToLocalTime().ToString("MMM d, h:mm tt")</dd>
+                <dd class="col-5 text-end">@Model.StartTime.ToFriendlyDateTime()</dd>
 
                 <dt class="col-7 text-muted fw-normal">Ends</dt>
-                <dd class="col-5 text-end">@Model.EndTime.ToLocalTime().ToString("MMM d, h:mm tt")</dd>
+                <dd class="col-5 text-end">@Model.EndTime.ToFriendlyDateTime()</dd>
 
                 <dt class="col-7 text-muted fw-normal">Current balance</dt>
                 <dd class="col-5 text-end">@Model.CurrentBalance.ToString("N2") credits</dd>

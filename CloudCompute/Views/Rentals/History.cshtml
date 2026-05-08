@@ -12,7 +12,7 @@
     {
         RentalStatus.Active => "text-bg-success",
         RentalStatus.Completed => "text-bg-success",
-        RentalStatus.Terminated => "text-bg-warning",
+        RentalStatus.Terminated => "text-bg-danger",
         _ => "text-bg-light"
     };
 }
@@ -122,7 +122,7 @@ else
                                 <div class="text-muted small">@item.ReferenceNumber</div>
                             </td>
                             <td>
-                                @item.StartTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt") -> @item.EndTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                @item.StartTime.ToFriendlyDateTime() -> @item.EndTime.ToFriendlyDateTime()
                             </td>
                             <td>@item.DurationHours h</td>
                             <td>@item.TotalCost.ToString("N2") credits</td>
@@ -142,7 +142,7 @@ else
                                     }
                                     else if (isReviewable && item.HasReview)
                                     {
-                                        <span class="badge rounded-pill text-bg-light border text-muted">Reviewed</span>
+                                        <span class="badge rounded-pill border text-white bg-transparent">Reviewed</span>
                                     }
 
                                     <a class="btn btn-sm btn-outline-info" asp-controller="Rentals" asp-action="Receipt" asp-route-rentalId="@item.Id"
